@@ -9,5 +9,5 @@
     </filter>
   </defs>
   <rect width="100%" height="100%" rx="12" ry="12" fill="url(#grad)"/>
-  <text x="50%" y="58%" font-size="38" text-anchor="middle" dominant-baseline="middle" font-family="Montserrat, 'Segoe UI', 'Futura', sans-serif" fill="#ffffff" font-weight="bold" text-anchor="middle" dominant-baseline="middle">Lu</text>
+  <text x="50%" y="58%" font-size="38" text-anchor="middle" dominant-baseline="middle" font-family="Montserrat, 'Segoe UI', 'Futura', sans-serif" fill="#ffffff" font-weight="bold">Lu</text>
 </svg>
