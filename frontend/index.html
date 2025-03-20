@@ -1,70 +1,89 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-    <meta charset="utf-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>LurkForWork</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- You can add your styles and scripts here -->
-    <link rel="stylesheet" type="text/css" media="screen" href="styles/global.css" />
-    <link rel="icon" type="image/svg+xml" href="styles/lu-favicon.svg">
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>LurkForWork</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- You can add your styles and scripts here -->
+  <link rel="stylesheet" type="text/css" media="screen" href="styles/global.css" />
+  <link rel="icon" type="image/svg+xml" href="styles/lu-favicon.svg" sizes="any">
 </head>
+
 <body>
-    <!-- This is an example app structure, you can modify this as much as you choose -->
-    <!-- Login Pages -->
-    <div id="loginPage" class="page">
-        <header>
-            <h1>lurkforwork.com</h1>
-            <form>
-                <div class="inputContainer">
-                    <label for="loginEmail">Email</label>
-                    <input type="email" id="loginEmail" name="Email" />
-                </div>
-                <div class="inputContainer">
-                    <label for="loginPassword">Password</label>
-                    <input type="password" id="loginPassword" name="Password" />
-                </div>
-                <button type="button" id="LoginButton">Login</button>
-                <button type="button" id="RegisterButton">Register</button>
-            </form>
-        </header>
-    </div>
+  <!-- Error Pages -->
+  <div id="errorPopup" class="popup hide">
+    <span id="errorMessage"></span>
+    <button id="closeErrorPopup">X</button>
+  </div>
 
-    <!-- Register pages -->
-    <div id="registerPage" class="page" style="display:none;">
-        <header>
-          <h1>Register</h1>
-          <form>
-            <div class="inputContainer">
-              <label for="registerEmail">Email</label>
-              <input type="email" id="registerEmail" name="Email" />
-            </div>
-            <div class="inputContainer">
-              <label for="registerPassword">Password</label>
-              <input type="password" id="registerPassword" name="Password" />
-            </div>
-            <button type="button" id="RegisterButton">Register</button>
-            <button type="button" id="GoToLogin">Back to Login</button>
-          </form>
-        </header>
-      </div>
+  <!-- Login Pages -->
+  <div id="loginPage" class="page" page="loginPage">
+    <header>
+      <h1>lurkforwork.com</h1>
+      <form>
+        <div class="inputContainer">
+          <label for="loginEmail">Email</label>
+          <input type="email" id="loginEmail" name="Email" />
+        </div>
+        <div class="inputContainer">
+          <label for="LoginPassword">Password</label>
+          <input type="password" id="LoginPassword" name="Password" />
+        </div>
+        <button type="button" id="LoginButton">Login</button>
+        <button type="button" id="RegisterButton">Register</button>
+      </form>
+    </header>
+  </div>
 
-      <!-- Homepage -->
-      <div id="homePage" class="page" style="display:none;">
-        <header>
-          <h1>Home Page</h1>
-        </header>
-        <main>
-          <p>Welcome</p>
-        </main>
-      </div>
+  <!-- Register pages -->
+  <div id="registerPage" class="page hide" page="registerPage">
+    <header>
+      <h1>Register</h1>
+      <form>
+        <div class="inputContainer">
+          <label for="registerEmail">Email</label>
+          <input type="email" id="registerEmail" name="Email" placeholder="augustine@email.com" />
+        </div>
+        <div class="inputContainer">
+          <label for="registerName">Name</label>
+          <input type="text" id="registerName" name="Name" placeholder="Augustine" />
+        </div>
+        <div class="inputContainer">
+          <label for="registerPassword">Password</label>
+          <input type="password" id="registerPassword" name="registerPassword" />
+        </div>
+        <div class="inputContainer">
+          <label for="ConfirmPassword">Confirm Password</label>
+          <input type="password" id="ConfirmPassword" name="ConfirmPassword" />
+          <button type="button" id="toggleConfirmPassword">Show</button>
+        </div>
+        <button type="button" id="SubmitButton">Submit</button>
+        <button type="button" id="GoToLogin">Back to Login</button>
+        <a></a>
+      </form>
+    </header>
+  </div>
 
-    <main role="main">
-        <!-- app goes here -->
+  <!-- Homepage -->
+  <div id="homePage" class="page hide" page="homePage">
+    <header>
+      <h1>Home Page</h1>
+    </header>
+    <main>
+      <p>Welcome</p>
+      <button type="button" id="LogoutButton">Logout</button>
     </main>
-    <footer>
-        <p>&copy; lurkforwork.com</p>
-    </footer>
-    <script type="module" src="src/main.js"></script>
+  </div>
+
+  <main role="main">
+    <!-- app goes here -->
+  </main>
+  <footer>
+    <p>&copy; lurkforwork.com</p>
+  </footer>
+  <script type="module" src="/src/main.js"></script>
 </body>
+
 </html>
