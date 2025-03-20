@@ -13,14 +13,29 @@ const registerEmail = document.getElementById('registerEmail');
 const registerName = document.getElementById('registerName');
 const registerPassword = document.getElementById('registerPassword');
 const confirmPassword = document.getElementById('ConfirmPassword');
+const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
 const submitButton = document.getElementById('SubmitButton');
 const goToLoginButton = document.getElementById('GoToLogin');
 
+// Error popup
+const errorPopup = document.getElementById('errorPopup');
+const errorMessage = document.getElementById('errorMessage');
+const closeErrorPopup = document.getElementById('closeErrorPopup');
 
 // Pages container
 const loginPage = document.getElementById('loginPage');
 const registerPage = document.getElementById('registerPage');
 const homePage = document.getElementById('homePage');
+
+// Error function showing
+function showErrorPopup(message) {
+    errorMessage.innerText = message;
+    errorPopup.classList.remove('hide');
+}
+// closing the Error page
+closeErrorPopup.addEventListener('click', () => {
+    errorPopup.classList.add('hide');
+  });
 
 // Page jump function
 function showPage(pageName) {
@@ -35,11 +50,35 @@ function showPage(pageName) {
 
 // Register button Eventlistener
 submitButton.addEventListener('click', () => {
-    if (registerPassword.value !== confirmPassword.value) {
-        alert('Passwords do not match');
+    // validate the email name password, first get their value
+    const email = registerEmail.value.trim();
+    const name = registerName.value.trim();
+    const password = registerPassword.value;
+    const confirm = confirmPassword.value;
+
+    // validate the format of email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        showErrorPopup('Please enter a valid email address.');
+        return;
+    }
+    // validate the format length of name
+    if (name.length < 3 || name.length > 50) {
+        showErrorPopup('Full name must be between 3 and 50 characters.');
+        return;
+    }
+    // validate the password security strength
+    if (password.length < 6) {
+        showErrorPopup('Password must be at least 6 characters long.');
+        return;
+    }
+    // Two password consistency checks
+    if (password !== confirm) {
+        showErrorPopup('Passwords do not match.');
         return;
     }
 
+    // If all validations are passed, call the registration API
     fetch('http://192.168.1.101:5005/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -55,8 +94,13 @@ submitButton.addEventListener('click', () => {
                 alert('Registered!');
                 showPage('home');
             } else {
-                alert('Registration failed: ' + data.error);
+                // The back end returned an error and error popup
+                showErrorPopup(data.error || 'Registration failed.');
             }
+        })
+        .catch(err => {
+            console.error('Register Error:', err);
+            showErrorPopup('Network error. Please try again later.');
         });
 });
 
@@ -81,13 +125,23 @@ loginButton.addEventListener('click', () => {
         });
 });
 
+//
+toggleConfirmPassword.addEventListener('click', function () {
+    let type = confirmPassword.getAttribute('type') === 'password' ? 'text' : 'password';
+    let types = registerPassword.getAttribute('type') === 'password' ? 'text' : 'password';
+    confirmPassword.setAttribute('type', type);
+    registerPassword.setAttribute('type', types);
+    this.textContent = type === 'password' ? 'Show' : 'Hide';
+    this.textContent = types === 'password' ? 'Show' : 'Hide';
+});
+
 
 // Page jump Eventlistener
 registerButton.addEventListener('click', () => showPage('register'));
 goToLoginButton.addEventListener('click', () => showPage('login'));
 logoutButton.addEventListener('click', () => {
-  localStorage.removeItem('token');
-  showPage('login');
+    localStorage.removeItem('token');
+    showPage('login');
 });
 
 
