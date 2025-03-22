@@ -145,6 +145,106 @@ loginButton.addEventListener('click', () => {
         });
 });
 
+// Defines a time formatting function
+function formatTime(createdAtStr) {
+    const now = new Date();
+    const jobDate = new Date(createdAtStr);
+    const diffMs = now - jobDate;
+    const diffHours = Math.floor(diffMs / 3600000); // 1hours = 3600000 millisecond
+
+    // Determine the time of job Posting
+    if (diffHours < 24) {
+        const diffMinutes = Math.floor((diffMs % 3600000) / 60000); // become the minutes
+        return `${diffHours}hour${diffMinutes}minutes ago`;
+    } else {
+        const day = String(jobDate.getDate()).padStart(2, '0');
+        const month = String(jobDate.getMonth() + 1).padStart(2, '0');
+        const year = jobDate.getFullYear();
+        return `${day}/${month}/${year}`;
+    }
+}
+
+// Define the function that loads the JobFeed (homepage)
+function loadFeed() {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        showErrorPopup('Please log in first');
+        showPage('login');
+        return;
+    }
+
+    fetch(`http://192.168.1.101:5005/job/feed?start=0`, {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        }
+    })
+        .then(response => {
+            if (response.status === 403) {
+                localStorage.removeItem('token');
+                showPage('login');
+                throw new Error('Login expired');
+            }
+            return response.json();
+        })
+        .then(data => {
+            displayJobs(data);
+        })
+        .catch(error => {
+            showErrorPopup(error.message);
+        });
+}
+
+function displayJobs(jobs) {
+    const container = document.getElementById('feedContainer');
+    container.innerHTML = ''; // initial the content
+
+    jobs.forEach(job => {
+        const jobElement = document.createElement('div');
+        jobElement.className = 'job-item';
+
+        // title
+        const title = document.createElement('h2');
+        title.innerText = job.title;
+        jobElement.appendChild(title);
+
+        // Publisher (assuming the API returns creatorId, we need to get the username)
+        const creator = document.createElement('p');
+        creator.innerText = `Publisher: User ID ${job.creatorId}`;
+        jobElement.appendChild(creator);
+
+        // Pub date time
+        const time = document.createElement('p');
+        time.innerText = `Date time:${formatTime(job.createdAt)}`;
+        jobElement.appendChild(time);
+
+        // Image
+        if (job.image) {
+            const image = document.createElement('img');
+            image.src = job.image;
+            jobElement.appendChild(image);
+        }
+
+        // Description
+        const description = document.createElement('p');
+        description.innerText = job.description;
+        jobElement.appendChild(description);
+
+        // Number of likes
+        const likes = document.createElement('p');
+        likes.innerText = `Like: ${job.likes.length}`;
+        jobElement.appendChild(likes);
+
+        // Number of comments
+        const comments = document.createElement('p');
+        comments.innerText = `number of comments${job.comments.length}`;
+        jobElement.appendChild(comments);
+
+        container.appendChild(jobElement);
+    });
+}
+
 // Initial page display
 if (localStorage.getItem('token')) {
     showPage('home');
