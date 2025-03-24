@@ -45,63 +45,84 @@ closeErrorPopup.addEventListener('click', () => {
 
 // ==================== PAGE NAVIGATION ====================
 
-// Show the selected page and update the URL hash if needed
-const showPage = (pageName, updateHash = true) => {
-    // Hide all pages first
-    loginPage.style.display = 'none';
-    registerPage.style.display = 'none';
-    homePage.style.display = 'none';
+// Define the hash routes for each page
+const ROUTES = {
+    login: '/auth/login',
+    register: '/auth/register',
+    home: '/job/feed',
+};
 
-    // Update URL hash for routing (optional)
+// Store page DOM elements in an object for easier access
+const pages = {
+    login: loginPage,
+    register: registerPage,
+    home: homePage,
+};
+
+// Show the selected page and optionally update the URL hash
+const showPage = (pageName, updateHash = true) => {
+    // Hide all pages
+    Object.values(pages).forEach(page => (page.style.display = 'none'));
+
+    // Update URL hash if needed
     if (updateHash) {
-        if (pageName === 'login') {
-            window.location.hash = '/auth/login';
-        } else if (pageName === 'register') {
-            window.location.hash = '/auth/register';
-        } else if (pageName === 'home') {
-            window.location.hash = '/job/feed';
-        }
+        window.location.hash = ROUTES[pageName];
     }
 
     // Display the selected page
-    if (pageName === 'login') {
-        loginPage.style.display = 'block';
-    } else if (pageName === 'register') {
-        registerPage.style.display = 'block';
-    } else if (pageName === 'home') {
-        homePage.style.display = 'block';
-        fetchFeed(); // Load job feed when entering home page
+    pages[pageName].style.display = 'block';
+
+    // If the home page is displayed, load the job feed
+    if (pageName === 'homePage') {
+        fetchFeed();
     }
 };
 
-// Listen for hash changes in the URL (e.g., back/forward buttons)
-window.addEventListener('hashchange', () => {
+// Route to the correct page based on the current URL hash
+const routeToPage = () => {
+    let hash = window.location.hash;
+    // If hash is empty or just '#' then update it to the default login route
+    if (!hash || hash === '#') {
+        window.location.hash = ROUTES.login;
+        return;
+    }
+    // Loop through ROUTES to find a matching route
+    for (const [page, route] of Object.entries(ROUTES)) {
+        if (hash === '#' + route) {
+            return showPage(page, false);
+        }
+    }
+    // If no route matches, update to default login route
+    return showPage('login');
+};
+
+// On page load, set the default hash if needed and route accordingly
+window.addEventListener('load', () => {
+    if (!window.location.hash || window.location.hash === '#') {
+        window.location.hash = ROUTES.login;
+    }
     routeToPage();
 });
 
-// Determine which page to display based on URL hash
-const routeToPage = () => {
-    const hash = window.location.hash;
-    if (hash === '#/auth/login') {
-        showPage('login', false);
-    } else if (hash === '#/auth/register') {
-        showPage('register', false);
-    } else if (hash === '#/job/feed') {
-        showPage('home', false);
-    } else {
-        // Default page (login)
-        showPage('login', false);
-    }
-};
+// Listen for hash changes (e.g., when using back/forward buttons)
+window.addEventListener('hashchange', routeToPage);
 
-// ==================== EVENT LISTENERS ====================
+// ==================== NAVIGATION BUTTON EVENT LISTENERS ====================
 
-// Navigation buttons
-registerButton.addEventListener('click', () => showPage('register'));
-goToLoginButton.addEventListener('click', () => showPage('login'));
+// When the register button is clicked, update the hash to trigger the register page
+registerButton.addEventListener('click', () => {
+    window.location.hash = ROUTES.register;
+});
+
+// When the "back to login" button is clicked, update the hash to trigger the login page
+goToLoginButton.addEventListener('click', () => {
+    window.location.hash = ROUTES.login;
+});
+
+// When logout is clicked, clear the token and navigate to the login page
 logoutButton.addEventListener('click', () => {
-    localStorage.removeItem('token');  // Clear saved token
-    showPage('login');
+    localStorage.removeItem('token'); // Clear saved token
+    window.location.hash = ROUTES.login;
 });
 
 // Toggle password visibility for registration
@@ -151,20 +172,20 @@ submitButton.addEventListener('click', () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password, name }),
     })
-    .then(res => res.json())
-    .then(data => {
-        if (data.token) {
-            localStorage.setItem('token', data.token);
-            alert('Registered!');
-            showPage('home');
-        } else {
-            showErrorPopup(data.error || 'Registration failed.');
-        }
-    })
-    .catch(err => {
-        console.error('Register Error:', err);
-        showErrorPopup('Network error. Please try again later.');
-    });
+        .then(res => res.json())
+        .then(data => {
+            if (data.token) {
+                localStorage.setItem('token', data.token);
+                alert('Registered!');
+                showPage('home');
+            } else {
+                showErrorPopup(data.error || 'Registration failed.');
+            }
+        })
+        .catch(err => {
+            console.error('Register Error:', err);
+            showErrorPopup('Network error. Please try again later.');
+        });
 });
 
 // Login submission
@@ -177,16 +198,16 @@ loginButton.addEventListener('click', () => {
             password: loginPassword.value,
         }),
     })
-    .then(res => res.json())
-    .then(data => {
-        if (data.token) {
-            localStorage.setItem('token', data.token);
-            alert('Logged in!');
-            showPage('home');
-        } else {
-            showErrorPopup(data.error ?? 'Login failed');
-        }
-    });
+        .then(res => res.json())
+        .then(data => {
+            if (data.token) {
+                localStorage.setItem('token', data.token);
+                alert('Logged in!');
+                showPage('home');
+            } else {
+                showErrorPopup(data.error ?? 'Login failed');
+            }
+        });
 });
 
 // ==================== INITIALIZATION ====================
