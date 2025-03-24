@@ -1,7 +1,9 @@
 import { BACKEND_PORT } from './config.js';
 // A helper you may want to use when uploading new images to the server.
 import { fileToDataUrl } from './helpers.js';
+
 // ==================== DOM ELEMENTS ====================
+import { showNotification } from './notification.js';
 
 // Login page elements
 const loginEmail = document.getElementById('loginEmail');
@@ -144,25 +146,25 @@ submitButton.addEventListener('click', () => {
     // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-        showErrorPopup('Please enter a valid email address.');
+        showNotification('Please enter a valid email address.', 'warning');
         return;
     }
 
     // Name length validation
     if (name.length < 3 || name.length > 50) {
-        showErrorPopup('Full name must be between 3 and 50 characters.');
+        showNotification('Full name must be between 3 and 50 characters.', 'warning');
         return;
     }
 
     // Password strength validation
     if (password.length < 6) {
-        showErrorPopup('Password must be at least 6 characters long.');
+        showNotification('Password must be at least 6 characters long.', 'warning');
         return;
     }
 
     // Password consistency check
     if (password !== confirm) {
-        showErrorPopup('Passwords do not match.');
+        showNotification('Passwords do not match.', 'warning');
         return;
     }
 
@@ -179,12 +181,12 @@ submitButton.addEventListener('click', () => {
                 alert('Registered!');
                 showPage('home');
             } else {
-                showErrorPopup(data.error || 'Registration failed.');
+                showNotification(data.error || 'Registration failed.', 'error');
             }
         })
         .catch(err => {
             console.error('Register Error:', err);
-            showErrorPopup('Network error. Please try again later.');
+            showNotification('Network error. Please try again later.', 'error');
         });
 });
 
@@ -205,7 +207,7 @@ loginButton.addEventListener('click', () => {
                 alert('Logged in!');
                 showPage('home');
             } else {
-                showErrorPopup(data.error ?? 'Login failed');
+                showNotification(data.error ?? 'Login failed', 'error');
             }
         });
 });
