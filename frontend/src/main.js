@@ -94,81 +94,80 @@ const routeToPage = () => {
     }
 };
 
-// Page jump Eventlistener
+// ==================== EVENT LISTENERS ====================
+
+// Navigation buttons
 registerButton.addEventListener('click', () => showPage('register'));
 goToLoginButton.addEventListener('click', () => showPage('login'));
 logoutButton.addEventListener('click', () => {
-    localStorage.removeItem('token');
+    localStorage.removeItem('token');  // Clear saved token
     showPage('login');
 });
 
+// Toggle password visibility for registration
+toggleConfirmPassword.addEventListener('click', function () {
+    let confirmType = confirmPassword.getAttribute('type') === 'password' ? 'text' : 'password';
+    let registerType = registerPassword.getAttribute('type') === 'password' ? 'text' : 'password';
+    confirmPassword.setAttribute('type', confirmType);
+    registerPassword.setAttribute('type', registerType);
+    this.textContent = confirmType === 'password' ? 'Show' : 'Hide';
+});
 
-// Register button Eventlistener
+// Registration submission
 submitButton.addEventListener('click', () => {
-    // validate the email name password, first get their value
     const email = registerEmail.value.trim();
     const name = registerName.value.trim();
     const password = registerPassword.value;
     const confirm = confirmPassword.value;
 
-    // validate the format of email
+    // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
         showErrorPopup('Please enter a valid email address.');
         return;
     }
-    // validate the format length of name
+
+    // Name length validation
     if (name.length < 3 || name.length > 50) {
         showErrorPopup('Full name must be between 3 and 50 characters.');
         return;
     }
-    // validate the password security strength
+
+    // Password strength validation
     if (password.length < 6) {
         showErrorPopup('Password must be at least 6 characters long.');
         return;
     }
-    // Two password consistency checks
+
+    // Password consistency check
     if (password !== confirm) {
         showErrorPopup('Passwords do not match.');
         return;
     }
 
-    // If all validations are passed, call the registration API
+    // Submit registration request
     fetch('http://192.168.1.101:5005/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            email: registerEmail.value,
-            password: registerPassword.value,
-            name: registerName.value,
-        }),
-    }).then(res => res.json())
-        .then(data => {
-            if (data.token) {
-                localStorage.setItem('token', data.token);
-                alert('Registered!');
-                showPage('home');
-            } else {
-                // The back end returned an error and error popup
-                showErrorPopup(data.error || 'Registration failed.');
-            }
-        })
-        .catch(err => {
-            console.error('Register Error:', err);
-            showErrorPopup('Network error. Please try again later.');
-        });
+        body: JSON.stringify({ email, password, name }),
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.token) {
+            localStorage.setItem('token', data.token);
+            alert('Registered!');
+            showPage('home');
+        } else {
+            showErrorPopup(data.error || 'Registration failed.');
+        }
+    })
+    .catch(err => {
+        console.error('Register Error:', err);
+        showErrorPopup('Network error. Please try again later.');
+    });
 });
 
-// show or hide the registerPassword
-toggleConfirmPassword.addEventListener('click', function () {
-    let type = confirmPassword.getAttribute('type') === 'password' ? 'text' : 'password';
-    let types = registerPassword.getAttribute('type') === 'password' ? 'text' : 'password';
-    confirmPassword.setAttribute('type', type);
-    registerPassword.setAttribute('type', types);
-    this.textContent = type === 'password' ? 'Show' : 'Hide';
-});
-
-// Login button Eventlistener
+// Login submission
 loginButton.addEventListener('click', () => {
     fetch('http://192.168.1.101:5005/auth/login', {
         method: 'POST',
@@ -177,17 +176,26 @@ loginButton.addEventListener('click', () => {
             email: loginEmail.value,
             password: loginPassword.value,
         }),
-    }).then(res => res.json())
-        .then(data => {
-            if (data.token) {
-                localStorage.setItem('token', data.token);
-                alert('Logged in!');
-                showPage('home');
-            } else {
-                showErrorPopup(data.error ?? 'Login failed');
-            }
-        });
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.token) {
+            localStorage.setItem('token', data.token);
+            alert('Logged in!');
+            showPage('home');
+        } else {
+            showErrorPopup(data.error ?? 'Login failed');
+        }
+    });
 });
+
+// ==================== INITIALIZATION ====================
+
+// Determine initial page based on URL or saved token
+if (localStorage.getItem('token')) {
+    window.location.hash = '/job/feed';
+}
+routeToPage();
 
 // Defines a time formatting function
 const formatTime = (createdAtStr) => {
@@ -288,11 +296,4 @@ const displayJobs = (jobs) => {
 
         container.appendChild(jobElement);
     });
-}
-
-// Initial page display
-if (localStorage.getItem('token')) {
-    showPage('home');
-} else {
-    showPage('login');
 }
