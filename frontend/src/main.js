@@ -1,9 +1,9 @@
 import { BACKEND_PORT } from './config.js';
 // A helper you may want to use when uploading new images to the server.
 import { fileToDataUrl } from './helpers.js';
+import { showNotification } from './notification.js';
 
 // ==================== DOM ELEMENTS ====================
-import { showNotification } from './notification.js';
 
 // Login page elements
 const loginEmail = document.getElementById('loginEmail');
@@ -61,49 +61,107 @@ const pages = {
     home: homePage,
 };
 
+// Define the function that loads the JobFeed (homepage)
+const fetchFeed = () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        showNotification('Please log in first', 'error');
+        showPage('login');
+        return;
+    }
+
+    fetch(`http://192.168.1.101:5005/job/feed?start=0`, {
+        // method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        }
+    })
+        .then(res => res.json())
+        .then(res => {
+            if (res && res.error) {
+            showNotification(res.error, 'error')
+            return;
+        }
+        console.log('job list: ', res)
+    })
+    // .then(response => {
+    //     console.log(response)
+    //     if (response.status === 403) {
+    //         localStorage.removeItem('token');
+    //         showPage('login');
+    //         throw new Error('Login expired');
+    //     }
+    //     return response.json();
+    // }).then(data => {
+    //     displayJobs(data);
+    // })
+    //     .catch(error => {
+    //         showErrorPopup(error.message);
+    //     })
+}
+
 // Show the selected page and optionally update the URL hash
+let currentPage = null;
 const showPage = (pageName, updateHash = true) => {
+    if (currentPage === pageName) {
+        return;
+    }
     // Hide all pages
     Object.values(pages).forEach(page => (page.style.display = 'none'));
 
     // Update URL hash if needed
     if (updateHash) {
-        window.location.hash = ROUTES[pageName];
+        const targetHash = '#' + ROUTES[pageName];
+        if (window.location.hash !== targetHash) {
+            window.location.hash = targetHash;
+        }
     }
 
     // Display the selected page
     pages[pageName].style.display = 'block';
+    currentPage = pageName;
 
     // If the home page is displayed, load the job feed
-    if (pageName === 'homePage') {
+    if (pageName === 'home') {
         fetchFeed();
     }
 };
 
 // Route to the correct page based on the current URL hash
 const routeToPage = () => {
-    let hash = window.location.hash;
-    // If hash is empty or just '#' then update it to the default login route
+    const hash = window.location.hash;
+    const token = localStorage.getItem('token');
+    // If hash is empty or just '#', go to login
     if (!hash || hash === '#') {
         window.location.hash = ROUTES.login;
         return;
     }
-    // Loop through ROUTES to find a matching route
+
+    // Loop through ROUTES to find a match
     for (const [page, route] of Object.entries(ROUTES)) {
         if (hash === '#' + route) {
+            // If accessing home page but no token, redirect to login
+            if (page === 'home' && !token) {
+                showNotification('Please log in first.', 'error');
+                window.location.hash = ROUTES.login;
+                return;
+            }
             return showPage(page, false);
         }
     }
+
     // If no route matches, update to default login route
-    return showPage('login');
+    window.location.hash = ROUTES.login;
 };
 
 // On page load, set the default hash if needed and route accordingly
 window.addEventListener('load', () => {
     if (!window.location.hash || window.location.hash === '#') {
         window.location.hash = ROUTES.login;
+    } else {
+        routeToPage();
     }
-    routeToPage();
 });
 
 // Listen for hash changes (e.g., when using back/forward buttons)
@@ -178,8 +236,8 @@ submitButton.addEventListener('click', () => {
         .then(data => {
             if (data.token) {
                 localStorage.setItem('token', data.token);
-                alert('Registered!');
-                showPage('home');
+                showNotification('Registered!', 'success');
+                showPage('login');
             } else {
                 showNotification(data.error || 'Registration failed.', 'error');
             }
@@ -199,17 +257,16 @@ loginButton.addEventListener('click', () => {
             email: loginEmail.value,
             password: loginPassword.value,
         }),
-    })
-        .then(res => res.json())
-        .then(data => {
-            if (data.token) {
-                localStorage.setItem('token', data.token);
-                alert('Logged in!');
-                showPage('home');
-            } else {
-                showNotification(data.error ?? 'Login failed', 'error');
-            }
-        });
+    }).then(res => res.json())
+      .then(data => {
+        if (data.token) {
+            localStorage.setItem('token', data.token);
+            showNotification('Logged in!', 'success');
+            showPage('home');
+        } else {
+            showNotification(data.error ?? 'Login failed', 'error');
+        }
+    });
 });
 
 // ==================== INITIALIZATION ====================
@@ -237,39 +294,6 @@ const formatTime = (createdAtStr) => {
         const year = jobDate.getFullYear();
         return `${day}/${month}/${year}`;
     }
-}
-
-// Define the function that loads the JobFeed (homepage)
-const fetchFeed = () => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-        showErrorPopup('Please log in first');
-        showPage('login');
-        return;
-    }
-
-    fetch(`http://192.168.1.101:5005/job/feed?start=0`, {
-        method: 'GET',
-        headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-        }
-    }).then(response => {
-        console.log(response)
-        if (response.status === 403) {
-            localStorage.removeItem('token');
-            showPage('login');
-            throw new Error('Login expired');
-        }
-        return response.json();
-    })
-        .then(data => {
-            displayJobs(data);
-        })
-        .catch(error => {
-            showErrorPopup(error.message);
-        })
-        .then(console.log(`${token}`))
 }
 
 const displayJobs = (jobs) => {
