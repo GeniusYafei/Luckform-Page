@@ -1,0 +1,62 @@
+/* Center the container */
+.auth-container {
+    max-width: 350px;
+    margin: 100px auto;
+    padding: 30px 25px;
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+/* Title Styling */
+.auth-container h2 {
+    margin-bottom: 25px;
+    font-size: 24px;
+    color: #333;
+    font-weight: 600;
+}
+
+/* Input field styling */
+.inputContainer input {
+    width: 100%;
+    padding: 12px 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+/* Button styling */
+.auth-button {
+    width: 100%;
+    padding: 12px;
+    margin-top: 15px;
+    background-color: #1e73e8;
+    color: #fff;
+    border: none;
+    border-radius: 20px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.auth-button:hover {
+    background-color: #1665c1;
+}
+
+/* Switch link (Register/Login) */
+.switch-link {
+    margin-top: 15px;
+    font-size: 14px;
+    color: #333;
+}
+
+.switch-link a {
+    color: #1e73e8;
+    text-decoration: none;
+}
+
+.switch-link a:hover {
+    text-decoration: underline;
+}
