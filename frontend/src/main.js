@@ -1,16 +1,16 @@
 import { BACKEND_PORT } from './config.js';
 // A helper you may want to use when uploading new images to the server.
 import { fileToDataUrl } from './helpers.js';
+// ==================== DOM ELEMENTS ====================
 
-// get all elements DOM
-// All login page DOM elements
+// Login page elements
 const loginEmail = document.getElementById('loginEmail');
 const loginPassword = document.getElementById('LoginPassword');
 const loginButton = document.getElementById('LoginButton');
 const registerButton = document.getElementById('RegisterButton');
 const logoutButton = document.getElementById('LogoutButton')
 
-// All register page DOM elements
+// Register page elements
 const registerEmail = document.getElementById('registerEmail');
 const registerName = document.getElementById('registerName');
 const registerPassword = document.getElementById('registerPassword');
@@ -19,26 +19,80 @@ const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
 const submitButton = document.getElementById('SubmitButton');
 const goToLoginButton = document.getElementById('GoToLogin');
 
-// All Error popup DOM elements
+// Error popup elements
 const errorPopup = document.getElementById('errorPopup');
 const errorMessage = document.getElementById('errorMessage');
 const closeErrorPopup = document.getElementById('closeErrorPopup');
 
-// Pages container DOM elements
+// Page containers
 const loginPage = document.getElementById('loginPage');
 const registerPage = document.getElementById('registerPage');
 const homePage = document.getElementById('homePage');
 
+// ==================== ERROR POPUP FUNCTIONS ====================
+
 // Error function showing
-function showErrorPopup(message) {
+// Show error popup with a custom message
+const showErrorPopup = (message) => {
     errorMessage.innerText = message;
     errorPopup.classList.remove('hide');
-}
+};
 
-// closing the Error page
+// Close error popup when close button is clicked
 closeErrorPopup.addEventListener('click', () => {
     errorPopup.classList.add('hide');
 });
+
+// ==================== PAGE NAVIGATION ====================
+
+// Show the selected page and update the URL hash if needed
+const showPage = (pageName, updateHash = true) => {
+    // Hide all pages first
+    loginPage.style.display = 'none';
+    registerPage.style.display = 'none';
+    homePage.style.display = 'none';
+
+    // Update URL hash for routing (optional)
+    if (updateHash) {
+        if (pageName === 'login') {
+            window.location.hash = '/auth/login';
+        } else if (pageName === 'register') {
+            window.location.hash = '/auth/register';
+        } else if (pageName === 'home') {
+            window.location.hash = '/job/feed';
+        }
+    }
+
+    // Display the selected page
+    if (pageName === 'login') {
+        loginPage.style.display = 'block';
+    } else if (pageName === 'register') {
+        registerPage.style.display = 'block';
+    } else if (pageName === 'home') {
+        homePage.style.display = 'block';
+        fetchFeed(); // Load job feed when entering home page
+    }
+};
+
+// Listen for hash changes in the URL (e.g., back/forward buttons)
+window.addEventListener('hashchange', () => {
+    routeToPage();
+});
+
+// Determine which page to display based on URL hash
+const routeToPage = () => {
+    const hash = window.location.hash;
+    if (hash === '#/auth/login') {
+        showPage('login', false);
+    } else if (hash === '#/auth/register') {
+        showPage('register', false);
+    } else if (hash === '#/job/feed') {
+        showPage('home', false);
+    } else {
+        // Default page (login)
+        showPage('login', false);
+    }
+};
 
 // Page jump Eventlistener
 registerButton.addEventListener('click', () => showPage('register'));
@@ -48,16 +102,6 @@ logoutButton.addEventListener('click', () => {
     showPage('login');
 });
 
-// Page jump function
-function showPage(pageName) {
-    loginPage.style.display = 'none';
-    registerPage.style.display = 'none';
-    homePage.style.display = 'none';
-
-    if (pageName === 'login') loginPage.style.display = 'block';
-    if (pageName === 'register') registerPage.style.display = 'block';
-    if (pageName === 'home') homePage.style.display = 'block';
-}
 
 // Register button Eventlistener
 submitButton.addEventListener('click', () => {
@@ -146,7 +190,7 @@ loginButton.addEventListener('click', () => {
 });
 
 // Defines a time formatting function
-function formatTime(createdAtStr) {
+const formatTime = (createdAtStr) => {
     const now = new Date();
     const jobDate = new Date(createdAtStr);
     const diffMs = now - jobDate;
@@ -165,7 +209,7 @@ function formatTime(createdAtStr) {
 }
 
 // Define the function that loads the JobFeed (homepage)
-function loadFeed() {
+const fetchFeed = () => {
     const token = localStorage.getItem('token');
     if (!token) {
         showErrorPopup('Please log in first');
@@ -179,24 +223,25 @@ function loadFeed() {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
         }
+    }).then(response => {
+        console.log(response)
+        if (response.status === 403) {
+            localStorage.removeItem('token');
+            showPage('login');
+            throw new Error('Login expired');
+        }
+        return response.json();
     })
-        .then(response => {
-            if (response.status === 403) {
-                localStorage.removeItem('token');
-                showPage('login');
-                throw new Error('Login expired');
-            }
-            return response.json();
-        })
         .then(data => {
             displayJobs(data);
         })
         .catch(error => {
             showErrorPopup(error.message);
-        });
+        })
+        .then(console.log(`${token}`))
 }
 
-function displayJobs(jobs) {
+const displayJobs = (jobs) => {
     const container = document.getElementById('feedContainer');
     container.innerHTML = ''; // initial the content
 
