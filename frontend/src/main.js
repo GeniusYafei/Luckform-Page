@@ -341,6 +341,7 @@ const formatTime = (createdAtStr) => {
 }
 
 const createJobCard = (job) => {
+    const token = localStorage.getItem('token');
     const card = document.createElement('div');
     card.className = 'job-card';
 
@@ -375,13 +376,44 @@ const createJobCard = (job) => {
     likesButton.className = 'like-button';
     card.appendChild(likesButton);
 
-    likesButton.addEventListener('click', () => {
-        showNotification('Liked~', 'success')
-        fetch('http://localhost:5005/job/like', {
-            method: 'PUT'
-        })
-    })
+    const currentUserId = localStorage.getItem('userId');
+    let liked = !!job.likes?.find(user => user.userId === Number(currentUserId));
+    let likeCount = job.likes.length;
+    const updateLikeButton = () => {
+        likesButton.textContent = `❤️ ${liked ? 'Unlike' : 'Like'} (${likeCount})`;
+        likesButton.className = liked ? 'like-button btn-primary' : 'like-button btn-outline-primary';
+    };
 
+    updateLikeButton();
+
+    likesButton.addEventListener('click', () => {
+        fetch('http://localhost:5005/job/like', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                id: job.id,
+                turnon: !liked,
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data && data.error){
+                showNotification(data.error, 'error');
+                return;
+            }
+
+            liked = !liked;
+            likeCount += liked ? 1 : -1;
+            updateLikeButton();
+            showNotification(liked ? 'Liked!' : 'Unliked!', 'success');
+        })
+        .catch(() => {
+            showNotification('Network error', 'error');
+        });
+    });
 
     const commentsButton = document.createElement('button');
     commentsButton.textContent = `Comment 💬 ${job.comments.length}`;
