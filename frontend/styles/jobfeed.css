@@ -1,25 +1,101 @@
-.feed-container {
+#homePage {
     display: flex;
     flex-direction: column;
-    gap: 16px;
-    padding: 16px;
-  }
+    height: 100vh;
+    font-family: sans-serif;
+}
 
-  .job-card {
-    border: 1px solid #ccc;
-    border-radius: 10px;
-    padding: 16px;
-    background-color: #fff;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-  }
+#homePage .jobfeed-header {
+    display: flex;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    justify-content: space-between;
+    align-items: center;
+    background-color: white;
+    padding: 10px 20px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
 
-  .job-card h2 {
+#homePage .logo {
+    font-weight: bold;
     font-size: 20px;
-    margin-bottom: 8px;
-  }
+}
 
-  .job-card img {
-    max-width: 100%;
-    height: auto;
+#homePage .nav-icons {
+    position: relative;
+}
+
+#homePage .avatar-button {
+    background-color: #e6f0f6;
+    color: #0073b1;
+    border: none;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    font-weight: bold;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 0 1px rgba(0,0,0,0.05);
+    transition: background-color 0.2s;
+}
+
+#homePage .avatar-button:hover {
+    background-color: #d0e6f7;
+}
+
+#homePage .profile-dropdown button {
+    background-color: transparent;
+    border: none;
+    padding: 6px 12px;
+    width: 100%;
+    text-align: left;
+    font-size: 14px;
+    color: #333;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#homePage .profile-dropdown button:hover {
+    background-color: #f3f2ef;
+    color: #0073b1;
+}
+
+#homePage .profile-dropdown.hide {
+    display: none;
+}
+
+#homePage .jobfeed-main {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+#homePage .sidebar {
+    width: 240px;
+    padding: 20px;
+    border-right: 1px solid #ddd;
+    background-color: #f9f9f9;
+}
+
+#homePage .feed-container {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+#homePage .job-card {
+    background-color: #fff;
+    padding: 15px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
     border-radius: 6px;
-  }
+}
+
+#homePage .id-img {
+    width: 120px;
+    height: auto;
+}
