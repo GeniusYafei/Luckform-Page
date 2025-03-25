@@ -21,6 +21,10 @@ const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
 const submitButton = document.getElementById('SubmitButton');
 const goToLoginButton = document.getElementById('GoToLogin');
 
+// Job page elements
+const profileButton = document.getElementById('profileMenuButton');
+const profileMenu = document.getElementById('profileMenu');
+
 // Error popup elements
 const errorPopup = document.getElementById('errorPopup');
 const errorMessage = document.getElementById('errorMessage');
@@ -91,6 +95,31 @@ const fetchFeed = () => {
             showNotification(err.message, 'error');
         });
 }
+
+const populateUserSidebar = (user) => {
+    document.getElementById('userName').textContent = user.name || 'User';
+    document.getElementById('userLocation').textContent = user.location || '';
+    document.getElementById('userOrg').textContent = user.org || '';
+    document.getElementById('avatarLetter').textContent = (user.name || 'U')[0];
+};
+
+// Toggle on click
+profileButton.addEventListener('click', (event) => {
+    event.stopPropagation(); // Prevents bubbling, preventing click events that trigger the document
+    profileMenu.classList.toggle('hide');
+});
+
+// Hide the menu when click elsewhere on the page
+document.addEventListener('click', (event) => {
+    if (!profileMenu.classList.contains('hide')) {
+        profileMenu.classList.add('hide');
+    }
+});
+
+// Preventing clicking on the menu itself also triggers hiding
+profileMenu.addEventListener('click', (event) => {
+    event.stopPropagation();
+});
 
 // Show the selected page and optionally update the URL hash
 let currentPage = null;
@@ -176,7 +205,7 @@ logoutButton.addEventListener('click', () => {
     setTimeout(() => {
         localStorage.removeItem('token'); // Clear saved token
         window.location.hash = ROUTES.login;
-    } , 100);
+    }, 100);
 });
 
 // Toggle password visibility for registration
@@ -305,12 +334,14 @@ const createJobCard = (job) => {
     card.appendChild(author);
 
     const time = document.createElement('p');
-    const formattedDate = new Date(job.createdAt).toLocaleString();
+    // const formattedDate = new Date(job.createdAt).toLocaleString();
+    const formattedDate = formatTime(job.createdAt)
     time.textContent = `Posted at: ${formattedDate}`;
     card.appendChild(time);
 
     if (job.image) {
         const img = document.createElement('img');
+        img.className = 'id-img'
         img.src = job.image;
         img.alt = 'Job image';
         card.appendChild(img);
