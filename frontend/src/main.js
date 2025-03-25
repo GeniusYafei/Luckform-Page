@@ -64,6 +64,7 @@ const pages = {
 // Define the function that loads the JobFeed (homepage)
 const fetchFeed = () => {
     const token = localStorage.getItem('token');
+    console.log(token)
     if (!token) {
         showNotification('Please log in first', 'error');
         showPage('login');
@@ -78,27 +79,17 @@ const fetchFeed = () => {
         }
     })
         .then(res => res.json())
-        .then(res => {
-            if (res && res.error) {
-            showNotification(res.error, 'error')
-            return;
-        }
-        console.log('job list: ', res)
-    })
-    // .then(response => {
-    //     console.log(response)
-    //     if (response.status === 403) {
-    //         localStorage.removeItem('token');
-    //         showPage('login');
-    //         throw new Error('Login expired');
-    //     }
-    //     return response.json();
-    // }).then(data => {
-    //     displayJobs(data);
-    // })
-    //     .catch(error => {
-    //         showErrorPopup(error.message);
-    //     })
+        .then(data => {
+            if (data.error) {
+                showNotification(data.error, 'error');
+                return;
+            }
+            console.log('job list: ', data)
+            renderJobFeed(data);
+        })
+        .catch(err => {
+            showNotification(err.message, 'error');
+        });
 }
 
 // Show the selected page and optionally update the URL hash
@@ -181,12 +172,15 @@ goToLoginButton.addEventListener('click', () => {
 
 // When logout is clicked, clear the token and navigate to the login page
 logoutButton.addEventListener('click', () => {
-    localStorage.removeItem('token'); // Clear saved token
-    window.location.hash = ROUTES.login;
+    showNotification('Logged out!', 'info')
+    setTimeout(() => {
+        localStorage.removeItem('token'); // Clear saved token
+        window.location.hash = ROUTES.login;
+    } , 100);
 });
 
 // Toggle password visibility for registration
-toggleConfirmPassword.addEventListener('click', function () {
+toggleConfirmPassword.addEventListener('click', () => {
     let confirmType = confirmPassword.getAttribute('type') === 'password' ? 'text' : 'password';
     let registerType = registerPassword.getAttribute('type') === 'password' ? 'text' : 'password';
     confirmPassword.setAttribute('type', confirmType);
@@ -258,15 +252,17 @@ loginButton.addEventListener('click', () => {
             password: loginPassword.value,
         }),
     }).then(res => res.json())
-      .then(data => {
-        if (data.token) {
-            localStorage.setItem('token', data.token);
-            showNotification('Logged in!', 'success');
-            showPage('home');
-        } else {
-            showNotification(data.error ?? 'Login failed', 'error');
-        }
-    });
+        .then(data => {
+            console.log('userId: ', data.userId)
+            if (data.token) {
+                localStorage.setItem('userId', data.userId)
+                localStorage.setItem('token', data.token);
+                showNotification('Logged in!', 'success');
+                showPage('home');
+            } else {
+                showNotification(data.error ?? 'Login failed', 'error');
+            }
+        });
 });
 
 // ==================== INITIALIZATION ====================
@@ -296,51 +292,55 @@ const formatTime = (createdAtStr) => {
     }
 }
 
-const displayJobs = (jobs) => {
+const createJobCard = (job) => {
+    const card = document.createElement('div');
+    card.className = 'job-card';
+
+    const title = document.createElement('h2');
+    title.textContent = job.title;
+    card.appendChild(title);
+
+    const author = document.createElement('p');
+    author.textContent = `Posted by: ${job.userId}`;
+    card.appendChild(author);
+
+    const time = document.createElement('p');
+    const formattedDate = new Date(job.createdAt).toLocaleString();
+    time.textContent = `Posted at: ${formattedDate}`;
+    card.appendChild(time);
+
+    if (job.image) {
+        const img = document.createElement('img');
+        img.src = job.image;
+        img.alt = 'Job image';
+        card.appendChild(img);
+    }
+
+    const desc = document.createElement('p');
+    desc.textContent = job.description;
+    card.appendChild(desc);
+
+    const likes = document.createElement('p');
+    likes.textContent = `Likes: ${job.likes.length}`;
+    card.appendChild(likes);
+
+    const comments = document.createElement('p');
+    comments.textContent = `Comments: ${job.comments.length}`;
+    card.appendChild(comments);
+
+    return card;
+}
+
+const renderJobFeed = (jobs) => {
     const container = document.getElementById('feedContainer');
-    container.innerHTML = ''; // initial the content
+
+    // Clear previous content
+    while (container.firstChild) {
+        container.removeChild(container.firstChild);
+    }
 
     jobs.forEach(job => {
-        const jobElement = document.createElement('div');
-        jobElement.className = 'job-item';
-
-        // title
-        const title = document.createElement('h2');
-        title.innerText = job.title;
-        jobElement.appendChild(title);
-
-        // Publisher (assuming the API returns creatorId, we need to get the username)
-        const creator = document.createElement('p');
-        creator.innerText = `Publisher: User ID ${job.creatorId}`;
-        jobElement.appendChild(creator);
-
-        // Pub date time
-        const time = document.createElement('p');
-        time.innerText = `Date time:${formatTime(job.createdAt)}`;
-        jobElement.appendChild(time);
-
-        // Image
-        if (job.image) {
-            const image = document.createElement('img');
-            image.src = job.image;
-            jobElement.appendChild(image);
-        }
-
-        // Description
-        const description = document.createElement('p');
-        description.innerText = job.description;
-        jobElement.appendChild(description);
-
-        // Number of likes
-        const likes = document.createElement('p');
-        likes.innerText = `Like: ${job.likes.length}`;
-        jobElement.appendChild(likes);
-
-        // Number of comments
-        const comments = document.createElement('p');
-        comments.innerText = `number of comments${job.comments.length}`;
-        jobElement.appendChild(comments);
-
-        container.appendChild(jobElement);
+        const jobCard = createJobCard(job);
+        container.appendChild(jobCard);
     });
 }
