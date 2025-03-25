@@ -68,7 +68,6 @@ const pages = {
 // Define the function that loads the JobFeed (homepage)
 const fetchFeed = () => {
     const token = localStorage.getItem('token');
-    console.log(token)
     if (!token) {
         showNotification('Please log in first', 'error');
         showPage('login');
@@ -95,13 +94,6 @@ const fetchFeed = () => {
             showNotification(err.message, 'error');
         });
 }
-
-const populateUserSidebar = (user) => {
-    document.getElementById('userName').textContent = user.name || 'User';
-    document.getElementById('userLocation').textContent = user.location || '';
-    document.getElementById('userOrg').textContent = user.org || '';
-    document.getElementById('avatarLetter').textContent = (user.name || 'U')[0];
-};
 
 // Toggle on click
 profileButton.addEventListener('click', (event) => {
@@ -273,24 +265,51 @@ submitButton.addEventListener('click', () => {
 
 // Login submission
 loginButton.addEventListener('click', () => {
+    const email = loginEmail.value;
+    const password = loginPassword.value;
+
     fetch('http://192.168.1.101:5005/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            email: loginEmail.value,
-            password: loginPassword.value,
-        }),
-    }).then(res => res.json())
+        body: JSON.stringify({ email, password }),
+    })
+        .then(res => res.json())
         .then(data => {
-            console.log('userId: ', data.userId)
-            if (data.token) {
-                localStorage.setItem('userId', data.userId)
-                localStorage.setItem('token', data.token);
-                showNotification('Logged in!', 'success');
-                showPage('home');
-            } else {
+            if (!data.token) {
                 showNotification(data.error ?? 'Login failed', 'error');
+                return Promise.reject('No token returned');
             }
+
+            // If the login succeeds, save the token and userId
+            console.log('userId:', data.userId);
+            localStorage.setItem('userId', data.userId);
+            localStorage.setItem('token', data.token);
+
+            // later usersWhoWatch
+            return fetch('http://192.168.1.101:5005/user/watch', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${data.token}`
+                },
+                body: JSON.stringify({ email, turnon: true }),
+            });
+        })
+        .then(res => res.json())
+        .then(result => {
+            if (result?.error) {
+                console.log('Watch error:', result.error);
+                showNotification(result.error, 'error');
+                return;
+            }
+
+            // Log in and watch successfully
+            showNotification('Logged in!', 'success');
+            showPage('home');
+        })
+        .catch(err => {
+            console.error('Login flow error:', err);
+            showNotification('Something went wrong during login.', 'error');
         });
 });
 
@@ -351,16 +370,27 @@ const createJobCard = (job) => {
     desc.textContent = job.description;
     card.appendChild(desc);
 
-    const likes = document.createElement('p');
-    likes.textContent = `Likes: ${job.likes.length}`;
-    card.appendChild(likes);
+    const likesButton = document.createElement('button');
+    likesButton.textContent = `Like ❤️ ${job.likes.length}`;
+    likesButton.className = 'like-button';
+    card.appendChild(likesButton);
 
-    const comments = document.createElement('p');
-    comments.textContent = `Comments: ${job.comments.length}`;
-    card.appendChild(comments);
+    likesButton.addEventListener('click', () => {
+        showNotification('Liked~', 'success')
+        fetch('http://localhost:5005/job/like', {
+            method: 'PUT'
+        })
+    })
+
+
+    const commentsButton = document.createElement('button');
+    commentsButton.textContent = `Comment 💬 ${job.comments.length}`;
+    commentsButton.className = 'comment-button';
+    card.appendChild(commentsButton);
 
     return card;
 }
+
 
 const renderJobFeed = (jobs) => {
     const container = document.getElementById('feedContainer');
