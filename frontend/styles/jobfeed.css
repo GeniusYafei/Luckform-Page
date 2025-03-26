@@ -234,3 +234,37 @@
     gap: 10px;
 }
 
+#homePage .modal-actions button {
+    padding: 8px 12px;
+    font-size: 14px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+#homePage #cancelPost {
+    background-color: #e4e6eb;
+    color: #333;
+}
+
+#homePage #confirmPost {
+    background-color: #0a66c2;
+    color: white;
+}
+
+#homePage #confirmPost:hover {
+    background-color: #004182;
+}
+
+#homePage .close-button {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 20px;
+    cursor: pointer;
+    color: #999;
+}
+
+#homePage .close-button:hover {
+    color: #333;
+}
