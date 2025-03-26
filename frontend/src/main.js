@@ -42,6 +42,8 @@ const loginPage = document.getElementById('loginPage');
 const registerPage = document.getElementById('registerPage');
 const homePage = document.getElementById('homePage');
 
+// Token
+const token = localStorage.getItem('token');
 // ==================== PAGE NAVIGATION ====================
 
 // Define the hash routes for each page
@@ -68,7 +70,7 @@ const fetchFeed = () => {
     }
 
     fetch(`${BACKEND_URL}/job/feed?start=0`, {
-        // method: 'GET',
+        method: 'GET',
         headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
@@ -224,37 +226,32 @@ jobImage.addEventListener('change', (event) => {
 });
 
 confirmPost.addEventListener('click', () => {
-    // split the date and get value
-    const parts = jobStartDate.value.split('/');
-    const inputDay = parseInt(parts[0], 10);
-    const inputMoth = parseInt(parts[1], 10);
-    const inputYear = parseInt(parts[2], 10);
-    // Create a Date object from the input
-    const inputDate = new Date(inputYear, inputMoth - 1, inputDay);
-
+    const title = jobTitle.value;
+    const description = jobDescription.value;
+    const startDateStr = jobStartDate.value;
+    const imageFile = jobImage.files[0];
+    const [inputDay, inputMonth, inputYear] = startDateStr.split('/').map(num => parseInt(num, 10));
+    const inputDate = new Date(inputYear, inputMonth - 1, inputDay);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    // Check empty fields
-    if (!jobTitle.value) {
-        showNotification('Job Title cannot be empty.', 'error');
-        return;
-    }
-    if (!jobStartDate.value) {
+
+    if (!title) return showNotification('Job Title cannot be empty.', 'error');
+    if (!startDateStr) {
         showNotification('Job Start Date is required.', 'error');
         return;
     } else {
-        // validate the Graduation Date
+        // validate the Date
         if (!/[0-9]{2}\/[0-9]{2}\/[0-9]{4}$/.test(jobStartDate.value)) {
             showNotification('Invalid date format. Please use DD/MM/YYYY.', 'info');
             return;
         }
-        // validate the graduation date
-        if (inputMoth < 1 || inputMoth > 12) {
+        // validate the date
+        if (inputMonth < 1 || inputMonth > 12) {
             showNotification('Please input a valid date', 'info');
             return;
         }
         // Calculate the number of days in the month
-        const daysInMonth = new Date(inputYear, inputMoth, 0).getDate();
+        const daysInMonth = new Date(inputYear, inputMonth, 0).getDate();
         if (inputDay < 1 || inputDay > daysInMonth) {
             showNotification('Please input a valid date', 'info');
             return;
@@ -263,18 +260,41 @@ confirmPost.addEventListener('click', () => {
             showNotification("Job Start Date can't be earlier than today.", 'error');
             return;
         }
-    }
-    if (!jobDescription.value) {
-        showNotification('Job Description cannot be empty.', 'error');
-        return;
-    }
-    if (!jobImage.value) {
-        showNotification('Please upload a Job Image.', 'error');
-        return;
-    }
+    };
+    if (!description) return showNotification('Job Description cannot be empty.', 'error');
+    if (!imageFile) return showNotification('Please upload a Job Image.', 'error');
 
-    
+    // Convert image to base64 and submit
+    fileToDataUrl(imageFile).then(imageBase64 => {
+        const data = {
+            title,
+            description,
+            start: inputDate.toISOString(), // ISO 8601 format
+            image: imageBase64
+        };
+
+        fetch(`${BACKEND_URL}/job`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(data)
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.error) {
+                    showNotification(data.error, 'error');
+                    return;
+                }
+                showNotification('Post a job success!', 'success');
+                console.log('Success', data);
+                fetchFeed(); // Refresh the feed
+                postJobModal.classList.add('hide');
+            });
+    });
 });
+
 
 // User can closed the modal of Post
 closeModal.addEventListener('click', () => {
@@ -285,8 +305,6 @@ closeModal.addEventListener('click', () => {
 cancelPost.addEventListener('click', () => {
     postJobModal.classList.add('hide');
 });
-
-
 
 // Registration submission
 submitButton.addEventListener('click', () => {
@@ -301,19 +319,16 @@ submitButton.addEventListener('click', () => {
         showNotification('Please enter a valid email address.', 'warning');
         return;
     }
-
     // Name length validation
     if (name.length < 3 || name.length > 50) {
         showNotification('Full name must be between 3 and 50 characters.', 'warning');
         return;
     }
-
     // Password strength validation
     if (password.length < 6) {
         showNotification('Password must be at least 6 characters long.', 'warning');
         return;
     }
-
     // Password consistency check
     if (password !== confirm) {
         showNotification('Passwords do not match.', 'warning');
