@@ -436,8 +436,7 @@ const formatTime = (createdAtStr) => {
     }
 }
 
-const createJobCard = (job) => {
-    const token = localStorage.getItem('token');
+const createJobCard = (job, index) => {
     const card = document.createElement('div');
     card.className = 'job-card';
 
@@ -445,15 +444,54 @@ const createJobCard = (job) => {
     title.textContent = job.title;
     card.appendChild(title);
 
-    const author = document.createElement('p');
-    author.textContent = `Posted by: ${job.userId}`;
-    card.appendChild(author);
+    const header = document.createElement('div');
+    header.className = 'header-information';
 
-    const time = document.createElement('p');
-    // const formattedDate = new Date(job.createdAt).toLocaleString();
-    const formattedDate = formatTime(job.createdAt)
-    time.textContent = `Posted at: ${formattedDate}`;
-    card.appendChild(time);
+
+    fetch(`${BACKEND_URL}/user?userId=${job.creatorId}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        }
+    })
+        .then(res => res.json())
+        .then(data => {
+            const avatarWrapper = document.createElement('div');
+            avatarWrapper.className = 'avatar-wrapper';
+
+            if (data.img) {
+                const avatar = document.createElement('img');
+                avatar.src = data.img;
+                avatar.alt = 'avatar';
+                avatar.className = 'user-avatar';
+                avatarWrapper.appendChild(avatar);
+            } else {
+                const avatarLetter = document.createElement('div');
+                avatarLetter.className = 'avatar-letter';
+                avatarLetter.textContent = data.name[0].toUpperCase();
+                avatarWrapper.appendChild(avatarLetter);
+            }
+
+            const authorInfo = document.createElement('div');
+            authorInfo.className = 'author-info';
+
+            const name = document.createElement('p');
+            name.textContent = data.name;
+            name.className = 'author-name';
+
+            const time = document.createElement('p');
+            time.textContent = formatTime(job.createdAt);
+            time.className = 'post-time';
+
+            authorInfo.appendChild(name);
+            authorInfo.appendChild(time);
+
+            header.appendChild(avatarWrapper);
+            header.appendChild(authorInfo);
+
+            card.insertBefore(header, title); // header before title
+        });
 
     if (job.image) {
         const img = document.createElement('img');
@@ -509,8 +547,7 @@ const createJobCard = (job) => {
                     body: JSON.stringify({
                         id: job.id
                     })
-                })
-                    .then(res => res.json())
+                }).then(res => res.json())
                     .then(data => {
                         if (data && data.error) {
                             showNotification(data.error, 'error');
@@ -525,8 +562,8 @@ const createJobCard = (job) => {
             }
         });
     };
-
     updateLikeButton();
+
     // likesButton Eventlistener
     likesButton.addEventListener('click', () => {
         fetch(`${BACKEND_URL}/job/like`, {
@@ -562,7 +599,39 @@ const createJobCard = (job) => {
     commentsButton.className = 'comment-button';
     card.appendChild(commentsButton);
 
+    // fetch(`${BACKEND_URL}/user?userId=${job.creatorId}`, {
+    //     method: 'GET',
+    //     headers: {
+    //         'Content-Type': 'application/json',
+    //         'Authorization': `Bearer ${token}`
+    //     }
+    // }).then(res => res.json())
+    //     .then(data => {
+    //         console.log('user information:', data)
+    //         if (data.error) {
+    //             showNotification(data.error, 'error');
+    //             return;
+    //         }
+    //         const avatarWrapper = document.createElement('div');
+    //         avatarWrapper.className = 'avatar-wrapper';
+
+    //         if (data.img) {
+    //             const userAvatar = document.createElement('img');
+    //             userAvatar.src = data.img;
+    //             userAvatar.alt = 'user Avatar';
+    //             userAvatar.className = 'user-avatar';
+    //             avatarWrapper.appendChild(userAvatar);
+    //         } else {
+    //             const avatarLetter = document.createElement('div');
+    //             avatarLetter.className = 'avatar-letter';
+    //             avatarLetter.textContent = data.name[0].toUpperCase();
+    //             avatarWrapper.appendChild(avatarLetter);
+    //         }
+    //         creatorId.appendChild(avatarWrapper);
+    //     })
+
     return card;
+
 }
 
 
@@ -574,8 +643,8 @@ const renderJobFeed = (jobs) => {
         container.removeChild(container.firstChild);
     }
 
-    jobs.forEach(job => {
-        const jobCard = createJobCard(job);
+    jobs.forEach((job, index) => {
+        const jobCard = createJobCard(job, index);
         container.appendChild(jobCard);
     });
 }
