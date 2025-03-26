@@ -1,4 +1,4 @@
-import { BACKEND_PORT } from './config.js';
+import { BACKEND_URL } from './config.js';
 // A helper you may want to use when uploading new images to the server.
 import { fileToDataUrl } from './helpers.js';
 import { showNotification } from './notification.js';
@@ -6,7 +6,7 @@ import { showNotification } from './notification.js';
 // ==================== DOM ELEMENTS ====================
 
 // Login page elements
-const loginEmail = document.getElementById('loginEmail');
+const loginEmail = document.getElementById('LoginEmail');
 const loginPassword = document.getElementById('LoginPassword');
 const loginButton = document.getElementById('LoginButton');
 const registerButton = document.getElementById('RegisterButton');
@@ -25,29 +25,16 @@ const goToLoginButton = document.getElementById('GoToLogin');
 const profileButton = document.getElementById('profileMenuButton');
 const profileMenu = document.getElementById('profileMenu');
 
-// Error popup elements
-const errorPopup = document.getElementById('errorPopup');
-const errorMessage = document.getElementById('errorMessage');
-const closeErrorPopup = document.getElementById('closeErrorPopup');
+// Post Job DOM elements
+const postJobModal = document.getElementById('postJobModal');
+const btnPostJob = document.getElementById('postJobButton');
+const closeModal = document.getElementById('closeModal');
+const cancelPost = document.getElementById('cancelPost');
 
 // Page containers
 const loginPage = document.getElementById('loginPage');
 const registerPage = document.getElementById('registerPage');
 const homePage = document.getElementById('homePage');
-
-// ==================== ERROR POPUP FUNCTIONS ====================
-
-// Error function showing
-// Show error popup with a custom message
-const showErrorPopup = (message) => {
-    errorMessage.innerText = message;
-    errorPopup.classList.remove('hide');
-};
-
-// Close error popup when close button is clicked
-closeErrorPopup.addEventListener('click', () => {
-    errorPopup.classList.add('hide');
-});
 
 // ==================== PAGE NAVIGATION ====================
 
@@ -74,7 +61,7 @@ const fetchFeed = () => {
         return;
     }
 
-    fetch(`http://192.168.1.101:5005/job/feed?start=0`, {
+    fetch(`${BACKEND_URL}/job/feed?start=0`, {
         // method: 'GET',
         headers: {
             'Authorization': `Bearer ${token}`,
@@ -209,6 +196,21 @@ toggleConfirmPassword.addEventListener('click', () => {
     this.textContent = confirmType === 'password' ? 'Show' : 'Hide';
 });
 
+// When user want post a new job click the Post a Job button
+btnPostJob.addEventListener('click', () => {
+    postJobModal.classList.remove('hide');
+});
+
+// User can closed the modal of Post
+closeModal.addEventListener('click', () => {
+    postJobModal.classList.add('hide');
+});
+
+// User also can cancel Post
+cancelPost.addEventListener('click', () => {
+    postJobModal.classList.add('hide');
+});
+
 // Registration submission
 submitButton.addEventListener('click', () => {
     const email = registerEmail.value.trim();
@@ -242,7 +244,7 @@ submitButton.addEventListener('click', () => {
     }
 
     // Submit registration request
-    fetch('http://192.168.1.101:5005/auth/register', {
+    fetch(`${BACKEND_URL}/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password, name }),
@@ -268,7 +270,7 @@ loginButton.addEventListener('click', () => {
     const email = loginEmail.value;
     const password = loginPassword.value;
 
-    fetch('http://192.168.1.101:5005/auth/login', {
+    fetch(`${BACKEND_URL}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
@@ -286,7 +288,7 @@ loginButton.addEventListener('click', () => {
             localStorage.setItem('token', data.token);
 
             // later usersWhoWatch
-            return fetch('http://192.168.1.101:5005/user/watch', {
+            return fetch(`${BACKEND_URL}/user/watch`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -380,14 +382,14 @@ const createJobCard = (job) => {
     let liked = !!job.likes?.find(user => user.userId === Number(currentUserId));
     let likeCount = job.likes.length;
     const updateLikeButton = () => {
-        likesButton.textContent = `❤️ ${liked ? 'Unlike' : 'Like'} (${likeCount})`;
+        likesButton.textContent = `${liked ? 'Like ❤️' : 'Like ❤️'} ${likeCount}`;
         likesButton.className = liked ? 'like-button btn-primary' : 'like-button btn-outline-primary';
     };
 
     updateLikeButton();
 
     likesButton.addEventListener('click', () => {
-        fetch('http://localhost:5005/job/like', {
+        fetch(`${BACKEND_URL}/job/like`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -398,21 +400,21 @@ const createJobCard = (job) => {
                 turnon: !liked,
             })
         })
-        .then(res => res.json())
-        .then(data => {
-            if (data && data.error){
-                showNotification(data.error, 'error');
-                return;
-            }
+            .then(res => res.json())
+            .then(data => {
+                if (data && data.error) {
+                    showNotification(data.error, 'error');
+                    return;
+                }
 
-            liked = !liked;
-            likeCount += liked ? 1 : -1;
-            updateLikeButton();
-            showNotification(liked ? 'Liked!' : 'Unliked!', 'success');
-        })
-        .catch(() => {
-            showNotification('Network error', 'error');
-        });
+                liked = !liked;
+                likeCount += liked ? 1 : -1;
+                updateLikeButton();
+                showNotification(liked ? 'Liked!' : 'Unliked!', 'success');
+            })
+            .catch(() => {
+                showNotification('Network error', 'error');
+            });
     });
 
     const commentsButton = document.createElement('button');
