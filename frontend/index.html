@@ -63,6 +63,49 @@
     </div>
   </div>
 
+  <!-- Homepage -->
+  <div id="homePage" class="page hide" page="homePage">
+    <header class="jobfeed-header">
+      <div class="logo">
+        <img src="styles/lu-favicon.svg" alt="logo icon" class="logo-icon" />
+        LurkForWork
+      </div>
+      <!-- Button post modal -->
+      <button id="postJobButton">Post a Job</button>
+      <!-- Post Job Modal -->
+      <div id="postJobModal" class="modal hide">
+        <div class="modal-content">
+          <span class="close-button" id="closeModal">&times;</span>
+          <h2>Post a Job</h2>
+
+          <label for="jobTitle">Job Title</label>
+          <input type="text" id="jobTitle" placeholder="This is a new job" />
+
+          <label for="jobStartDate">Job StartDate</label>
+          <input type="date" id="jobStartDate" />
+
+          <label for="jobDescription">Job Description</label>
+          <textarea id="jobDescription" rows="4" placeholder="Please enter a job description..."></textarea>
+
+          <label for="jobImage">Job Image</label>
+          <input type="file" id="jobImage" accept="image/*" />
+
+          <div class="modal-actions">
+            <button id="cancelPost">Cancel Post</button>
+            <button id="confirmPost">Post</button>
+          </div>
+        </div>
+      </div>
+      <div class="nav-icons">
+        <button id="profileMenuButton" class="avatar-button">
+          <span class="avatar-letter" id="avatarLetter">U</span>
+        </button>
+        <div id="profileMenu" class="profile-dropdown hide">
+          <p id="profileName"></p>
+          <button id="LogoutButton">Sign Out</button>
+        </div>
+      </div>
+    </header>
 
     <main class="jobfeed-main">
       <!-- Sidebar -->
