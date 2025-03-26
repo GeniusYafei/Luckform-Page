@@ -28,8 +28,13 @@ const profileMenu = document.getElementById('profileMenu');
 // Post Job DOM elements
 const postJobModal = document.getElementById('postJobModal');
 const btnPostJob = document.getElementById('postJobButton');
+const jobTitle = document.getElementById('jobTitle')
+const jobStartDate = document.getElementById('jobStartDate');
+const jobDescription = document.getElementById('jobDescription');
+const jobImage = document.getElementById('jobImage')
 const closeModal = document.getElementById('closeModal');
 const cancelPost = document.getElementById('cancelPost');
+const previewContainer = document.getElementById('jobImagePreview');
 
 // Page containers
 const loginPage = document.getElementById('loginPage');
@@ -200,6 +205,26 @@ toggleConfirmPassword.addEventListener('click', () => {
 btnPostJob.addEventListener('click', () => {
     postJobModal.classList.remove('hide');
 });
+
+jobStartDate.addEventListener('input',  (event) => {
+    this.value = this.value.replace(/[^0-9/]/g, '').replace(/(\d{2})(\d{2})(\d{4})/, '$1/$2/$3');
+});
+
+jobImage.addEventListener('change', (event) => {
+    const imageFile = event.target.files[0];
+    if (!imageFile) return;
+
+    fileToDataUrl(imageFile).then(fileBase64 => {
+      const img = document.createElement('img');
+      img.src = fileBase64;
+      img.className = 'preview-image';
+      img.alt = 'job-image-preview';
+      while (previewContainer.firstChild) {
+        previewContainer.removeChild(previewContainer.firstChild);
+      }
+      previewContainer.appendChild(img);
+    })
+})
 
 // User can closed the modal of Post
 closeModal.addEventListener('click', () => {
