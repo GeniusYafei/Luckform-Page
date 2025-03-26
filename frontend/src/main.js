@@ -44,6 +44,8 @@ const homePage = document.getElementById('homePage');
 
 // Token
 const token = localStorage.getItem('token');
+// userId
+const currentUserId = localStorage.getItem('userId');
 // ==================== PAGE NAVIGATION ====================
 
 // Define the hash routes for each page
@@ -470,7 +472,6 @@ const createJobCard = (job) => {
     likesButton.className = 'like-button';
     card.appendChild(likesButton);
 
-    const currentUserId = localStorage.getItem('userId');
     let liked = !!job.likes?.find(user => user.userId === Number(currentUserId));
     let likeCount = job.likes.length;
     const updateLikeButton = () => {
@@ -478,8 +479,55 @@ const createJobCard = (job) => {
         likesButton.className = liked ? 'like-button btn-primary' : 'like-button btn-outline-primary';
     };
 
-    updateLikeButton();
+    // delete button logic
+    if (Number(currentUserId) === job.creatorId) {
+        const deleteButton = document.createElement('button');
+        deleteButton.className = 'delete-button';
 
+        const deleteIcon = document.createElement('img');
+        deleteIcon.src = 'styles/deleteicon.svg';
+        deleteIcon.alt = 'Delete';
+        deleteIcon.className = 'delete-icon';
+
+        const deleteIconHover = document.createElement('img');
+        deleteIconHover.src = 'styles/deleteicon-hover.svg';
+        deleteIconHover.alt = 'Delete';
+        deleteIconHover.className = 'delete-icon-hover';
+
+        deleteButton.appendChild(deleteIcon);
+        deleteButton.appendChild(deleteIconHover);
+        card.appendChild(deleteButton);
+        // delete button Eventlistener
+        deleteButton.addEventListener('click', () => {
+            if (confirm('Are you sure you want to delete this post?')) {
+                fetch(`${BACKEND_URL}/job`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        id: job.id
+                    })
+                })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data && data.error) {
+                            showNotification(data.error, 'error');
+                            return;
+                        }
+                        showNotification('successfully deleted!', 'success');
+                        fetchFeed();
+                    })
+                    .catch(() => {
+                        showNotification('Network error', 'error');
+                    });
+            }
+        });
+    };
+
+    updateLikeButton();
+    // likesButton Eventlistener
     likesButton.addEventListener('click', () => {
         fetch(`${BACKEND_URL}/job/like`, {
             method: 'PUT',
