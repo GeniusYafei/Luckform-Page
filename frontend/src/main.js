@@ -37,6 +37,11 @@ const cancelPost = document.getElementById('cancelPost');
 const confirmPost = document.getElementById('confirmPost')
 const previewContainer = document.getElementById('jobImagePreview');
 
+// Job feed Dom elements
+const avatarLetter = document.getElementById('avatarLetter');
+const profileName = document.getElementById('profileName');
+const profileMenuButton = document.getElementById('profileMenuButton');
+
 // Page containers
 const loginPage = document.getElementById('loginPage');
 const registerPage = document.getElementById('registerPage');
@@ -447,8 +452,9 @@ const createJobCard = (job, index) => {
     const header = document.createElement('div');
     header.className = 'header-information';
 
+    const sidebarUser = document.getElementById('userSidebar')
 
-    fetch(`${BACKEND_URL}/user?userId=${job.creatorId}`, {
+    fetch(`${BACKEND_URL}/user/?userId=${currentUserId}`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
@@ -456,6 +462,68 @@ const createJobCard = (job, index) => {
         }
     })
         .then(res => res.json())
+        .then(data => {
+            if (data.error) {
+                showNotification(data.error, 'error');
+                return;
+            }
+
+            // empty sidebarUser content and
+            while (sidebarUser.firstChild) {
+                sidebarUser.removeChild(sidebarUser.firstChild);
+            }
+
+            if (data.img) {
+                const img = document.createElement('img');
+                img.src = data.img;
+                img.alt = 'User Avatar';
+                img.className = 'avatar-img';
+                sidebarUser.appendChild(img);
+            } else {
+                const fallback = document.createElement('div');
+                fallback.className = 'avatar-fallback';
+                fallback.textContent = data.name[0]?.toUpperCase();
+                sidebarUser.appendChild(fallback);
+            }
+
+            // user name
+            const name = document.createElement('h2');
+            name.textContent = data.name || 'User';
+            sidebarUser.appendChild(name);
+
+            // user email
+            const email = document.createElement('p');
+            email.textContent = data.email || '';
+            sidebarUser.appendChild(email);
+
+            // Set the top avatar letter or picture
+            if (data.img) {
+                // Clear old avatar letters
+                while (profileMenuButton.firstChild) {
+                    profileMenuButton.removeChild(profileMenuButton.firstChild);
+                }
+                const img = document.createElement('img');
+                img.src = data.img;
+                img.alt = 'avatar';
+                img.className = 'avatar-img';
+                profileMenuButton.appendChild(img);
+            } else {
+                avatarLetter.textContent = data.name[0]?.toUpperCase();
+            }
+
+        })
+        .catch(err => {
+            console.error('Failed to load user info:', err);
+        });
+
+
+    fetch(`${BACKEND_URL}/user?userId=${job.creatorId}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        }
+    }).then(res => res.json())
         .then(data => {
             const avatarWrapper = document.createElement('div');
             avatarWrapper.className = 'avatar-wrapper';
@@ -599,42 +667,8 @@ const createJobCard = (job, index) => {
     commentsButton.className = 'comment-button';
     card.appendChild(commentsButton);
 
-    // fetch(`${BACKEND_URL}/user?userId=${job.creatorId}`, {
-    //     method: 'GET',
-    //     headers: {
-    //         'Content-Type': 'application/json',
-    //         'Authorization': `Bearer ${token}`
-    //     }
-    // }).then(res => res.json())
-    //     .then(data => {
-    //         console.log('user information:', data)
-    //         if (data.error) {
-    //             showNotification(data.error, 'error');
-    //             return;
-    //         }
-    //         const avatarWrapper = document.createElement('div');
-    //         avatarWrapper.className = 'avatar-wrapper';
-
-    //         if (data.img) {
-    //             const userAvatar = document.createElement('img');
-    //             userAvatar.src = data.img;
-    //             userAvatar.alt = 'user Avatar';
-    //             userAvatar.className = 'user-avatar';
-    //             avatarWrapper.appendChild(userAvatar);
-    //         } else {
-    //             const avatarLetter = document.createElement('div');
-    //             avatarLetter.className = 'avatar-letter';
-    //             avatarLetter.textContent = data.name[0].toUpperCase();
-    //             avatarWrapper.appendChild(avatarLetter);
-    //         }
-    //         creatorId.appendChild(avatarWrapper);
-    //     })
-
     return card;
-
 }
-
-
 const renderJobFeed = (jobs) => {
     const container = document.getElementById('feedContainer');
 
