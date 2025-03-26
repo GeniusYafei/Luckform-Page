@@ -34,6 +34,7 @@ const jobDescription = document.getElementById('jobDescription');
 const jobImage = document.getElementById('jobImage')
 const closeModal = document.getElementById('closeModal');
 const cancelPost = document.getElementById('cancelPost');
+const confirmPost = document.getElementById('confirmPost')
 const previewContainer = document.getElementById('jobImagePreview');
 
 // Page containers
@@ -85,7 +86,7 @@ const fetchFeed = () => {
         .catch(err => {
             showNotification(err.message, 'error');
         });
-}
+};
 
 // Toggle on click
 profileButton.addEventListener('click', (event) => {
@@ -206,25 +207,74 @@ btnPostJob.addEventListener('click', () => {
     postJobModal.classList.remove('hide');
 });
 
-jobStartDate.addEventListener('input',  (event) => {
-    this.value = this.value.replace(/[^0-9/]/g, '').replace(/(\d{2})(\d{2})(\d{4})/, '$1/$2/$3');
-});
-
 jobImage.addEventListener('change', (event) => {
     const imageFile = event.target.files[0];
     if (!imageFile) return;
 
     fileToDataUrl(imageFile).then(fileBase64 => {
-      const img = document.createElement('img');
-      img.src = fileBase64;
-      img.className = 'preview-image';
-      img.alt = 'job-image-preview';
-      while (previewContainer.firstChild) {
-        previewContainer.removeChild(previewContainer.firstChild);
-      }
-      previewContainer.appendChild(img);
+        const img = document.createElement('img');
+        img.src = fileBase64;
+        img.className = 'preview-image';
+        img.alt = 'job-image-preview';
+        while (previewContainer.firstChild) {
+            previewContainer.removeChild(previewContainer.firstChild);
+        }
+        previewContainer.appendChild(img);
     })
-})
+});
+
+confirmPost.addEventListener('click', () => {
+    // split the date and get value
+    const parts = jobStartDate.value.split('/');
+    const inputDay = parseInt(parts[0], 10);
+    const inputMoth = parseInt(parts[1], 10);
+    const inputYear = parseInt(parts[2], 10);
+    // Create a Date object from the input
+    const inputDate = new Date(inputYear, inputMoth - 1, inputDay);
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    // Check empty fields
+    if (!jobTitle.value) {
+        showNotification('Job Title cannot be empty.', 'error');
+        return;
+    }
+    if (!jobStartDate.value) {
+        showNotification('Job Start Date is required.', 'error');
+        return;
+    } else {
+        // validate the Graduation Date
+        if (!/[0-9]{2}\/[0-9]{2}\/[0-9]{4}$/.test(jobStartDate.value)) {
+            showNotification('Invalid date format. Please use DD/MM/YYYY.', 'info');
+            return;
+        }
+        // validate the graduation date
+        if (inputMoth < 1 || inputMoth > 12) {
+            showNotification('Please input a valid date', 'info');
+            return;
+        }
+        // Calculate the number of days in the month
+        const daysInMonth = new Date(inputYear, inputMoth, 0).getDate();
+        if (inputDay < 1 || inputDay > daysInMonth) {
+            showNotification('Please input a valid date', 'info');
+            return;
+        }
+        if (inputDate < today) {
+            showNotification("Job Start Date can't be earlier than today.", 'error');
+            return;
+        }
+    }
+    if (!jobDescription.value) {
+        showNotification('Job Description cannot be empty.', 'error');
+        return;
+    }
+    if (!jobImage.value) {
+        showNotification('Please upload a Job Image.', 'error');
+        return;
+    }
+
+    
+});
 
 // User can closed the modal of Post
 closeModal.addEventListener('click', () => {
@@ -235,6 +285,8 @@ closeModal.addEventListener('click', () => {
 cancelPost.addEventListener('click', () => {
     postJobModal.classList.add('hide');
 });
+
+
 
 // Registration submission
 submitButton.addEventListener('click', () => {
