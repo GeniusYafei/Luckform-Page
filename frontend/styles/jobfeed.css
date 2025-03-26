@@ -1,7 +1,7 @@
 #homePage {
     display: flex;
     flex-direction: column;
-    height: 100vh;
+    height: auto;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     background-color: #f4f2ee;
 }
@@ -33,7 +33,7 @@
     height: 1.5rem;
     width: auto;
     margin-right: 0.5rem;
-  }
+}
 
 #homePage .nav-icons {
     position: relative;
@@ -52,7 +52,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 0 0 1px rgba(0,0,0,0.05);
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.05);
     transition: background-color 0.2s;
 }
 
@@ -150,6 +150,7 @@
 }
 
 #homePage .job-card {
+    position: relative;
     background-color: #fff;
     padding: 15px;
     margin-bottom: 15px;
@@ -159,7 +160,7 @@
 }
 
 #homePage .id-img {
-    width: 50px;
+    width: 10%;
     height: auto;
 }
 
@@ -267,4 +268,39 @@
 
 #homePage .close-button:hover {
     color: #333;
+}
+
+
+.delete-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: none;
+    background: none;
+    cursor: pointer;
+}
+
+.delete-button img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    transition: opacity 0.2s ease;
+}
+
+.delete-icon-hover {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.delete-button:hover .delete-icon {
+    opacity: 0;
+}
+
+.delete-button:hover .delete-icon-hover {
+    opacity: 1;
 }
