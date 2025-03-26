@@ -28,7 +28,7 @@
       <h2>LurkForWork</h2>
       <form>
         <div class="inputContainer">
-          <input type="email" id="loginEmail" name="Email" placeholder="Email" />
+          <input type="email" id="LoginEmail" name="Email" placeholder="Email" />
         </div>
         <div class="inputContainer">
           <input type="password" id="LoginPassword" name="Password" placeholder="Password" />
@@ -63,36 +63,22 @@
     </div>
   </div>
 
-  <!-- Homepage -->
-  <div id="homePage" class="page hide" page="homePage">
-    <header>
-      <h1>Home Page</h1>
-    </header>
-    <!-- Job feed template -->
-    <template id="jobTemplate">
-      <div class="job-card">
-        <h2 class="job-title"></h2>
-        <p class="job-author"></p>
-        <p class="job-time"></p>
-        <img class="job-image" src="" alt="Job Image">
-        <p class="job-start"></p>
-        <p class="job-desc"></p>
-        <p class="job-likes"></p>
-        <p class="job-comments"></p>
-      </div>
-    </template>
-    <main>
-      <p>Welcome</p>
-      <button type="button" id="LogoutButton">Logout</button>
-      <!-- Job Feed Container -->
-      <div id="feedContainer" class="feed-container"></div>
+
+    <main class="jobfeed-main">
+      <!-- Sidebar -->
+      <aside class="sidebar" id="userSidebar">
+        <!-- <img id="userAvatar" src="default-avatar.png" alt="Avatar" /> -->
+        <h2 id="userName">User</h2>
+        <p id="userLocation"></p>
+        <p id="userOrg"></p>
+      </aside>
+
+      <!-- Feed Section -->
+      <section class="feed-container" id="feedContainer"></section>
     </main>
   </div>
 
 
-  <main role="main">
-    <!-- app goes here -->
-  </main>
   <footer>
     <p>&copy; lurkforwork.com</p>
   </footer>

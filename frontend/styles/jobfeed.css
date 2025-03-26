@@ -2,7 +2,12 @@
     display: flex;
     flex-direction: column;
     height: 100vh;
-    font-family: sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background-color: #f4f2ee;
+}
+
+#homePage p {
+    margin-bottom: 0;
 }
 
 #homePage .jobfeed-header {
@@ -18,8 +23,9 @@
 }
 
 #homePage .logo {
-    font-weight: bold;
+    font-weight: 600;
     font-size: 20px;
+    color: #0a66c2;
 }
 
 #homePage .nav-icons {
@@ -47,6 +53,19 @@
     background-color: #d0e6f7;
 }
 
+#homePage .profile-dropdown {
+    position: absolute;
+    top: 45px;
+    right: 0;
+    background: white;
+    border: 1px solid #ccc;
+    padding: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    min-width: 160px;
+    border-radius: 8px;
+}
+
 #homePage .profile-dropdown button {
     background-color: transparent;
     border: none;
@@ -70,21 +89,48 @@
 
 #homePage .jobfeed-main {
     display: flex;
-    flex: 1;
+    /* flex: 1; */
     overflow: hidden;
+    margin-top: 20px;
+    padding: 0 20px;
+    align-items: flex-start;
+    gap: 20px;
 }
 
 #homePage .sidebar {
     width: 240px;
     padding: 20px;
-    border-right: 1px solid #ddd;
-    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    background-color: white;
+    border-radius: 12px;
+    height: auto;
+    margin: 0;
 }
 
 #homePage .feed-container {
     flex: 1;
-    padding: 20px;
+    padding: 0;
     overflow-y: auto;
+    background-color: transparent;
+}
+
+#homePage .like-button,
+#homePage .comment-button {
+    background-color: transparent;
+    border: none;
+    color: #555;
+    font-size: 14px;
+    cursor: pointer;
+    margin-right: 10px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+#homePage .like-button:hover,
+#homePage .comment-button:hover {
+    background-color: #eef3f8;
+    color: #0a66c2;
 }
 
 #homePage .job-card {
@@ -92,10 +138,11 @@
     padding: 15px;
     margin-bottom: 15px;
     border: 1px solid #ddd;
-    border-radius: 6px;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 #homePage .id-img {
-    width: 120px;
+    width: 50px;
     height: auto;
 }
