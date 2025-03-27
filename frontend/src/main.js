@@ -298,48 +298,61 @@ const validateJobForm = (dateStr) => {
 }
 
 // handleJob Post function
-const handleJobPost = () => {
-    const title = jobTitle.value;
-    const description = jobDescription.value;
-    const startDateStr = jobStartDate.value;
-    const imageFile = jobImage.files[0];
+const handleJobSubmit = ({ mode, jobId = null }) => {
+    // Select input elements based on mode
+    const isUpdate = mode === 'update';
+    const titleInput = isUpdate ? jobTitleUp : jobTitle;
+    const descInput = isUpdate ? jobDescriptionUp : jobDescription;
+    const dateInput = isUpdate ? jobStartDateUp : jobStartDate;
+    const imageInput = isUpdate ? jobImageUp : jobImage;
+    const modalToHide = isUpdate ? updateJobModal : postJobModal;
 
-    if (!title) {
-        return showNotification('Job Title cannot be empty.', 'error');
-    } else {
-        const result = validateJobForm(startDateStr);
-        if (result.error) return showNotification(result.error, 'error');
-        const inputDate = result.date;
-        if (!description) return showNotification('Job Description cannot be empty.', 'error');
-        if (!imageFile) return showNotification('Please upload a Job Image.', 'error');
-    }
+    const title = titleInput.value;
+    const description = descInput.value;
+    const startDateStr = dateInput.value;
+    const imageFile = imageInput.files[0];
+
+    // === Validate ===
+    if (!title) return showNotification('Job Title cannot be empty.', 'error');
+    if (!description) return showNotification('Job Description cannot be empty.', 'error');
+    if (!imageFile) return showNotification('Please upload a Job Image.', 'error');
+
     const result = validateJobForm(startDateStr);
+    if (result.error) return showNotification(result.error, 'error');
     const inputDate = result.date;
-    // Convert image to base64, prepare job data and send POST request
+
+    // === Convert Image and Submit ===
     fileToDataUrl(imageFile).then(imageBase64 => {
         const data = {
             title,
             description,
-            start: inputDate.toISOString(), // ISO 8601 format
+            start: inputDate.toISOString(),
             image: imageBase64
         };
 
-        // Call backend to post job
+        if (isUpdate) {
+            data.id = jobId;
+        }
+
         apiCall({
             url: `${BACKEND_URL}/job`,
-            method: 'POST',
+            method: isUpdate ? 'PUT' : 'POST',
             body: data
         }).then(data => {
-            showNotification('Post a job success!', 'success');
-            console.log('job id:', data.id)
+            showNotification(
+                isUpdate ? 'Job updated successfully!' : 'Job posted successfully!',
+                'success'
+            );
+            console.log('job id:', data.id);
             fetchFeed();
-            postJobModal.classList.add('hide');
+            modalToHide.classList.add('hide');
         });
     });
 };
 
-// When user clicks "Confirm Post" after filling job form
-confirmPost.addEventListener('click', handleJobPost)
+confirmPost.addEventListener('click', () => {
+    handleJobSubmit({ mode: 'post' });
+});
 
 
 // User can closed the modal of Post
@@ -621,6 +634,11 @@ const createActionButtons = (job, onDelete, onUpdate) => {
         updateDropdown.classList.add('hide');
         if (typeof onUpdate === 'function') onUpdate();
     });
+
+    confirmUpdate.onclick = () => {
+        showModal('update');
+        handleJobSubmit({ mode: 'update', jobId: job.id });
+    };
 
     const updateWrapper = document.createElement('div');
     updateWrapper.className = 'update-wrapper';
