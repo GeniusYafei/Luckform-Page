@@ -47,6 +47,42 @@ const loginPage = document.getElementById('loginPage');
 const registerPage = document.getElementById('registerPage');
 const homePage = document.getElementById('homePage');
 
+// ==================== apiCall FUNCTION ====================
+const apiCall = ({ url, method = 'GET', token = true, body = null }) => {
+    const headers = {
+        'Content-Type': 'application/json'
+    };
+
+    if (token) {
+        const savedToken = localStorage.getItem('token');
+        if (!savedToken) {
+            showNotification('Please log in first.', 'error');
+            showPage('login');
+            return Promise.reject('No token found');
+        }
+        headers['Authorization'] = `Bearer ${savedToken}`;
+    }
+
+    return fetch(url, {
+        method: method,
+        headers: headers,
+        body: body ? JSON.stringify(body) : null
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.error) {
+            showNotification(data.error, 'error');
+            return Promise.reject(data.error);
+        }
+        return data;
+    })
+    .catch(err => {
+        showNotification(err.message || 'Network error', 'error');
+        return Promise.reject(err);
+    });
+};
+
+
 // ==================== PAGE NAVIGATION ====================
 
 // Define the hash routes for each page
