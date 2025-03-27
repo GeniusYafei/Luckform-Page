@@ -465,57 +465,96 @@ const renderSidebarUser = () => {
     const currentUserId = localStorage.getItem('userId');
 
     apiCall({ url: `${BACKEND_URL}/user/?userId=${currentUserId}` })
-      .then(data => {
-        if (data.error) {
-          showNotification(data.error, 'error');
-          return;
-        }
+        .then(data => {
+            if (data.error) {
+                showNotification(data.error, 'error');
+                return;
+            }
 
-        // Clear existing sidebar content
-        while (sidebarUser.firstChild) {
-          sidebarUser.removeChild(sidebarUser.firstChild);
-        }
+            // Clear existing sidebar content
+            while (sidebarUser.firstChild) {
+                sidebarUser.removeChild(sidebarUser.firstChild);
+            }
 
-        // Render avatar or fallback letter
-        if (data.img) {
-          const img = document.createElement('img');
-          img.src = data.img;
-          img.alt = 'User Avatar';
-          img.className = 'avatar-img';
-          sidebarUser.appendChild(img);
-        } else {
-          const fallback = document.createElement('div');
-          fallback.className = 'avatar-fallback';
-          fallback.textContent = data.name[0]?.toUpperCase();
-          sidebarUser.appendChild(fallback);
-        }
+            // Render avatar or fallback letter
+            if (data.img) {
+                const img = document.createElement('img');
+                img.src = data.img;
+                img.alt = 'User Avatar';
+                img.className = 'avatar-img';
+                sidebarUser.appendChild(img);
+            } else {
+                const fallback = document.createElement('div');
+                fallback.className = 'avatar-fallback';
+                fallback.textContent = data.name[0]?.toUpperCase();
+                sidebarUser.appendChild(fallback);
+            }
 
-        // Append name and email
-        const name = document.createElement('h2');
-        name.textContent = data.name || 'User';
-        sidebarUser.appendChild(name);
+            // Append name and email
+            const name = document.createElement('h2');
+            name.textContent = data.name || 'User';
+            sidebarUser.appendChild(name);
 
-        const email = document.createElement('p');
-        email.textContent = data.email || '';
-        sidebarUser.appendChild(email);
+            const email = document.createElement('p');
+            email.textContent = data.email || '';
+            sidebarUser.appendChild(email);
 
-        // Update top-right avatar menu
-        const profileMenuButton = document.getElementById('profileMenuButton');
-        const avatarLetter = document.getElementById('avatarLetter');
-        if (data.img) {
-          while (profileMenuButton.firstChild) {
-            profileMenuButton.removeChild(profileMenuButton.firstChild);
-          }
-          const img = document.createElement('img');
-          img.src = data.img;
-          img.alt = 'avatar';
-          img.className = 'avatar-img';
-          profileMenuButton.appendChild(img);
-        } else {
-          avatarLetter.textContent = data.name[0]?.toUpperCase();
-        }
-      });
-  };
+            // Update top-right avatar menu
+            const profileMenuButton = document.getElementById('profileMenuButton');
+            const avatarLetter = document.getElementById('avatarLetter');
+            if (data.img) {
+                while (profileMenuButton.firstChild) {
+                    profileMenuButton.removeChild(profileMenuButton.firstChild);
+                }
+                const img = document.createElement('img');
+                img.src = data.img;
+                img.alt = 'avatar';
+                img.className = 'avatar-img';
+                profileMenuButton.appendChild(img);
+            } else {
+                avatarLetter.textContent = data.name[0]?.toUpperCase();
+            }
+        });
+};
+
+// ==================== Render job card header (author info) ====================
+const renderJobHeader = (job, headerElement) => {
+    apiCall({ url: `${BACKEND_URL}/user?userId=${job.creatorId}` })
+        .then(data => {
+            const avatarWrapper = document.createElement('div');
+            avatarWrapper.className = 'avatar-wrapper';
+
+            if (data.img) {
+                const avatar = document.createElement('img');
+                avatar.src = data.img;
+                avatar.alt = 'avatar';
+                avatar.className = 'user-avatar';
+                avatarWrapper.appendChild(avatar);
+            } else {
+                const avatarLetter = document.createElement('div');
+                avatarLetter.className = 'avatar-letter';
+                avatarLetter.textContent = data.name[0].toUpperCase();
+                avatarWrapper.appendChild(avatarLetter);
+            }
+
+            const authorInfo = document.createElement('div');
+            authorInfo.className = 'author-info';
+
+            const name = document.createElement('p');
+            name.textContent = data.name;
+            name.className = 'author-name';
+
+            const time = document.createElement('p');
+            time.textContent = formatTime(job.createdAt);
+            time.className = 'post-time';
+
+            authorInfo.appendChild(name);
+            authorInfo.appendChild(time);
+
+            headerElement.appendChild(avatarWrapper);
+            headerElement.appendChild(authorInfo);
+        });
+};
 
 // ==================== CREATE JOB CARD ====================
 // Dynamically creates a job card element for each job in the feed
