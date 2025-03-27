@@ -239,7 +239,31 @@ btnPostJob.addEventListener('click', () => {
     postJobModal.classList.remove('hide');
 });
 
+// When a user selects an image file, preview it before posting
+// ==================== IMAGE PREVIEW HANDLER ====================
+const handleImagePreview = (inputElement, previewContainer) => {
+    inputElement.addEventListener('change', (event) => {
+        const imageFile = event.target.files[0];
+        if (!imageFile) return;
 
+        fileToDataUrl(imageFile).then(fileBase64 => {
+            const img = document.createElement('img');
+            img.src = fileBase64;
+            img.className = 'preview-image';
+            img.alt = 'job-image-preview';
+
+            while (previewContainer.firstChild) {
+                previewContainer.removeChild(previewContainer.firstChild);
+            }
+
+            previewContainer.appendChild(img);
+        });
+    });
+};
+
+// Call for both uploaders
+// handleImagePreview(jobImage, previewContainer);
+// handleImagePreview(jobImageUp, previewContainerUP);
 
 // handleJob Post function
 const handleJobPost = () => {
