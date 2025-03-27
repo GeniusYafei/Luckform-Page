@@ -157,8 +157,16 @@
     min-height: 0;
 }
 
+#homePage .interaction-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 10px;
+}
+
 #homePage .like-button,
-#homePage .comment-button {
+#homePage .comment-button,
+#homePage .toggle-likes-button {
     background-color: transparent;
     border: 1px solid #0073b1;
     color: #0073b1;
@@ -171,7 +179,8 @@
 }
 
 #homePage .like-button:hover,
-#homePage .comment-button:hover {
+#homePage .comment-button:hover,
+#homePage .toggle-likes-button:hover {
     background-color: #eef3f8;
 }
 
@@ -248,7 +257,7 @@
     margin-top: 0;
 }
 
-#homePage #jobImagePreview .preview-image {
+#homePage .preview-image {
     max-width: 100%;
     height: 50%;
     margin-top: 10px;
@@ -288,17 +297,21 @@
     cursor: pointer;
 }
 
-#homePage #cancelPost {
+#homePage .cancel {
     background-color: #e4e6eb;
     color: #333;
 }
 
-#homePage #confirmPost {
+#homePage .cancel:hover {
+    background-color: #b5b5b5;
+}
+
+#homePage .confirm {
     background-color: #0a66c2;
     color: white;
 }
 
-#homePage #confirmPost:hover {
+#homePage .confirm:hover {
     background-color: #004182;
 }
 
@@ -461,4 +474,62 @@
     height: 32px;
     border-radius: 50%;
     object-fit: cover;
+}
+
+#homePage .like-list,
+#homePage .comment-section {
+    padding-left: 10px;
+    margin-top: 8px;
+}
+
+#homePage .like-item,
+#homePage .comment-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 2px 0;
+}
+
+#homePage .avatar-letter {
+    width: 24px;
+    height: 24px;
+    background-color: #e6f0f6;
+    color: #0073b1;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+#homePage .comment-input {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+#homePage .comment-input input {
+    flex: 1;
+    padding: 6px 10px;
+    border: 1px solid #ccc;
+    border-radius: 16px;
+}
+
+#homePage .comment-input button {
+    padding: 6px 12px;
+    background-color: #0073b1;
+    color: white;
+    border: none;
+    border-radius: 16px;
+    cursor: pointer;
+}
+
+#homePage .comment-input button:hover {
+    background-color: #005f99;
+}
+
+.hide {
+    display: none;
 }

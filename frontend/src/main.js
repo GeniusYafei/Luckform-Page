@@ -546,7 +546,7 @@ const renderJobHeader = (job, headerElement) => {
                 avatarWrapper.appendChild(avatar);
             } else {
                 const avatarLetter = document.createElement('div');
-                avatarLetter.className = 'avatar-letter';
+                avatarLetter.className = 'avatar-button';
                 avatarLetter.textContent = data.name[0].toUpperCase();
                 avatarWrapper.appendChild(avatarLetter);
             }
@@ -873,7 +873,7 @@ function createInteractionSection(job, currentUserId, currentUserName) {
         item.appendChild(content);
         commentList.appendChild(item);
     });
-    
+
     const commentInput = document.createElement('div');
     commentInput.className = 'comment-input';
 
@@ -905,7 +905,6 @@ function createInteractionSection(job, currentUserId, currentUserName) {
         commentSection.classList.toggle('hide');
     });
 
-    // ========== Append to wrapper ========== //
     wrapper.appendChild(likeBtn);
     wrapper.appendChild(toggleLikesBtn);
     wrapper.appendChild(likeList);
@@ -946,8 +945,8 @@ const createJobCard = (job) => {
     desc.textContent = job.description;
     card.appendChild(desc);
 
-    const likeButton = createLikeButton(job, currentUserId);
-    card.appendChild(likeButton);
+    // const likeButton = createLikeButton(job, currentUserId);
+    // card.appendChild(likeButton);
 
     // Only show update/delete for creator
     if (Number(currentUserId) === job.creatorId) {
@@ -968,13 +967,23 @@ const createJobCard = (job) => {
         card.appendChild(actionButtons);
     }
 
+    // Get the current user name and insert it into the interactive bar
+    apiCall({
+        url: `${BACKEND_URL}/user/?userId=${currentUserId}`,
+        method: 'GET',
+    }).then(data => {
+        const currentUserName = data.name || 'User';
+        const interaction = createInteractionSection(job, currentUserId, currentUserName);
+        card.appendChild(interaction);
+    })
     // const commentsButton = document.createElement('button');
     // commentsButton.textContent = `Comment 💬 ${job.comments.length}`;
     // commentsButton.className = 'comment-button';
     // // card.appendChild(commentsButton);
 
-    card.appendChild(createLikeSection(job));
-    card.appendChild(createCommentSection(job));
+    // card.appendChild(createLikeSection(job));
+    // card.appendChild(createCommentSection(job));
+    // const interaction = createInteractionSection(job, currentUserId, currentUserName);
     return card;
 };
 
