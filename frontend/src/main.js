@@ -27,15 +27,24 @@ const profileMenu = document.getElementById('profileMenu');
 
 // Post Job DOM elements
 const postJobModal = document.getElementById('postJobModal');
+const updateJobModal = document.getElementById('updateJobModal');
 const btnPostJob = document.getElementById('postJobButton');
-const jobTitle = document.getElementById('jobTitle')
+const jobTitle = document.getElementById('jobTitle');
+const jobTitleUp = document.getElementById('jobTitle-update')
 const jobStartDate = document.getElementById('jobStartDate');
+const jobStartDateUp = document.getElementById('jobStartDate-update');
 const jobDescription = document.getElementById('jobDescription');
-const jobImage = document.getElementById('jobImage')
+const jobDescriptionUp = document.getElementById('jobDescription-update');
+const jobImage = document.getElementById('jobImage');
+const jobImageUp = document.getElementById('jobImage-update');
 const closeModal = document.getElementById('closeModal');
+const closeModalUp = document.getElementById('closeModal-update');
 const cancelPost = document.getElementById('cancelPost');
-const confirmPost = document.getElementById('confirmPost')
+const cancelPostUp = document.getElementById('cancelPost-update');
+const confirmPost = document.getElementById('confirmPost');
+const confirmUpdate = document.getElementById('confirmUpdate')
 const previewContainer = document.getElementById('jobImagePreview');
+const previewContainerUP = document.getElementById('jobImagePreview-update');
 
 // Job feed Dom elements
 const avatarLetter = document.getElementById('avatarLetter');
@@ -229,24 +238,8 @@ toggleConfirmPassword.addEventListener('click', (e) => {
 btnPostJob.addEventListener('click', () => {
     postJobModal.classList.remove('hide');
 });
-// When a user selects an image file, preview it before posting
-jobImage.addEventListener('change', (event) => {
-    const imageFile = event.target.files[0];
-    if (!imageFile) return;
-    // Convert image file to base64 and render it in the preview container
-    fileToDataUrl(imageFile).then(fileBase64 => {
-        const img = document.createElement('img');
-        img.src = fileBase64;
-        img.className = 'preview-image';
-        img.alt = 'job-image-preview';
-        // Clear previous preview
-        while (previewContainer.firstChild) {
-            previewContainer.removeChild(previewContainer.firstChild);
-        }
-        // show
-        previewContainer.appendChild(img);
-    })
-});
+
+
 
 // handleJob Post function
 const handleJobPost = () => {
@@ -306,11 +299,13 @@ const handleJobPost = () => {
             body: data
         }).then(data => {
             showNotification('Post a job success!', 'success');
+            console.log('job id:', data.id)
             fetchFeed();
             postJobModal.classList.add('hide');
         });
     });
 };
+
 // When user clicks "Confirm Post" after filling job form
 confirmPost.addEventListener('click', handleJobPost)
 
@@ -320,9 +315,17 @@ closeModal.addEventListener('click', () => {
     postJobModal.classList.add('hide');
 });
 
+closeModalUp.addEventListener('click', () => {
+    updateJobModal.classList.add('hide');
+});
+
 // User also can cancel Post
 cancelPost.addEventListener('click', () => {
     postJobModal.classList.add('hide');
+});
+
+cancelPostUp.addEventListener('click', () => {
+    updateJobModal.classList.add('hide');
 });
 
 // Registration submission
@@ -619,24 +622,85 @@ const createJobCard = (job) => {
         // On clicking "Update" inside dropdown
         updateOption.addEventListener('click', () => {
             updateDropdown.classList.add('hide');
-            postJobModal.classList.remove('hide');
-            jobTitle.value = job.title;
-            jobDescription.value = job.description;
-            jobStartDate.value = formatTime(job.start);
+            updateJobModal.classList.remove('hide');
+        });
+
+        confirmUpdate.addEventListener('click', () => {
+            const title = jobTitleUp.value;
+            const description = jobDescriptionUp.value;
+            const startDateStr = jobStartDateUp.value;
+            const imageFile = jobImageUp.files[0];
+
+            // Parse and validate date
+            const [inputDay, inputMonth, inputYear] = startDateStr.split('/').map(num => parseInt(num, 10));
+            const inputDate = new Date(inputYear, inputMonth - 1, inputDay);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            if (!title) return showNotification('Job Title cannot be empty.', 'error');
+            if (!startDateStr) {
+                showNotification('Job Start Date is required.', 'error');
+                return;
+            } else {
+                // validate the Date
+                if (!/[0-9]{2}\/[0-9]{2}\/[0-9]{4}$/.test(jobStartDate.value)) {
+                    showNotification('Invalid date format. Please use DD/MM/YYYY.', 'info');
+                    return;
+                }
+                // validate the date
+                if (inputMonth < 1 || inputMonth > 12) {
+                    showNotification('Please input a valid date', 'info');
+                    return;
+                }
+                // Calculate the number of days in the month
+                const daysInMonth = new Date(inputYear, inputMonth, 0).getDate();
+                if (inputDay < 1 || inputDay > daysInMonth) {
+                    showNotification('Please input a valid date', 'info');
+                    return;
+                }
+                if (inputDate < today) {
+                    showNotification("Job Start Date can't be earlier than today.", 'error');
+                    return;
+                }
+            };
+            if (!description) return showNotification('Job Description cannot be empty.', 'error');
+            if (!imageFile) return showNotification('Please upload a Job Image.', 'error');
+
+            // Convert image to base64, prepare job data and send POST request
+            fileToDataUrl(imageFile).then(imageBase64 => {
+                const data = {
+                    id: job.id,
+                    title: title,
+                    image: imageBase64,
+                    start: inputDate.toISOString(), // ISO 8601 format
+                    description: description
+                };
+
+            // Call backend to post job
+            apiCall({
+                url: `${BACKEND_URL}/job`,
+                method: 'PUT',
+                body: data
+            }).then(data => {
+                showNotification('Post a job success!', 'success');
+                console.log('job id:', data.id)
+                fetchFeed();
+                postJobModal.classList.add('hide');
+            });
         });
 
         // Job feed global eventListener
         document.addEventListener('click', (event) => {
             // If you click the updateButton or its dropdown, you don't close it
             if (
-              updateButton.contains(event.target) ||
-              updateDropdown.contains(event.target)
+                updateButton.contains(event.target) ||
+                updateDropdown.contains(event.target)
             ) {
-              return;
+                return;
             }
             // Otherwise, close dropdown
             updateDropdown.classList.add('hide');
-          });
+        });
 
         // delete button Eventlistener
         deleteButton.addEventListener('click', () => {
@@ -651,7 +715,7 @@ const createJobCard = (job) => {
                 });
             }
         });
-    };
+    });
     updateLikeButton();
 
     // likesButton Eventlistener
@@ -687,8 +751,8 @@ const renderJobFeed = (jobs) => {
     }
 
     // Append each job card to container
-    jobs.forEach((job, index) => {
-        const jobCard = createJobCard(job, index);
+    jobs.forEach((job) => {
+        const jobCard = createJobCard(job);
         container.appendChild(jobCard);
     });
 }
@@ -709,4 +773,5 @@ document.addEventListener('click', (event) => {
     if (!profileMenu.classList.contains('hide')) {
         profileMenu.classList.add('hide');
     }
-});
+})
+};
