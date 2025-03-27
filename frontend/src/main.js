@@ -873,6 +873,47 @@ function createInteractionSection(job, currentUserId, currentUserName) {
         item.appendChild(content);
         commentList.appendChild(item);
     });
+    
+    const commentInput = document.createElement('div');
+    commentInput.className = 'comment-input';
+
+    const commentAvatar = document.createElement('div');
+    commentAvatar.className = 'avatar-letter';
+    commentAvatar.textContent = currentUserName?.[0]?.toUpperCase() || 'U';
+
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.placeholder = 'Add a comment...';
+
+    const send = document.createElement('button');
+    send.textContent = 'Send';
+    send.addEventListener('click', () => {
+        const text = input.value.trim();
+        if (!text) return;
+        showNotification('Comment added (not yet implemented)', 'success');
+        input.value = '';
+    });
+
+    commentInput.appendChild(commentAvatar);
+    commentInput.appendChild(input);
+    commentInput.appendChild(send);
+
+    commentSection.appendChild(commentList);
+    commentSection.appendChild(commentInput);
+
+    toggleCommentsBtn.addEventListener('click', () => {
+        commentSection.classList.toggle('hide');
+    });
+
+    // ========== Append to wrapper ========== //
+    wrapper.appendChild(likeBtn);
+    wrapper.appendChild(toggleLikesBtn);
+    wrapper.appendChild(likeList);
+    wrapper.appendChild(toggleCommentsBtn);
+    wrapper.appendChild(commentSection);
+
+    return wrapper;
+}
 
 // ==================== Create Job Card (composed component) ====================
 const createJobCard = (job) => {
