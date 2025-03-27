@@ -780,6 +780,99 @@ const createActionButtons = (job, onDelete, onUpdate) => {
 //     return section;
 // }
 
+// ==================== Create Like and Comment Section ====================
+function createInteractionSection(job, currentUserId, currentUserName) {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'interaction-wrapper';
+
+    // ========== Like Button ========== //
+    const likeBtn = document.createElement('button');
+    likeBtn.className = 'like-button';
+
+    let liked = !!job.likes?.find(user => user.userId === Number(currentUserId));
+    let likeCount = job.likes.length;
+
+    const updateLikeButton = () => {
+        likeBtn.textContent = `Like ❤️ ${likeCount}`;
+        likeBtn.className = liked
+            ? 'like-button btn-primary'
+            : 'like-button btn-outline-primary';
+    };
+
+    updateLikeButton();
+
+    likeBtn.addEventListener('click', () => {
+        apiCall({
+            url: `${BACKEND_URL}/job/like`,
+            method: 'PUT',
+            body: { id: job.id, turnon: !liked }
+        }).then(() => {
+            liked = !liked;
+            likeCount += liked ? 1 : -1;
+            updateLikeButton();
+            showNotification(liked ? 'Liked!' : 'Unliked!', 'success');
+        });
+    });
+
+    // ========== Show Likes Toggle ========== //
+    const likeList = document.createElement('div');
+    likeList.className = 'like-list hide';
+
+    const toggleLikesBtn = document.createElement('button');
+    toggleLikesBtn.textContent = 'Show Likes';
+    toggleLikesBtn.className = 'toggle-likes-button';
+
+    toggleLikesBtn.addEventListener('click', () => {
+        const isHidden = likeList.classList.contains('hide');
+        likeList.classList.toggle('hide');
+        toggleLikesBtn.textContent = isHidden ? 'Hide Likes' : 'Show Likes';
+
+        if (isHidden) {
+            likeList.replaceChildren();
+
+            job.likes.forEach(user => {
+                const item = document.createElement('div');
+                item.className = 'like-item';
+
+                const avatar = document.createElement('div');
+                avatar.className = 'avatar-letter';
+                avatar.textContent = user.userName?.[0]?.toUpperCase() || '?';
+
+                const name = document.createElement('span');
+                name.textContent = user.userName || user.userEmail;
+
+                item.appendChild(avatar);
+                item.appendChild(name);
+                likeList.appendChild(item);
+            });
+        }
+    });
+
+    // ========== Comment Section ========== //
+    const commentSection = document.createElement('div');
+    commentSection.className = 'comment-section hide';
+
+    const toggleCommentsBtn = document.createElement('button');
+    toggleCommentsBtn.textContent = 'Comment 💬 ' + job.comments.length;
+    toggleCommentsBtn.className = 'comment-button';
+
+    const commentList = document.createElement('div');
+    commentList.className = 'comment-list';
+
+    job.comments.forEach(comment => {
+        const item = document.createElement('div');
+        item.className = 'comment-item';
+
+        const name = document.createElement('strong');
+        name.textContent = comment.userName;
+
+        const content = document.createElement('span');
+        content.textContent = `: ${comment.comment}`;
+
+        item.appendChild(name);
+        item.appendChild(content);
+        commentList.appendChild(item);
+    });
 
 // ==================== Create Job Card (composed component) ====================
 const createJobCard = (job) => {
