@@ -265,6 +265,56 @@ const handleImagePreview = (inputElement, previewContainer) => {
 // handleImagePreview(jobImage, previewContainer);
 // handleImagePreview(jobImageUp, previewContainerUP);
 
+const validateAndParseDate = (dateStr) => {
+    if (!dateStr) return { error: 'Job Start Date is required.' };
+
+
+    if (!/^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) {
+        return { error: 'Invalid date format. Please use DD/MM/YYYY.' };
+    }
+    const [day, month, year] = dateStr.split('/').map(Number);
+    const inputDate = new Date(year, month - 1, day);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const daysInMonth = new Date(year, month, 0).getDate();
+    if (month < 1 || month > 12 || day < 1 || day > daysInMonth) {
+        return { error: 'Please input a valid date' };
+    }
+
+    if (inputDate < today) {
+        return { error: "Job Start Date can't be earlier than today." };
+    }
+
+    return { date: inputDate };
+
+    // if (!startDateStr) {
+    //     showNotification('Job Start Date is required.', 'error');
+    //     return;
+    // } else {
+    //     // validate the Date
+    //     if (!/[0-9]{2}\/[0-9]{2}\/[0-9]{4}$/.test(jobStartDate.value)) {
+    //         showNotification('Invalid date format. Please use DD/MM/YYYY.', 'info');
+    //         return;
+    //     }
+    //     // validate the date
+    //     if (inputMonth < 1 || inputMonth > 12) {
+    //         showNotification('Please input a valid date', 'info');
+    //         return;
+    //     }
+    //     // Calculate the number of days in the month
+    //     const daysInMonth = new Date(inputYear, inputMonth, 0).getDate();
+    //     if (inputDay < 1 || inputDay > daysInMonth) {
+    //         showNotification('Please input a valid date', 'info');
+    //         return;
+    //     }
+    //     if (inputDate < today) {
+    //         showNotification("Job Start Date can't be earlier than today.", 'error');
+    //         return;
+    //     }
+    // };
+}
+
 // handleJob Post function
 const handleJobPost = () => {
     const title = jobTitle.value;
@@ -272,38 +322,16 @@ const handleJobPost = () => {
     const startDateStr = jobStartDate.value;
     const imageFile = jobImage.files[0];
 
-    // Parse and validate date
-    const [inputDay, inputMonth, inputYear] = startDateStr.split('/').map(num => parseInt(num, 10));
-    const inputDate = new Date(inputYear, inputMonth - 1, inputDay);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    // // Parse and validate date
+    // const [inputDay, inputMonth, inputYear] = startDateStr.split('/').map(num => parseInt(num, 10));
+    // const inputDate = new Date(inputYear, inputMonth - 1, inputDay);
+    // const today = new Date();
+    // today.setHours(0, 0, 0, 0);
+    const result = validateAndParseDate(startDateStr);
+    if (result.error) return showNotification(result.error, 'error');
+    const inputDate = result.date;
 
     if (!title) return showNotification('Job Title cannot be empty.', 'error');
-    if (!startDateStr) {
-        showNotification('Job Start Date is required.', 'error');
-        return;
-    } else {
-        // validate the Date
-        if (!/[0-9]{2}\/[0-9]{2}\/[0-9]{4}$/.test(jobStartDate.value)) {
-            showNotification('Invalid date format. Please use DD/MM/YYYY.', 'info');
-            return;
-        }
-        // validate the date
-        if (inputMonth < 1 || inputMonth > 12) {
-            showNotification('Please input a valid date', 'info');
-            return;
-        }
-        // Calculate the number of days in the month
-        const daysInMonth = new Date(inputYear, inputMonth, 0).getDate();
-        if (inputDay < 1 || inputDay > daysInMonth) {
-            showNotification('Please input a valid date', 'info');
-            return;
-        }
-        if (inputDate < today) {
-            showNotification("Job Start Date can't be earlier than today.", 'error');
-            return;
-        }
-    };
     if (!description) return showNotification('Job Description cannot be empty.', 'error');
     if (!imageFile) return showNotification('Please upload a Job Image.', 'error');
 
