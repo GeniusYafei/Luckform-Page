@@ -68,18 +68,18 @@ const apiCall = ({ url, method = 'GET', token = true, body = null }) => {
         headers: headers,
         body: body ? JSON.stringify(body) : null
     })
-    .then(res => res.json())
-    .then(data => {
-        if (data.error) {
-            showNotification(data.error, 'error');
-            return Promise.reject(data.error);
-        }
-        return data;
-    })
-    .catch(err => {
-        showNotification(err.message || 'Network error', 'error');
-        return Promise.reject(err);
-    });
+        .then(res => res.json())
+        .then(data => {
+            if (data.error) {
+                showNotification(data.error, 'error');
+                return Promise.reject(data.error);
+            }
+            return data;
+        })
+        .catch(err => {
+            showNotification(err.message || 'Network error', 'error');
+            return Promise.reject(err);
+        });
 };
 
 
@@ -107,25 +107,9 @@ const fetchFeed = () => {
         showPage('login');
         return;
     }
-
-    fetch(`${BACKEND_URL}/job/feed?start=0`, {
-        method: 'GET',
-        headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-        }
-    })
-        .then(res => res.json())
+    apiCall({ url: `${BACKEND_URL}/job/feed?start=0` })
         .then(data => {
-            if (data.error) {
-                showNotification(data.error, 'error');
-                return;
-            }
-            console.log('job list: ', data)
             renderJobFeed(data);
-        })
-        .catch(err => {
-            showNotification(err.message, 'error');
         });
 };
 
@@ -314,26 +298,15 @@ confirmPost.addEventListener('click', () => {
             image: imageBase64
         };
 
-        const token = localStorage.getItem('token');
-        fetch(`${BACKEND_URL}/job`, {
+        apiCall({
+            url: `${BACKEND_URL}/job`,
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify(data)
-        })
-            .then(res => res.json())
-            .then(data => {
-                if (data.error) {
-                    showNotification(data.error, 'error');
-                    return;
-                }
-                showNotification('Post a job success!', 'success');
-                console.log('Success', data);
-                fetchFeed(); // Refresh the feed
-                postJobModal.classList.add('hide');
-            });
+            body: data
+        }).then(data => {
+            showNotification('Post a job success!', 'success');
+            fetchFeed();
+            postJobModal.classList.add('hide');
+        });
     });
 });
 
@@ -378,24 +351,16 @@ submitButton.addEventListener('click', () => {
     }
 
     // Submit registration request
-    fetch(`${BACKEND_URL}/auth/register`, {
+    apiCall({
+        url: `${BACKEND_URL}/auth/register`,
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, name }),
+        token: false,
+        body: { email, password, name }
     })
-        .then(res => res.json())
         .then(data => {
-            if (data.token) {
-                localStorage.setItem('token', data.token);
-                showNotification('Registered!', 'success');
-                showPage('login');
-            } else {
-                showNotification(data.error || 'Registration failed.', 'error');
-            }
-        })
-        .catch(err => {
-            console.error('Register Error:', err);
-            showNotification('Network error. Please try again later.', 'error');
+            localStorage.setItem('token', data.token);
+            showNotification('Registered!', 'success');
+            showPage('login');
         });
 });
 
@@ -406,55 +371,33 @@ loginButton.addEventListener('click', () => {
     if (!email) {
         showNotification('Please enter email', 'info');
         return;
-    }
+    };
     if (!password) {
         showNotification('Please enter password', 'info');
         return;
-    }
+    };
 
-    fetch(`${BACKEND_URL}/auth/login`, {
+    apiCall({
+        url: `${BACKEND_URL}/auth/login`,
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        token: false,
+        body: { email, password }
     })
-        .then(res => res.json())
         .then(data => {
-            if (!data.token) {
-                showNotification(data.error ?? 'Login failed', 'error');
-                return Promise.reject('No token returned');
-            }
-
             // If the login succeeds, save the token and userId
-            console.log('userId:', data.userId);
-            localStorage.setItem('userId', data.userId);
             localStorage.setItem('token', data.token);
-
+            localStorage.setItem('userId', data.userId);
             // later usersWhoWatch
-            return fetch(`${BACKEND_URL}/user/watch`, {
+            return apiCall({
+                url: `${BACKEND_URL}/user/watch`,
                 method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${data.token}`
-                },
-                body: JSON.stringify({ email, turnon: true }),
+                body: { email, turnon: true }
             });
         })
-        .then(res => res.json())
-        .then(result => {
-            if (result?.error) {
-                console.log('Watch error:', result.error);
-                showNotification(result.error, 'error');
-                return;
-            }
-
-            // Log in and watch successfully
+        .then(() => {
             showNotification('Logged in!', 'success');
             // updateUser();
             showPage('home');
-        })
-        .catch(err => {
-            console.error('Login flow error:', err);
-            showNotification('invalid email or password.', 'error');
         });
 });
 
@@ -501,76 +444,62 @@ const createJobCard = (job, index) => {
     const token = localStorage.getItem('token');
     const currentUserId = localStorage.getItem('userId')
 
-    fetch(`${BACKEND_URL}/user/?userId=${currentUserId}`, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
+    apiCall({
+        url: `${BACKEND_URL}/user/?userId=${currentUserId}`
+    }).then(data => {
+        if (data.error) {
+            showNotification(data.error, 'error');
+            return;
         }
-    })
-        .then(res => res.json())
-        .then(data => {
-            if (data.error) {
-                showNotification(data.error, 'error');
-                return;
-            }
 
-            // empty sidebarUser content and
-            while (sidebarUser.firstChild) {
-                sidebarUser.removeChild(sidebarUser.firstChild);
-            }
-
-            if (data.img) {
-                const img = document.createElement('img');
-                img.src = data.img;
-                img.alt = 'User Avatar';
-                img.className = 'avatar-img';
-                sidebarUser.appendChild(img);
-            } else {
-                const fallback = document.createElement('div');
-                fallback.className = 'avatar-fallback';
-                fallback.textContent = data.name[0]?.toUpperCase();
-                sidebarUser.appendChild(fallback);
-            }
-
-            // user name
-            const name = document.createElement('h2');
-            name.textContent = data.name || 'User';
-            sidebarUser.appendChild(name);
-
-            // user email
-            const email = document.createElement('p');
-            email.textContent = data.email || '';
-            sidebarUser.appendChild(email);
-
-            // Set the top avatar letter or picture
-            if (data.img) {
-                // Clear old avatar letters
-                while (profileMenuButton.firstChild) {
-                    profileMenuButton.removeChild(profileMenuButton.firstChild);
-                }
-                const img = document.createElement('img');
-                img.src = data.img;
-                img.alt = 'avatar';
-                img.className = 'avatar-img';
-                profileMenuButton.appendChild(img);
-            } else {
-                avatarLetter.textContent = data.name[0]?.toUpperCase();
-            }
-
-        })
-        .catch(err => {
-            console.error('Failed to load user info:', err);
-        });
-
-    fetch(`${BACKEND_URL}/user?userId=${job.creatorId}`, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
+        // empty sidebarUser content and
+        while (sidebarUser.firstChild) {
+            sidebarUser.removeChild(sidebarUser.firstChild);
         }
-    }).then(res => res.json())
-        .then(data => {
+
+        if (data.img) {
+            const img = document.createElement('img');
+            img.src = data.img;
+            img.alt = 'User Avatar';
+            img.className = 'avatar-img';
+            sidebarUser.appendChild(img);
+        } else {
+            const fallback = document.createElement('div');
+            fallback.className = 'avatar-fallback';
+            fallback.textContent = data.name[0]?.toUpperCase();
+            sidebarUser.appendChild(fallback);
+        }
+
+        // user name
+        const name = document.createElement('h2');
+        name.textContent = data.name || 'User';
+        sidebarUser.appendChild(name);
+
+        // user email
+        const email = document.createElement('p');
+        email.textContent = data.email || '';
+        sidebarUser.appendChild(email);
+
+        // Set the top avatar letter or picture
+        if (data.img) {
+            // Clear old avatar letters
+            while (profileMenuButton.firstChild) {
+                profileMenuButton.removeChild(profileMenuButton.firstChild);
+            }
+            const img = document.createElement('img');
+            img.src = data.img;
+            img.alt = 'avatar';
+            img.className = 'avatar-img';
+            profileMenuButton.appendChild(img);
+        } else {
+            avatarLetter.textContent = data.name[0]?.toUpperCase();
+        }
+
+    });
+
+    apiCall({
+        url: `${BACKEND_URL}/user?userId=${job.creatorId}`
+    }).then(data => {
             const avatarWrapper = document.createElement('div');
             avatarWrapper.className = 'avatar-wrapper';
 
@@ -652,27 +581,14 @@ const createJobCard = (job, index) => {
         // delete button Eventlistener
         deleteButton.addEventListener('click', () => {
             if (confirm('Are you sure you want to delete this post?')) {
-                fetch(`${BACKEND_URL}/job`, {
+                apiCall({
+                    url: `${BACKEND_URL}/job`,
                     method: 'DELETE',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({
-                        id: job.id
-                    })
-                }).then(res => res.json())
-                    .then(data => {
-                        if (data && data.error) {
-                            showNotification(data.error, 'error');
-                            return;
-                        }
-                        showNotification('successfully deleted!', 'success');
-                        fetchFeed();
-                    })
-                    .catch(() => {
-                        showNotification('Network error', 'error');
-                    });
+                    body: { id: job.id }
+                }).then(() => {
+                    showNotification('successfully deleted!', 'success');
+                    fetchFeed();
+                });
             }
         });
     };
