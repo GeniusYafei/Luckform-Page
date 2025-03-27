@@ -41,6 +41,7 @@ const previewContainer = document.getElementById('jobImagePreview');
 const avatarLetter = document.getElementById('avatarLetter');
 const profileName = document.getElementById('profileName');
 const profileMenuButton = document.getElementById('profileMenuButton');
+// const updateButton = document.getElementById('button');
 
 // Page containers
 const loginPage = document.getElementById('loginPage');
@@ -119,13 +120,6 @@ const fetchFeed = () => {
 profileButton.addEventListener('click', (event) => {
     event.stopPropagation(); // Prevents bubbling, preventing click events that trigger the document
     profileMenu.classList.toggle('hide');
-});
-
-// Hide the menu when click elsewhere on the page
-document.addEventListener('click', (event) => {
-    if (!profileMenu.classList.contains('hide')) {
-        profileMenu.classList.add('hide');
-    }
 });
 
 // Preventing clicking on the menu itself also triggers hiding
@@ -506,41 +500,41 @@ const createJobCard = (job) => {
     apiCall({
         url: `${BACKEND_URL}/user?userId=${job.creatorId}`
     }).then(data => {
-            const avatarWrapper = document.createElement('div');
-            avatarWrapper.className = 'avatar-wrapper';
+        const avatarWrapper = document.createElement('div');
+        avatarWrapper.className = 'avatar-wrapper';
 
-            if (data.img) {
-                const avatar = document.createElement('img');
-                avatar.src = data.img;
-                avatar.alt = 'avatar';
-                avatar.className = 'user-avatar';
-                avatarWrapper.appendChild(avatar);
-            } else {
-                const avatarLetter = document.createElement('div');
-                avatarLetter.className = 'avatar-letter';
-                avatarLetter.textContent = data.name[0].toUpperCase();
-                avatarWrapper.appendChild(avatarLetter);
-            }
+        if (data.img) {
+            const avatar = document.createElement('img');
+            avatar.src = data.img;
+            avatar.alt = 'avatar';
+            avatar.className = 'user-avatar';
+            avatarWrapper.appendChild(avatar);
+        } else {
+            const avatarLetter = document.createElement('div');
+            avatarLetter.className = 'avatar-letter';
+            avatarLetter.textContent = data.name[0].toUpperCase();
+            avatarWrapper.appendChild(avatarLetter);
+        }
 
-            const authorInfo = document.createElement('div');
-            authorInfo.className = 'author-info';
+        const authorInfo = document.createElement('div');
+        authorInfo.className = 'author-info';
 
-            const name = document.createElement('p');
-            name.textContent = data.name;
-            name.className = 'author-name';
+        const name = document.createElement('p');
+        name.textContent = data.name;
+        name.className = 'author-name';
 
-            const time = document.createElement('p');
-            time.textContent = formatTime(job.createdAt);
-            time.className = 'post-time';
+        const time = document.createElement('p');
+        time.textContent = formatTime(job.createdAt);
+        time.className = 'post-time';
 
-            authorInfo.appendChild(name);
-            authorInfo.appendChild(time);
+        authorInfo.appendChild(name);
+        authorInfo.appendChild(time);
 
-            header.appendChild(avatarWrapper);
-            header.appendChild(authorInfo);
-            // Insert header before title
-            card.insertBefore(header, title);
-        });
+        header.appendChild(avatarWrapper);
+        header.appendChild(authorInfo);
+        // Insert header before title
+        card.insertBefore(header, title);
+    });
 
     // Render job image if exists
     if (job.image) {
@@ -572,13 +566,35 @@ const createJobCard = (job) => {
     if (Number(currentUserId) === job.creatorId) {
         const actionWrapper = document.createElement('div');
         actionWrapper.className = 'action-buttons';
+
+        // Create update button
         const updateButton = document.createElement('button');
         updateButton.className = 'update-button';
 
+        // Icon inside button
         const updateIcon = document.createElement('img');
         updateIcon.src = 'styles/horizontal.svg';
         updateIcon.alt = 'Update';
         updateIcon.className = 'update-icon';
+
+        // Dropdown container
+        const updateDropdown = document.createElement('div');
+        updateDropdown.className = 'update-dropdown hide';  // initially hidden
+
+        // Dropdown item: Update
+        const updateOption = document.createElement('button');
+        updateOption.textContent = 'Update';
+        updateOption.className = 'dropdown-item';
+        updateDropdown.appendChild(updateOption);
+        // Toggle dropdown on button click
+        updateButton.addEventListener('click', () => {
+            updateDropdown.classList.toggle('hide');
+        });
+        const updateWrapper = document.createElement('div');
+        updateWrapper.className = 'update-wrapper';
+        updateWrapper.appendChild(updateButton);
+        updateWrapper.appendChild(updateDropdown);
+        actionWrapper.appendChild(updateWrapper);
 
         const deleteButton = document.createElement('button');
         deleteButton.className = 'delete-button';
@@ -599,19 +615,28 @@ const createJobCard = (job) => {
         actionWrapper.appendChild(updateButton);
         actionWrapper.appendChild(deleteButton);
         card.appendChild(actionWrapper);
-        // card.appendChild(updateButton);
-        // card.appendChild(deleteButton);
 
-        // update button Eventlistener
-        updateButton.addEventListener('click', () => {
-            if (confirm('Do you want to update this post?')){
-                postJobModal.classList.remove('hide');
-                jobTitle.value = job.title;
-                jobDescription.value = job.description;
-                jobStartDate.value = formatTime(job.start);
+        // On clicking "Update" inside dropdown
+        updateOption.addEventListener('click', () => {
+            updateDropdown.classList.add('hide');
+            postJobModal.classList.remove('hide');
+            jobTitle.value = job.title;
+            jobDescription.value = job.description;
+            jobStartDate.value = formatTime(job.start);
+        });
 
+        // Job feed global eventListener
+        document.addEventListener('click', (event) => {
+            // If you click the updateButton or its dropdown, you don't close it
+            if (
+              updateButton.contains(event.target) ||
+              updateDropdown.contains(event.target)
+            ) {
+              return;
             }
-        })
+            // Otherwise, close dropdown
+            updateDropdown.classList.add('hide');
+          });
 
         // delete button Eventlistener
         deleteButton.addEventListener('click', () => {
@@ -675,3 +700,13 @@ if (localStorage.getItem('token')) {
     window.location.hash = '/job/feed';
 }
 routeToPage();
+
+// ==================== GLOBAL EVENTLISTENER  ====================
+
+// Hide the menu when click elsewhere on the page
+document.addEventListener('click', (event) => {
+    // --- Profile Menu hide ---
+    if (!profileMenu.classList.contains('hide')) {
+        profileMenu.classList.add('hide');
+    }
+});
