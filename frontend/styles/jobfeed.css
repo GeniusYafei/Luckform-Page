@@ -1,7 +1,7 @@
 #homePage {
     display: flex;
     flex-direction: column;
-    height: auto;
+    min-height: 100vh;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     background-color: #f4f2ee;
 }
@@ -96,11 +96,13 @@
 
 #homePage .jobfeed-main {
     display: flex;
-    overflow: hidden;
+    flex: 1;
+    overflow-y: auto;
     margin-top: 20px;
     padding: 0 20px;
     align-items: flex-start;
     gap: 20px;
+    min-height: 0;
 }
 
 #homePage .sidebar {
@@ -118,6 +120,7 @@
     padding: 0;
     overflow-y: auto;
     background-color: transparent;
+    min-height: 0;
 }
 
 #homePage .like-button,
@@ -211,6 +214,14 @@
     margin-top: 0;
 }
 
+#homePage #jobImagePreview .preview-image {
+    max-width: 100%;
+    height: 50%;
+    margin-top: 10px;
+    border-radius: 8px;
+    object-fit: contain;
+    display: block;
+  }
 #homePage .modal-content label {
     display: block;
     margin-top: 10px;
@@ -256,53 +267,48 @@
     background-color: #004182;
 }
 
-#homePage .close-button {
-    position: absolute;
-    top: 10px;
-    right: 15px;
-    font-size: 20px;
-    cursor: pointer;
-    color: #999;
-}
-
-#homePage .close-button:hover {
-    color: #333;
-}
-
-
-.delete-button {
+#homePage .action-buttons {
     position: absolute;
     top: 10px;
     right: 10px;
+    display: flex;
+    gap: 6px; /* space between update and delete */
+  }
+
+  #homePage .update-button,
+  #homePage .delete-button {
     width: 32px;
     height: 32px;
     padding: 0;
     border: none;
     background: none;
     cursor: pointer;
-}
+  }
 
-.delete-button img {
-    position: absolute;
-    top: 0;
-    left: 0;
+  #homePage .update-icon,
+  #homePage .delete-icon,
+  #homePage .delete-icon-hover {
     width: 100%;
-    height: 100%;
-    transition: opacity 0.2s ease;
-}
+    height: auto;
+    display: block;
+  }
 
-.delete-icon-hover {
-    opacity: 0;
-    pointer-events: none;
-}
+  #homePage .delete-icon-hover {
+    display: none;
+  }
 
-.delete-button:hover .delete-icon {
-    opacity: 0;
-}
+  #homePage .delete-button:hover .delete-icon {
+    display: none;
+  }
 
-.delete-button:hover .delete-icon-hover {
-    opacity: 1;
-}
+  #homePage .delete-button:hover .delete-icon-hover {
+    display: block;
+  }
+
+  #homePage .update-button:hover {
+    background-color: #f3f2ef;
+    border-radius: 50%;
+  }
 
 #homePage .header-information {
     display: flex;
