@@ -254,8 +254,8 @@ jobImage.addEventListener('change', (event) => {
     })
 });
 
-// When user clicks "Confirm Post" after filling job form
-confirmPost.addEventListener('click', () => {
+// handleJob Post function
+const handleJobPost = () => {
     const title = jobTitle.value;
     const description = jobDescription.value;
     const startDateStr = jobStartDate.value;
@@ -316,7 +316,9 @@ confirmPost.addEventListener('click', () => {
             postJobModal.classList.add('hide');
         });
     });
-});
+};
+// When user clicks "Confirm Post" after filling job form
+confirmPost.addEventListener('click', handleJobPost)
 
 
 // User can closed the modal of Post
@@ -568,6 +570,16 @@ const createJobCard = (job) => {
 
     // delete button logic only if current user is creator
     if (Number(currentUserId) === job.creatorId) {
+        const actionWrapper = document.createElement('div');
+        actionWrapper.className = 'action-buttons';
+        const updateButton = document.createElement('button');
+        updateButton.className = 'update-button';
+
+        const updateIcon = document.createElement('img');
+        updateIcon.src = 'styles/horizontal.svg';
+        updateIcon.alt = 'Update';
+        updateIcon.className = 'update-icon';
+
         const deleteButton = document.createElement('button');
         deleteButton.className = 'delete-button';
 
@@ -581,9 +593,25 @@ const createJobCard = (job) => {
         deleteIconHover.alt = 'Delete';
         deleteIconHover.className = 'delete-icon-hover';
 
+        updateButton.appendChild(updateIcon);
         deleteButton.appendChild(deleteIcon);
         deleteButton.appendChild(deleteIconHover);
-        card.appendChild(deleteButton);
+        actionWrapper.appendChild(updateButton);
+        actionWrapper.appendChild(deleteButton);
+        card.appendChild(actionWrapper);
+        // card.appendChild(updateButton);
+        // card.appendChild(deleteButton);
+
+        // update button Eventlistener
+        updateButton.addEventListener('click', () => {
+            if (confirm('Do you want to update this post?')){
+                postJobModal.classList.remove('hide');
+                jobTitle.value = job.title;
+                jobDescription.value = job.description;
+                jobStartDate.value = formatTime(job.start);
+
+            }
+        })
 
         // delete button Eventlistener
         deleteButton.addEventListener('click', () => {
