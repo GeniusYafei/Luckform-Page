@@ -47,10 +47,6 @@ const loginPage = document.getElementById('loginPage');
 const registerPage = document.getElementById('registerPage');
 const homePage = document.getElementById('homePage');
 
-// Token
-const token = localStorage.getItem('token');
-// userId
-const currentUserId = localStorage.getItem('userId');
 // ==================== PAGE NAVIGATION ====================
 
 // Define the hash routes for each page
@@ -198,18 +194,20 @@ logoutButton.addEventListener('click', () => {
     showNotification('Logged out!', 'info')
     setTimeout(() => {
         localStorage.removeItem('token'); // Clear saved token
+        localStorage.removeItem('userId') // Clear saved userId
         window.location.hash = ROUTES.login;
     }, 100);
 });
 
 // Toggle password visibility for registration
-toggleConfirmPassword.addEventListener('click', () => {
+toggleConfirmPassword.addEventListener('click', (e) => {
     let confirmType = confirmPassword.getAttribute('type') === 'password' ? 'text' : 'password';
     let registerType = registerPassword.getAttribute('type') === 'password' ? 'text' : 'password';
     confirmPassword.setAttribute('type', confirmType);
     registerPassword.setAttribute('type', registerType);
-    this.textContent = confirmType === 'password' ? 'Show' : 'Hide';
+    e.currentTarget.textContent = confirmType === 'password' ? 'Show' : 'Hide';
 });
+
 
 // When user want post a new job click the Post a Job button
 btnPostJob.addEventListener('click', () => {
@@ -280,6 +278,7 @@ confirmPost.addEventListener('click', () => {
             image: imageBase64
         };
 
+        const token = localStorage.getItem('token');
         fetch(`${BACKEND_URL}/job`, {
             method: 'POST',
             headers: {
@@ -368,6 +367,14 @@ submitButton.addEventListener('click', () => {
 loginButton.addEventListener('click', () => {
     const email = loginEmail.value;
     const password = loginPassword.value;
+    if (!email) {
+        showNotification('Please enter email', 'info');
+        return;
+    }
+    if (!password) {
+        showNotification('Please enter password', 'info');
+        return;
+    }
 
     fetch(`${BACKEND_URL}/auth/login`, {
         method: 'POST',
@@ -406,11 +413,12 @@ loginButton.addEventListener('click', () => {
 
             // Log in and watch successfully
             showNotification('Logged in!', 'success');
+            // updateUser();
             showPage('home');
         })
         .catch(err => {
             console.error('Login flow error:', err);
-            showNotification('Something went wrong during login.', 'error');
+            showNotification('invalid email or password.', 'error');
         });
 });
 
@@ -442,6 +450,7 @@ const formatTime = (createdAtStr) => {
 }
 
 const createJobCard = (job, index) => {
+
     const card = document.createElement('div');
     card.className = 'job-card';
 
@@ -453,6 +462,8 @@ const createJobCard = (job, index) => {
     header.className = 'header-information';
 
     const sidebarUser = document.getElementById('userSidebar')
+    const token = localStorage.getItem('token');
+    const currentUserId = localStorage.getItem('userId')
 
     fetch(`${BACKEND_URL}/user/?userId=${currentUserId}`, {
         method: 'GET',
@@ -515,7 +526,6 @@ const createJobCard = (job, index) => {
         .catch(err => {
             console.error('Failed to load user info:', err);
         });
-
 
     fetch(`${BACKEND_URL}/user?userId=${job.creatorId}`, {
         method: 'GET',
