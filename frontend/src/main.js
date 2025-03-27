@@ -590,6 +590,82 @@ const createLikeButton = (job, currentUserId, updateCallback) => {
     return likesButton;
 };
 
+// ==================== Create Action Buttons (Update/Delete) ====================
+const createActionButtons = (job, onDelete, onUpdate) => {
+    const actionWrapper = document.createElement('div');
+    actionWrapper.className = 'action-buttons';
+
+    // Create update dropdown button
+    const updateButton = document.createElement('button');
+    updateButton.className = 'update-button';
+
+    const updateIcon = document.createElement('img');
+    updateIcon.src = 'styles/horizontal.svg';
+    updateIcon.alt = 'Update';
+    updateIcon.className = 'update-icon';
+    updateButton.appendChild(updateIcon);
+
+    const updateDropdown = document.createElement('div');
+    updateDropdown.className = 'update-dropdown hide';
+
+    const updateOption = document.createElement('button');
+    updateOption.textContent = 'Update';
+    updateOption.className = 'dropdown-item';
+    updateDropdown.appendChild(updateOption);
+
+    updateButton.addEventListener('click', () => {
+        updateDropdown.classList.toggle('hide');
+    });
+
+    updateOption.addEventListener('click', () => {
+        updateDropdown.classList.add('hide');
+        if (typeof onUpdate === 'function') onUpdate();
+    });
+
+    const updateWrapper = document.createElement('div');
+    updateWrapper.className = 'update-wrapper';
+    updateWrapper.appendChild(updateButton);
+    updateWrapper.appendChild(updateDropdown);
+    actionWrapper.appendChild(updateWrapper);
+
+    // Create delete button
+    const deleteButton = document.createElement('button');
+    deleteButton.className = 'delete-button';
+
+    const deleteIcon = document.createElement('img');
+    deleteIcon.src = 'styles/deleteicon.svg';
+    deleteIcon.alt = 'Delete';
+    deleteIcon.className = 'delete-icon';
+
+    const deleteIconHover = document.createElement('img');
+    deleteIconHover.src = 'styles/deleteicon-hover.svg';
+    deleteIconHover.alt = 'Delete';
+    deleteIconHover.className = 'delete-icon-hover';
+
+    deleteButton.appendChild(deleteIcon);
+    deleteButton.appendChild(deleteIconHover);
+
+    deleteButton.addEventListener('click', () => {
+        if (confirm('Are you sure you want to delete this post?')) {
+            if (typeof onDelete === 'function') onDelete();
+        }
+    });
+
+    actionWrapper.appendChild(deleteButton);
+
+    // Global listener to close dropdown when clicking elsewhere
+    document.addEventListener('click', (event) => {
+        if (
+            !updateButton.contains(event.target) &&
+            !updateDropdown.contains(event.target)
+        ) {
+            updateDropdown.classList.add('hide');
+        }
+    });
+
+    return actionWrapper;
+};
+
 // ==================== CREATE JOB CARD ====================
 // Dynamically creates a job card element for each job in the feed
 const createJobCard = (job) => {
