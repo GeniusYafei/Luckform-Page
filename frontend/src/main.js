@@ -570,46 +570,46 @@ const renderJobHeader = (job, headerElement) => {
         });
 };
 
-// ==================== Create Like Button and Logic ====================
-const createLikeButton = (job, currentUserId, updateCallback) => {
+// // ==================== Create Like Button and Logic ====================
+// const createLikeButton = (job, currentUserId, updateCallback) => {
 
-    const wrapper = document.createElement('div');
-    wrapper.className = 'like-wrapper';
+//     const wrapper = document.createElement('div');
+//     wrapper.className = 'like-wrapper';
 
-    const likesButton = document.createElement('button');
-    likesButton.className = 'like-button';
+//     const likesButton = document.createElement('button');
+//     likesButton.className = 'like-button';
 
-    const likeList = document.createElement('div');
-    likeList.className = 'like-list hide';
+//     const likeList = document.createElement('div');
+//     likeList.className = 'like-list hide';
 
-    let liked = !!job.likes?.find(user => user.userId === Number(currentUserId));
-    let likeCount = job.likes.length;
+//     let liked = !!job.likes?.find(user => user.userId === Number(currentUserId));
+//     let likeCount = job.likes.length;
 
-    const updateLikeButton = () => {
-        likesButton.textContent = `Like ❤️ ${likeCount}`;
-        likesButton.className = liked
-            ? 'like-button btn-primary'
-            : 'like-button btn-outline-primary';
-    };
+//     const updateLikeButton = () => {
+//         likesButton.textContent = `Like ❤️ ${likeCount}`;
+//         likesButton.className = liked
+//             ? 'like-button btn-primary'
+//             : 'like-button btn-outline-primary';
+//     };
 
-    updateLikeButton(); // Initialize button appearance
+//     updateLikeButton(); // Initialize button appearance
 
-    likesButton.addEventListener('click', () => {
-        apiCall({
-            url: `${BACKEND_URL}/job/like`,
-            method: 'PUT',
-            body: { id: job.id, turnon: !liked }
-        }).then(() => {
-            liked = !liked;
-            likeCount += liked ? 1 : -1;
-            updateLikeButton();
-            showNotification(liked ? 'Liked!' : 'Unliked!', 'success');
-            if (typeof updateCallback === 'function') updateCallback(liked, likeCount);
-        });
-    });
+//     likesButton.addEventListener('click', () => {
+//         apiCall({
+//             url: `${BACKEND_URL}/job/like`,
+//             method: 'PUT',
+//             body: { id: job.id, turnon: !liked }
+//         }).then(() => {
+//             liked = !liked;
+//             likeCount += liked ? 1 : -1;
+//             updateLikeButton();
+//             showNotification(liked ? 'Liked!' : 'Unliked!', 'success');
+//             if (typeof updateCallback === 'function') updateCallback(liked, likeCount);
+//         });
+//     });
 
-    return likesButton;
-};
+//     return likesButton;
+// };
 
 // ==================== Create Action Buttons (Update/Delete) ====================
 const createActionButtons = (job, onDelete, onUpdate) => {
@@ -726,51 +726,60 @@ const createLikeSection = (job) => {
 }
 
 // ==================== Create CommentSection Part  ====================
-const createCommentSection = (job) => {
-    const container = document.createElement('div');
+function createCommentSection(job, currentUserName) {
+    const section = document.createElement('div');
+    section.className = 'comment-section hide';
 
-    const commentListContainer = document.createElement('div');
-    commentListContainer.className = 'comment-list hide';
+    const list = document.createElement('div');
+    list.className = 'comment-list';
 
-    const showCommentsButton = document.createElement('button');
-    showCommentsButton.textContent = 'Show Comments';
-    showCommentsButton.className = 'show-comments-button';
+    job.comments.forEach(comment => {
+        const item = document.createElement('div');
+        item.className = 'comment-item';
 
-    showCommentsButton.addEventListener('click', () => {
-        const isHidden = commentListContainer.classList.contains('hide');
-        commentListContainer.classList.toggle('hide');
-        showCommentsButton.textContent = isHidden ? 'Hide Comments' : 'Show Comments';
+        const name = document.createElement('strong');
+        name.textContent = comment.userName;
 
-        if (isHidden) {
-            commentListContainer.replaceChildren();
+        const content = document.createElement('span');
+        content.textContent = `: ${comment.comment}`;
 
-            job.comments.forEach(comment => {
-                const commentItem = document.createElement('div');
-                commentItem.className = 'comment-item';
-
-                const name = document.createElement('strong');
-                name.textContent = comment.userName || comment.userEmail;
-
-                const content = document.createElement('span');
-                content.textContent = `: ${comment.comment}`;
-
-                commentItem.appendChild(name);
-                commentItem.appendChild(content);
-                commentListContainer.appendChild(commentItem);
-            });
-        }
+        item.appendChild(name);
+        item.appendChild(content);
+        list.appendChild(item);
     });
 
-    const commentsCountButton = document.createElement('button');
-    commentsCountButton.textContent = `Comment 💬 ${job.comments.length}`;
-    commentsCountButton.className = 'comment-button';
+    // Input area
+    const form = document.createElement('div');
+    form.className = 'comment-input';
 
-    container.appendChild(commentsCountButton);
-    container.appendChild(showCommentsButton);
-    container.appendChild(commentListContainer);
+    const avatar = document.createElement('div');
+    avatar.className = 'avatar-letter';
+    avatar.textContent = currentUserName.charAt(0).toUpperCase();
 
-    return container;
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.placeholder = 'Add a comment...';
+
+    const send = document.createElement('button');
+    send.textContent = 'Send';
+
+    send.addEventListener('click', () => {
+        const commentText = input.value.trim();
+        if (!commentText) return;
+        // Call API here: PUT /job/comment
+        showNotification('Comment added (not yet implemented)', 'success');
+    });
+
+    form.appendChild(avatar);
+    form.appendChild(input);
+    form.appendChild(send);
+
+    section.appendChild(list);
+    section.appendChild(form);
+
+    return section;
 }
+
 
 // ==================== Create Job Card (composed component) ====================
 const createJobCard = (job) => {
@@ -825,10 +834,10 @@ const createJobCard = (job) => {
         card.appendChild(actionButtons);
     }
 
-    const commentsButton = document.createElement('button');
-    commentsButton.textContent = `Comment 💬 ${job.comments.length}`;
-    commentsButton.className = 'comment-button';
-    card.appendChild(commentsButton);
+    // const commentsButton = document.createElement('button');
+    // commentsButton.textContent = `Comment 💬 ${job.comments.length}`;
+    // commentsButton.className = 'comment-button';
+    // // card.appendChild(commentsButton);
 
     card.appendChild(createLikeSection(job));
     card.appendChild(createCommentSection(job));
