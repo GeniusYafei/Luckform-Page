@@ -670,6 +670,9 @@ const createActionButtons = (job, onDelete, onUpdate) => {
 const createJobCard = (job) => {
     const currentUserId = localStorage.getItem('userId');
 
+    // Ensure sidebar is updated when rendering a job card
+    renderSidebarUser();
+
     const card = document.createElement('div');
     card.className = 'job-card';
 
@@ -683,11 +686,11 @@ const createJobCard = (job) => {
     renderJobHeader(job, header);
 
     if (job.image) {
-      const img = document.createElement('img');
-      img.className = 'id-img';
-      img.src = job.image;
-      img.alt = 'Job image';
-      card.appendChild(img);
+        const img = document.createElement('img');
+        img.className = 'id-img';
+        img.src = job.image;
+        img.alt = 'Job image';
+        card.appendChild(img);
     }
 
     const desc = document.createElement('p');
@@ -699,21 +702,21 @@ const createJobCard = (job) => {
 
     // Only show update/delete for creator
     if (Number(currentUserId) === job.creatorId) {
-      const actionButtons = createActionButtons(
-        job,
-        () => {
-          apiCall({
-            url: `${BACKEND_URL}/job`,
-            method: 'DELETE',
-            body: { id: job.id }
-          }).then(() => {
-            showNotification('Successfully deleted!', 'success');
-            fetchFeed();
-          });
-        },
-        () => showModal('update')
-      );
-      card.appendChild(actionButtons);
+        const actionButtons = createActionButtons(
+            job,
+            () => {
+                apiCall({
+                    url: `${BACKEND_URL}/job`,
+                    method: 'DELETE',
+                    body: { id: job.id }
+                }).then(() => {
+                    showNotification('Successfully deleted!', 'success');
+                    fetchFeed();
+                });
+            },
+            () => showModal('update')
+        );
+        card.appendChild(actionButtons);
     }
 
     const commentsButton = document.createElement('button');
@@ -722,7 +725,8 @@ const createJobCard = (job) => {
     card.appendChild(commentsButton);
 
     return card;
-  };
+};
+
 
 // ==================== CREATE JOB CARD ====================
 // Dynamically creates a job card element for each job in the feed
