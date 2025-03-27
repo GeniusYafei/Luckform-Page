@@ -96,6 +96,11 @@ const apiCall = ({ url, method = 'GET', token = true, body = null }) => {
 
 
 // ==================== PAGE NAVIGATION ====================
+// Define the Modal for post and update
+const modals = {
+    post: postJobModal,
+    update: updateJobModal
+};
 
 // Define the hash routes for each page
 const ROUTES = {
@@ -110,6 +115,11 @@ const pages = {
     register: registerPage,
     home: homePage,
 };
+
+const showModal = (type) => {
+    Object.values(modals).forEach(m => m.classList.add('hide'));
+    modals[type].classList.remove('hide');
+}
 
 // Define the function that loads the JobFeed (homepage)
 const fetchFeed = () => {
@@ -235,9 +245,7 @@ toggleConfirmPassword.addEventListener('click', (e) => {
 
 
 // When user want post a new job click the Post a Job button
-btnPostJob.addEventListener('click', () => {
-    postJobModal.classList.remove('hide');
-});
+btnPostJob.addEventListener('click', () => showModal('post'));
 
 // When a user selects an image file, preview it before posting
 // ==================== IMAGE PREVIEW HANDLER ====================
@@ -262,10 +270,10 @@ const handleImagePreview = (inputElement, previewContainer) => {
 };
 
 // Call for both uploaders
-// handleImagePreview(jobImage, previewContainer);
-// handleImagePreview(jobImageUp, previewContainerUP);
+handleImagePreview(jobImage, previewContainer);
+handleImagePreview(jobImageUp, previewContainerUP);
 
-const validateAndParseDate = (dateStr) => {
+const validateJobForm = (dateStr) => {
     if (!dateStr) return { error: 'Job Start Date is required.' };
 
 
@@ -327,14 +335,18 @@ const handleJobPost = () => {
     // const inputDate = new Date(inputYear, inputMonth - 1, inputDay);
     // const today = new Date();
     // today.setHours(0, 0, 0, 0);
-    const result = validateAndParseDate(startDateStr);
-    if (result.error) return showNotification(result.error, 'error');
+
+    if (!title) {
+        return showNotification('Job Title cannot be empty.', 'error');
+    } else {
+        const result = validateJobForm(startDateStr);
+        if (result.error) return showNotification(result.error, 'error');
+        const inputDate = result.date;
+        if (!description) return showNotification('Job Description cannot be empty.', 'error');
+        if (!imageFile) return showNotification('Please upload a Job Image.', 'error');
+    }
+    const result = validateJobForm(startDateStr);
     const inputDate = result.date;
-
-    if (!title) return showNotification('Job Title cannot be empty.', 'error');
-    if (!description) return showNotification('Job Description cannot be empty.', 'error');
-    if (!imageFile) return showNotification('Please upload a Job Image.', 'error');
-
     // Convert image to base64, prepare job data and send POST request
     fileToDataUrl(imageFile).then(imageBase64 => {
         const data = {
@@ -672,74 +684,47 @@ const createJobCard = (job) => {
         card.appendChild(actionWrapper);
 
         // On clicking "Update" inside dropdown
-        updateOption.addEventListener('click', () => {
-            updateDropdown.classList.add('hide');
-            updateJobModal.classList.remove('hide');
-        });
+        updateOption.addEventListener('click', () => showModal('update'));
+        // updateOption.addEventListener('click', () => {
+        //     updateDropdown.classList.add('hide');
+        //     updateJobModal.classList.remove('hide');
+        // });
 
-        confirmUpdate.addEventListener('click', () => {
-            const title = jobTitleUp.value;
-            const description = jobDescriptionUp.value;
-            const startDateStr = jobStartDateUp.value;
-            const imageFile = jobImageUp.files[0];
+        // confirmUpdate.addEventListener('click', () => {
+        //     const title = jobTitleUp.value;
+        //     const description = jobDescriptionUp.value;
+        //     const startDateStr = jobStartDateUp.value;
+        //     const imageFile = jobImageUp.files[0];
 
-            // Parse and validate date
-            const [inputDay, inputMonth, inputYear] = startDateStr.split('/').map(num => parseInt(num, 10));
-            const inputDate = new Date(inputYear, inputMonth - 1, inputDay);
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
+        //     const result = validateJobForm(startDateStr);
+        //     if (result.error) return showNotification(result.error, 'error');
+        //     const inputDate = result.date;
 
-            if (!title) return showNotification('Job Title cannot be empty.', 'error');
-            if (!startDateStr) {
-                showNotification('Job Start Date is required.', 'error');
-                return;
-            } else {
-                // validate the Date
-                if (!/[0-9]{2}\/[0-9]{2}\/[0-9]{4}$/.test(jobStartDate.value)) {
-                    showNotification('Invalid date format. Please use DD/MM/YYYY.', 'info');
-                    return;
-                }
-                // validate the date
-                if (inputMonth < 1 || inputMonth > 12) {
-                    showNotification('Please input a valid date', 'info');
-                    return;
-                }
-                // Calculate the number of days in the month
-                const daysInMonth = new Date(inputYear, inputMonth, 0).getDate();
-                if (inputDay < 1 || inputDay > daysInMonth) {
-                    showNotification('Please input a valid date', 'info');
-                    return;
-                }
-                if (inputDate < today) {
-                    showNotification("Job Start Date can't be earlier than today.", 'error');
-                    return;
-                }
-            };
-            if (!description) return showNotification('Job Description cannot be empty.', 'error');
-            if (!imageFile) return showNotification('Please upload a Job Image.', 'error');
+        //     if (!description) return showNotification('Job Description cannot be empty.', 'error');
+        //     if (!imageFile) return showNotification('Please upload a Job Image.', 'error');
 
-            // Convert image to base64, prepare job data and send POST request
-            fileToDataUrl(imageFile).then(imageBase64 => {
-                const data = {
-                    id: job.id,
-                    title: title,
-                    image: imageBase64,
-                    start: inputDate.toISOString(), // ISO 8601 format
-                    description: description
-                };
+        //     // Convert image to base64, prepare job data and send POST request
+        //     fileToDataUrl(imageFile).then(imageBase64 => {
+        //         const data = {
+        //             id: job.id,
+        //             title: title,
+        //             image: imageBase64,
+        //             start: inputDate.toISOString(), // ISO 8601 format
+        //             description: description
+        //         };
 
-            // Call backend to post job
-            apiCall({
-                url: `${BACKEND_URL}/job`,
-                method: 'PUT',
-                body: data
-            }).then(data => {
-                showNotification('Post a job success!', 'success');
-                console.log('job id:', data.id)
-                fetchFeed();
-                postJobModal.classList.add('hide');
-            });
-        });
+        //     // Call backend to post job
+        //     apiCall({
+        //         url: `${BACKEND_URL}/job`,
+        //         method: 'PUT',
+        //         body: data
+        //     }).then(data => {
+        //         showNotification('Post a job success!', 'success');
+        //         console.log('job id:', data.id)
+        //         fetchFeed();
+        //         postJobModal.classList.add('hide');
+        //     });
+        // });
 
         // Job feed global eventListener
         document.addEventListener('click', (event) => {
@@ -767,7 +752,7 @@ const createJobCard = (job) => {
                 });
             }
         });
-    });
+    };
     updateLikeButton();
 
     // likesButton Eventlistener
@@ -826,4 +811,4 @@ document.addEventListener('click', (event) => {
         profileMenu.classList.add('hide');
     }
 })
-};
+
