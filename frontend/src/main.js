@@ -596,32 +596,16 @@ const createJobCard = (job, index) => {
 
     // likesButton Eventlistener
     likesButton.addEventListener('click', () => {
-        fetch(`${BACKEND_URL}/job/like`, {
+        apiCall({
+            url: `${BACKEND_URL}/job/like`,
             method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({
-                id: job.id,
-                turnon: !liked,
-            })
-        })
-            .then(res => res.json())
-            .then(data => {
-                if (data && data.error) {
-                    showNotification(data.error, 'error');
-                    return;
-                }
-
-                liked = !liked;
-                likeCount += liked ? 1 : -1;
-                updateLikeButton();
-                showNotification(liked ? 'Liked!' : 'Unliked!', 'success');
-            })
-            .catch(() => {
-                showNotification('Network error', 'error');
-            });
+            body: { id: job.id, turnon: !liked }
+        }).then(() => {
+            liked = !liked;
+            likeCount += liked ? 1 : -1;
+            updateLikeButton();
+            showNotification(liked ? 'Liked!' : 'Unliked!', 'success');
+        });
     });
 
     const commentsButton = document.createElement('button');
