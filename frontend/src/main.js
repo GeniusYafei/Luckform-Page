@@ -666,9 +666,67 @@ const createActionButtons = (job, onDelete, onUpdate) => {
     return actionWrapper;
 };
 
+// ==================== Create Job Card (composed component) ====================
+const createJobCard = (job) => {
+    const currentUserId = localStorage.getItem('userId');
+
+    const card = document.createElement('div');
+    card.className = 'job-card';
+
+    const title = document.createElement('h2');
+    title.textContent = job.title;
+    card.appendChild(title);
+
+    const header = document.createElement('div');
+    header.className = 'header-information';
+    card.insertBefore(header, title);
+    renderJobHeader(job, header);
+
+    if (job.image) {
+      const img = document.createElement('img');
+      img.className = 'id-img';
+      img.src = job.image;
+      img.alt = 'Job image';
+      card.appendChild(img);
+    }
+
+    const desc = document.createElement('p');
+    desc.textContent = job.description;
+    card.appendChild(desc);
+
+    const likeButton = createLikeButton(job, currentUserId);
+    card.appendChild(likeButton);
+
+    // Only show update/delete for creator
+    if (Number(currentUserId) === job.creatorId) {
+      const actionButtons = createActionButtons(
+        job,
+        () => {
+          apiCall({
+            url: `${BACKEND_URL}/job`,
+            method: 'DELETE',
+            body: { id: job.id }
+          }).then(() => {
+            showNotification('Successfully deleted!', 'success');
+            fetchFeed();
+          });
+        },
+        () => showModal('update')
+      );
+      card.appendChild(actionButtons);
+    }
+
+    const commentsButton = document.createElement('button');
+    commentsButton.textContent = `Comment 💬 ${job.comments.length}`;
+    commentsButton.className = 'comment-button';
+    card.appendChild(commentsButton);
+
+    return card;
+  };
+
 // ==================== CREATE JOB CARD ====================
 // Dynamically creates a job card element for each job in the feed
-const createJobCard = (job) => {
+const createJobCardU = (job) => {
 
     const card = document.createElement('div');
     card.className = 'job-card';
