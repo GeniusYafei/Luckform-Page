@@ -692,6 +692,86 @@ const createActionButtons = (job, onDelete, onUpdate) => {
     return actionWrapper;
 };
 
+// ==================== Create LikeSection ====================
+const createLikeSection = (job) => {
+    const container = document.createElement('div');
+
+    const likeListContainer = document.createElement('div');
+    likeListContainer.className = 'like-list hide';
+
+    const showLikesButton = document.createElement('button');
+    showLikesButton.textContent = 'Show Likes';
+    showLikesButton.className = 'show-likes-button';
+
+    showLikesButton.addEventListener('click', () => {
+        const isHidden = likeListContainer.classList.contains('hide');
+        likeListContainer.classList.toggle('hide');
+        showLikesButton.textContent = isHidden ? 'Hide Likes' : 'Show Likes';
+
+        if (isHidden) {
+            likeListContainer.replaceChildren(); // clear all children
+
+            job.likes.forEach(liker => {
+                const p = document.createElement('p');
+                p.textContent = liker.userName || liker.userEmail;
+                likeListContainer.appendChild(p);
+            });
+        }
+    });
+
+    container.appendChild(showLikesButton);
+    container.appendChild(likeListContainer);
+
+    return container;
+}
+
+// ==================== Create CommentSection Part  ====================
+const createCommentSection = (job) => {
+    const container = document.createElement('div');
+
+    const commentListContainer = document.createElement('div');
+    commentListContainer.className = 'comment-list hide';
+
+    const showCommentsButton = document.createElement('button');
+    showCommentsButton.textContent = 'Show Comments';
+    showCommentsButton.className = 'show-comments-button';
+
+    showCommentsButton.addEventListener('click', () => {
+        const isHidden = commentListContainer.classList.contains('hide');
+        commentListContainer.classList.toggle('hide');
+        showCommentsButton.textContent = isHidden ? 'Hide Comments' : 'Show Comments';
+
+        if (isHidden) {
+            commentListContainer.replaceChildren();
+
+            job.comments.forEach(comment => {
+                const commentItem = document.createElement('div');
+                commentItem.className = 'comment-item';
+
+                const name = document.createElement('strong');
+                name.textContent = comment.userName || comment.userEmail;
+
+                const content = document.createElement('span');
+                content.textContent = `: ${comment.comment}`;
+
+                commentItem.appendChild(name);
+                commentItem.appendChild(content);
+                commentListContainer.appendChild(commentItem);
+            });
+        }
+    });
+
+    const commentsCountButton = document.createElement('button');
+    commentsCountButton.textContent = `Comment 💬 ${job.comments.length}`;
+    commentsCountButton.className = 'comment-button';
+
+    container.appendChild(commentsCountButton);
+    container.appendChild(showCommentsButton);
+    container.appendChild(commentListContainer);
+
+    return container;
+}
+
 // ==================== Create Job Card (composed component) ====================
 const createJobCard = (job) => {
     const currentUserId = localStorage.getItem('userId');
@@ -817,11 +897,8 @@ const createJobCard = (job) => {
     commentsButton.className = 'comment-button';
     card.appendChild(commentsButton);
 
-    card.appendChild(showLikesButton);
-    card.appendChild(likeListContainer);
-    card.appendChild(showCommentsButton);
-    card.appendChild(commentListContainer);
-
+    card.appendChild(createLikeSection(job));
+    card.appendChild(createCommentSection(job));
     return card;
 };
 
