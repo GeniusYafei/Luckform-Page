@@ -295,32 +295,6 @@ const validateJobForm = (dateStr) => {
     }
 
     return { date: inputDate };
-
-    // if (!startDateStr) {
-    //     showNotification('Job Start Date is required.', 'error');
-    //     return;
-    // } else {
-    //     // validate the Date
-    //     if (!/[0-9]{2}\/[0-9]{2}\/[0-9]{4}$/.test(jobStartDate.value)) {
-    //         showNotification('Invalid date format. Please use DD/MM/YYYY.', 'info');
-    //         return;
-    //     }
-    //     // validate the date
-    //     if (inputMonth < 1 || inputMonth > 12) {
-    //         showNotification('Please input a valid date', 'info');
-    //         return;
-    //     }
-    //     // Calculate the number of days in the month
-    //     const daysInMonth = new Date(inputYear, inputMonth, 0).getDate();
-    //     if (inputDay < 1 || inputDay > daysInMonth) {
-    //         showNotification('Please input a valid date', 'info');
-    //         return;
-    //     }
-    //     if (inputDate < today) {
-    //         showNotification("Job Start Date can't be earlier than today.", 'error');
-    //         return;
-    //     }
-    // };
 }
 
 // handleJob Post function
@@ -329,12 +303,6 @@ const handleJobPost = () => {
     const description = jobDescription.value;
     const startDateStr = jobStartDate.value;
     const imageFile = jobImage.files[0];
-
-    // // Parse and validate date
-    // const [inputDay, inputMonth, inputYear] = startDateStr.split('/').map(num => parseInt(num, 10));
-    // const inputDate = new Date(inputYear, inputMonth - 1, inputDay);
-    // const today = new Date();
-    // today.setHours(0, 0, 0, 0);
 
     if (!title) {
         return showNotification('Job Title cannot be empty.', 'error');
@@ -490,6 +458,62 @@ const formatTime = (createdAtStr) => {
         return `${day}/${month}/${year}`;
     }
 }
+
+// render SidebarUser
+const renderSidebarUser = (currentUserId) => {
+    const sidebarUser = document.getElementById('userSidebar');
+    apiCall({
+        url: `${BACKEND_URL}/user/?userId=${currentUserId}`
+    }).then(data => {
+        if (data.error) {
+            showNotification(data.error, 'error');
+            return;
+        }
+
+        // clear sidebar content
+        while (sidebarUser.firstChild) {
+            sidebarUser.removeChild(sidebarUser.firstChild);
+        }
+
+        // Set an avatar or initials
+        if (data.img) {
+            const img = document.createElement('img');
+            img.src = data.img;
+            img.alt = 'User Avatar';
+            img.className = 'avatar-img';
+            sidebarUser.appendChild(img);
+        } else {
+            const fallback = document.createElement('div');
+            fallback.className = 'avatar-fallback';
+            fallback.textContent = data.name[0]?.toUpperCase();
+            sidebarUser.appendChild(fallback);
+        }
+
+        // 添加名字
+        const name = document.createElement('h2');
+        name.textContent = data.name || 'User';
+        sidebarUser.appendChild(name);
+
+        // 添加邮箱
+        const email = document.createElement('p');
+        email.textContent = data.email || '';
+        sidebarUser.appendChild(email);
+
+        // 顶部导航头像
+        if (data.img) {
+            while (profileMenuButton.firstChild) {
+                profileMenuButton.removeChild(profileMenuButton.firstChild);
+            }
+            const img = document.createElement('img');
+            img.src = data.img;
+            img.alt = 'avatar';
+            img.className = 'avatar-img';
+            profileMenuButton.appendChild(img);
+        } else {
+            avatarLetter.textContent = data.name[0]?.toUpperCase();
+        }
+    });
+};
 
 // ==================== CREATE JOB CARD ====================
 // Dynamically creates a job card element for each job in the feed
@@ -685,46 +709,6 @@ const createJobCard = (job) => {
 
         // On clicking "Update" inside dropdown
         updateOption.addEventListener('click', () => showModal('update'));
-        // updateOption.addEventListener('click', () => {
-        //     updateDropdown.classList.add('hide');
-        //     updateJobModal.classList.remove('hide');
-        // });
-
-        // confirmUpdate.addEventListener('click', () => {
-        //     const title = jobTitleUp.value;
-        //     const description = jobDescriptionUp.value;
-        //     const startDateStr = jobStartDateUp.value;
-        //     const imageFile = jobImageUp.files[0];
-
-        //     const result = validateJobForm(startDateStr);
-        //     if (result.error) return showNotification(result.error, 'error');
-        //     const inputDate = result.date;
-
-        //     if (!description) return showNotification('Job Description cannot be empty.', 'error');
-        //     if (!imageFile) return showNotification('Please upload a Job Image.', 'error');
-
-        //     // Convert image to base64, prepare job data and send POST request
-        //     fileToDataUrl(imageFile).then(imageBase64 => {
-        //         const data = {
-        //             id: job.id,
-        //             title: title,
-        //             image: imageBase64,
-        //             start: inputDate.toISOString(), // ISO 8601 format
-        //             description: description
-        //         };
-
-        //     // Call backend to post job
-        //     apiCall({
-        //         url: `${BACKEND_URL}/job`,
-        //         method: 'PUT',
-        //         body: data
-        //     }).then(data => {
-        //         showNotification('Post a job success!', 'success');
-        //         console.log('job id:', data.id)
-        //         fetchFeed();
-        //         postJobModal.classList.add('hide');
-        //     });
-        // });
 
         // Job feed global eventListener
         document.addEventListener('click', (event) => {
