@@ -62,7 +62,7 @@ const apiCall = ({ url, method = 'GET', token = true, body = null }) => {
         }
         headers['Authorization'] = `Bearer ${savedToken}`;
     }
-
+    // Supports GET, POST, PUT, DELETE methods
     return fetch(url, {
         method: method,
         headers: headers,
@@ -77,6 +77,7 @@ const apiCall = ({ url, method = 'GET', token = true, body = null }) => {
             return data;
         })
         .catch(err => {
+            // Handle network or unexpected errors
             showNotification(err.message || 'Network error', 'error');
             return Promise.reject(err);
         });
@@ -233,28 +234,33 @@ toggleConfirmPassword.addEventListener('click', (e) => {
 btnPostJob.addEventListener('click', () => {
     postJobModal.classList.remove('hide');
 });
-
+// When a user selects an image file, preview it before posting
 jobImage.addEventListener('change', (event) => {
     const imageFile = event.target.files[0];
     if (!imageFile) return;
-
+    // Convert image file to base64 and render it in the preview container
     fileToDataUrl(imageFile).then(fileBase64 => {
         const img = document.createElement('img');
         img.src = fileBase64;
         img.className = 'preview-image';
         img.alt = 'job-image-preview';
+        // Clear previous preview
         while (previewContainer.firstChild) {
             previewContainer.removeChild(previewContainer.firstChild);
         }
+        // show
         previewContainer.appendChild(img);
     })
 });
 
+// When user clicks "Confirm Post" after filling job form
 confirmPost.addEventListener('click', () => {
     const title = jobTitle.value;
     const description = jobDescription.value;
     const startDateStr = jobStartDate.value;
     const imageFile = jobImage.files[0];
+
+    // Parse and validate date
     const [inputDay, inputMonth, inputYear] = startDateStr.split('/').map(num => parseInt(num, 10));
     const inputDate = new Date(inputYear, inputMonth - 1, inputDay);
     const today = new Date();
@@ -289,7 +295,7 @@ confirmPost.addEventListener('click', () => {
     if (!description) return showNotification('Job Description cannot be empty.', 'error');
     if (!imageFile) return showNotification('Please upload a Job Image.', 'error');
 
-    // Convert image to base64 and submit
+    // Convert image to base64, prepare job data and send POST request
     fileToDataUrl(imageFile).then(imageBase64 => {
         const data = {
             title,
@@ -298,6 +304,7 @@ confirmPost.addEventListener('click', () => {
             image: imageBase64
         };
 
+        // Call backend to post job
         apiCall({
             url: `${BACKEND_URL}/job`,
             method: 'POST',
@@ -428,7 +435,9 @@ const formatTime = (createdAtStr) => {
     }
 }
 
-const createJobCard = (job, index) => {
+// ==================== CREATE JOB CARD ====================
+// Dynamically creates a job card element for each job in the feed
+const createJobCard = (job) => {
 
     const card = document.createElement('div');
     card.className = 'job-card';
@@ -441,9 +450,9 @@ const createJobCard = (job, index) => {
     header.className = 'header-information';
 
     const sidebarUser = document.getElementById('userSidebar')
-    const token = localStorage.getItem('token');
     const currentUserId = localStorage.getItem('userId')
 
+    // Fetch and render current user's profile info in sidebar
     apiCall({
         url: `${BACKEND_URL}/user/?userId=${currentUserId}`
     }).then(data => {
@@ -452,11 +461,12 @@ const createJobCard = (job, index) => {
             return;
         }
 
-        // empty sidebarUser content and
+        // Clear existing content in sidebar
         while (sidebarUser.firstChild) {
             sidebarUser.removeChild(sidebarUser.firstChild);
         }
 
+        // Render avatar or fallback letter
         if (data.img) {
             const img = document.createElement('img');
             img.src = data.img;
@@ -497,6 +507,7 @@ const createJobCard = (job, index) => {
 
     });
 
+    // Fetch and render job poster's info in job card header
     apiCall({
         url: `${BACKEND_URL}/user?userId=${job.creatorId}`
     }).then(data => {
@@ -532,10 +543,11 @@ const createJobCard = (job, index) => {
 
             header.appendChild(avatarWrapper);
             header.appendChild(authorInfo);
-
-            card.insertBefore(header, title); // header before title
+            // Insert header before title
+            card.insertBefore(header, title);
         });
 
+    // Render job image if exists
     if (job.image) {
         const img = document.createElement('img');
         img.className = 'id-img'
@@ -543,11 +555,12 @@ const createJobCard = (job, index) => {
         img.alt = 'Job image';
         card.appendChild(img);
     }
-
+    // Job description
     const desc = document.createElement('p');
     desc.textContent = job.description;
     card.appendChild(desc);
 
+    // Likes button and logic
     const likesButton = document.createElement('button');
     likesButton.textContent = `Like ❤️ ${job.likes.length}`;
     likesButton.className = 'like-button';
@@ -560,7 +573,7 @@ const createJobCard = (job, index) => {
         likesButton.className = liked ? 'like-button btn-primary' : 'like-button btn-outline-primary';
     };
 
-    // delete button logic
+    // delete button logic only if current user is creator
     if (Number(currentUserId) === job.creatorId) {
         const deleteButton = document.createElement('button');
         deleteButton.className = 'delete-button';
@@ -578,6 +591,7 @@ const createJobCard = (job, index) => {
         deleteButton.appendChild(deleteIcon);
         deleteButton.appendChild(deleteIconHover);
         card.appendChild(deleteButton);
+
         // delete button Eventlistener
         deleteButton.addEventListener('click', () => {
             if (confirm('Are you sure you want to delete this post?')) {
@@ -608,6 +622,7 @@ const createJobCard = (job, index) => {
         });
     });
 
+    // Comments button (no logic added here yet)
     const commentsButton = document.createElement('button');
     commentsButton.textContent = `Comment 💬 ${job.comments.length}`;
     commentsButton.className = 'comment-button';
@@ -615,6 +630,8 @@ const createJobCard = (job, index) => {
 
     return card;
 }
+
+// Clears and repopulates job feed container with fresh job cards
 const renderJobFeed = (jobs) => {
     const container = document.getElementById('feedContainer');
 
@@ -623,6 +640,7 @@ const renderJobFeed = (jobs) => {
         container.removeChild(container.firstChild);
     }
 
+    // Append each job card to container
     jobs.forEach((job, index) => {
         const jobCard = createJobCard(job, index);
         container.appendChild(jobCard);
