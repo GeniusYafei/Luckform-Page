@@ -62,6 +62,7 @@ const apiCall = ({ url, method = 'GET', token = true, body = null }) => {
         }
         headers['Authorization'] = `Bearer ${savedToken}`;
     }
+
     // Supports GET, POST, PUT, DELETE methods
     return fetch(url, {
         method: method,
@@ -408,14 +409,6 @@ loginButton.addEventListener('click', () => {
         });
 });
 
-// ==================== INITIALIZATION ====================
-
-// Determine initial page based on URL or saved token
-if (localStorage.getItem('token')) {
-    window.location.hash = '/job/feed';
-}
-routeToPage();
-
 // Defines a time formatting function
 const formatTime = (createdAtStr) => {
     const now = new Date();
@@ -646,3 +639,11 @@ const renderJobFeed = (jobs) => {
         container.appendChild(jobCard);
     });
 }
+
+// ==================== INITIALIZATION ====================
+
+// Determine initial page based on URL or saved token
+if (localStorage.getItem('token')) {
+    window.location.hash = '/job/feed';
+}
+routeToPage();
