@@ -221,7 +221,8 @@
     border-radius: 8px;
     object-fit: contain;
     display: block;
-  }
+}
+
 #homePage .modal-content label {
     display: block;
     margin-top: 10px;
@@ -267,48 +268,62 @@
     background-color: #004182;
 }
 
+#homePage .close-button {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 20px;
+    cursor: pointer;
+    color: #999;
+}
+
+#homePage .close-button:hover {
+    color: #333;
+}
+
 #homePage .action-buttons {
     position: absolute;
     top: 10px;
     right: 10px;
     display: flex;
-    gap: 6px; /* space between update and delete */
-  }
+    gap: 6px;
+    /* space between update and delete */
+}
 
-  #homePage .update-button,
-  #homePage .delete-button {
+#homePage .update-button,
+#homePage .delete-button {
     width: 32px;
     height: 32px;
     padding: 0;
     border: none;
     background: none;
     cursor: pointer;
-  }
+}
 
-  #homePage .update-icon,
-  #homePage .delete-icon,
-  #homePage .delete-icon-hover {
+#homePage .update-icon,
+#homePage .delete-icon,
+#homePage .delete-icon-hover {
     width: 100%;
     height: auto;
     display: block;
-  }
+}
 
-  #homePage .delete-icon-hover {
+#homePage .delete-icon-hover {
     display: none;
-  }
+}
 
-  #homePage .delete-button:hover .delete-icon {
+#homePage .delete-button:hover .delete-icon {
     display: none;
-  }
+}
 
-  #homePage .delete-button:hover .delete-icon-hover {
+#homePage .delete-button:hover .delete-icon-hover {
     display: block;
-  }
+}
 
-  #homePage .update-button:hover {
+#homePage .update-button:hover {
     background-color: #f3f2ef;
     border-radius: 50%;
-  }
+}
 
 #homePage .header-information {
     display: flex;
@@ -405,4 +420,11 @@
     margin-right: 20px;
     font-size: 14px;
     color: #333;
+}
+
+#homePage .avatar-img {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
 }
