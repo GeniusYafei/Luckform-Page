@@ -556,6 +556,40 @@ const renderJobHeader = (job, headerElement) => {
         });
 };
 
+// ==================== Create Like Button and Logic ====================
+const createLikeButton = (job, currentUserId, updateCallback) => {
+    const likesButton = document.createElement('button');
+    likesButton.className = 'like-button';
+
+    let liked = !!job.likes?.find(user => user.userId === Number(currentUserId));
+    let likeCount = job.likes.length;
+
+    const updateLikeButton = () => {
+        likesButton.textContent = `Like ❤️ ${likeCount}`;
+        likesButton.className = liked
+            ? 'like-button btn-primary'
+            : 'like-button btn-outline-primary';
+    };
+
+    updateLikeButton(); // Initialize button appearance
+
+    likesButton.addEventListener('click', () => {
+        apiCall({
+            url: `${BACKEND_URL}/job/like`,
+            method: 'PUT',
+            body: { id: job.id, turnon: !liked }
+        }).then(() => {
+            liked = !liked;
+            likeCount += liked ? 1 : -1;
+            updateLikeButton();
+            showNotification(liked ? 'Liked!' : 'Unliked!', 'success');
+            if (typeof updateCallback === 'function') updateCallback(liked, likeCount);
+        });
+    });
+
+    return likesButton;
+};
+
 // ==================== CREATE JOB CARD ====================
 // Dynamically creates a job card element for each job in the feed
 const createJobCard = (job) => {
