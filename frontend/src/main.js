@@ -459,61 +459,63 @@ const formatTime = (createdAtStr) => {
     }
 }
 
-// render SidebarUser
-const renderSidebarUser = (currentUserId) => {
+// ==================== Render sidebar user profile ====================
+const renderSidebarUser = () => {
     const sidebarUser = document.getElementById('userSidebar');
-    apiCall({
-        url: `${BACKEND_URL}/user/?userId=${currentUserId}`
-    }).then(data => {
+    const currentUserId = localStorage.getItem('userId');
+
+    apiCall({ url: `${BACKEND_URL}/user/?userId=${currentUserId}` })
+      .then(data => {
         if (data.error) {
-            showNotification(data.error, 'error');
-            return;
+          showNotification(data.error, 'error');
+          return;
         }
 
-        // clear sidebar content
+        // Clear existing sidebar content
         while (sidebarUser.firstChild) {
-            sidebarUser.removeChild(sidebarUser.firstChild);
+          sidebarUser.removeChild(sidebarUser.firstChild);
         }
 
-        // Set an avatar or initials
+        // Render avatar or fallback letter
         if (data.img) {
-            const img = document.createElement('img');
-            img.src = data.img;
-            img.alt = 'User Avatar';
-            img.className = 'avatar-img';
-            sidebarUser.appendChild(img);
+          const img = document.createElement('img');
+          img.src = data.img;
+          img.alt = 'User Avatar';
+          img.className = 'avatar-img';
+          sidebarUser.appendChild(img);
         } else {
-            const fallback = document.createElement('div');
-            fallback.className = 'avatar-fallback';
-            fallback.textContent = data.name[0]?.toUpperCase();
-            sidebarUser.appendChild(fallback);
+          const fallback = document.createElement('div');
+          fallback.className = 'avatar-fallback';
+          fallback.textContent = data.name[0]?.toUpperCase();
+          sidebarUser.appendChild(fallback);
         }
 
-        // 添加名字
+        // Append name and email
         const name = document.createElement('h2');
         name.textContent = data.name || 'User';
         sidebarUser.appendChild(name);
 
-        // 添加邮箱
         const email = document.createElement('p');
         email.textContent = data.email || '';
         sidebarUser.appendChild(email);
 
-        // 顶部导航头像
+        // Update top-right avatar menu
+        const profileMenuButton = document.getElementById('profileMenuButton');
+        const avatarLetter = document.getElementById('avatarLetter');
         if (data.img) {
-            while (profileMenuButton.firstChild) {
-                profileMenuButton.removeChild(profileMenuButton.firstChild);
-            }
-            const img = document.createElement('img');
-            img.src = data.img;
-            img.alt = 'avatar';
-            img.className = 'avatar-img';
-            profileMenuButton.appendChild(img);
+          while (profileMenuButton.firstChild) {
+            profileMenuButton.removeChild(profileMenuButton.firstChild);
+          }
+          const img = document.createElement('img');
+          img.src = data.img;
+          img.alt = 'avatar';
+          img.className = 'avatar-img';
+          profileMenuButton.appendChild(img);
         } else {
-            avatarLetter.textContent = data.name[0]?.toUpperCase();
+          avatarLetter.textContent = data.name[0]?.toUpperCase();
         }
-    });
-};
+      });
+  };
 
 // ==================== CREATE JOB CARD ====================
 // Dynamically creates a job card element for each job in the feed
