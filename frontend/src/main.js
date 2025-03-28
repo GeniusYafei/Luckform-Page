@@ -10,7 +10,7 @@ const loginEmail = document.getElementById('LoginEmail');
 const loginPassword = document.getElementById('LoginPassword');
 const loginButton = document.getElementById('LoginButton');
 const registerButton = document.getElementById('RegisterButton');
-const logoutButton = document.getElementById('LogoutButton')
+const logoutButton = document.querySelectorAll('.LogoutButton')
 
 // Register page elements
 const registerEmail = document.getElementById('registerEmail');
@@ -22,8 +22,8 @@ const submitButton = document.getElementById('SubmitButton');
 const goToLoginButton = document.getElementById('GoToLogin');
 
 // Job page elements
-const profileButton = document.getElementById('profileMenuButton');
-const profileMenu = document.getElementById('profileMenu');
+const profileButton = document.querySelectorAll('.avatar-button');
+const profileMenu = document.querySelectorAll('.profile-dropdown');
 
 // Post Job DOM elements
 const postJobModal = document.getElementById('postJobModal');
@@ -47,10 +47,7 @@ const previewContainer = document.getElementById('jobImagePreview');
 const previewContainerUP = document.getElementById('jobImagePreview-update');
 
 // Job feed Dom elements
-const avatarLetter = document.getElementById('avatarLetter');
-const profileName = document.getElementById('profileName');
-const profileMenuButton = document.getElementById('profileMenuButton');
-// const updateButton = document.getElementById('button');
+
 
 // Page containers
 const loginPage = document.getElementById('loginPage');
@@ -132,20 +129,31 @@ const fetchFeed = () => {
     apiCall({ url: `${BACKEND_URL}/job/feed?start=0` })
         .then(data => {
             renderJobFeed(data);
-                // Ensure sidebar is updated when rendering a job card
+            // Ensure sidebar is updated when rendering a job card
             renderSidebarUser();
         });
 };
 
 // Toggle on click
-profileButton.addEventListener('click', (event) => {
-    event.stopPropagation(); // Prevents bubbling, preventing click events that trigger the document
-    profileMenu.classList.toggle('hide');
+// profileButton.addEventListener('click', (event) => {
+//     event.stopPropagation(); // Prevents bubbling, preventing click events that trigger the document
+//     profileMenu.classList.toggle('hide');
+// });
+profileButton.forEach((btn, index) => {
+    btn.addEventListener('click', (event) => {
+        event.stopPropagation();
+        profileMenu[index].classList.toggle('hide');
+    });
 });
 
 // Preventing clicking on the menu itself also triggers hiding
-profileMenu.addEventListener('click', (event) => {
-    event.stopPropagation();
+// profileMenu.addEventListener('click', (event) => {
+//     event.stopPropagation();
+// });
+profileMenu.forEach((menu) => {
+    menu.addEventListener('click', (event) => {
+        event.stopPropagation();
+    });
 });
 
 // Show the selected page and optionally update the URL hash
@@ -227,14 +235,24 @@ goToLoginButton.addEventListener('click', () => {
 });
 
 // When logout is clicked, clear the token and navigate to the login page
-logoutButton.addEventListener('click', () => {
-    showNotification('Logged out!', 'info')
-    setTimeout(() => {
-        localStorage.removeItem('token'); // Clear saved token
-        localStorage.removeItem('userId') // Clear saved userId
-        window.location.hash = ROUTES.login;
-    }, 100);
-});
+// logoutButton.addEventListener('click', () => {
+//     showNotification('Logged out!', 'info')
+//     setTimeout(() => {
+//         localStorage.removeItem('token'); // Clear saved token
+//         localStorage.removeItem('userId') // Clear saved userId
+//         window.location.hash = ROUTES.login;
+//     }, 100);
+// });
+logoutButton.forEach(btn => {
+    btn.addEventListener('click', () => {
+        showNotification('Logged out!', 'info')
+        setTimeout(() => {
+            localStorage.removeItem('token'); // Clear saved token
+            localStorage.removeItem('userId') // Clear saved userId
+            window.location.hash = ROUTES.login;
+        }, 100);
+    })
+})
 
 // Toggle password visibility for registration
 toggleConfirmPassword.addEventListener('click', (e) => {
@@ -516,21 +534,37 @@ const renderSidebarUser = () => {
             email.textContent = data.email || '';
             sidebarUser.appendChild(email);
 
-            // Update top-right avatar menu
-            const profileMenuButton = document.getElementById('profileMenuButton');
+            // // Update top-right avatar menu
+            const profileMenuButton = document.querySelectorAll('.avatar-button');
             const avatarLetter = document.getElementById('avatarLetter');
-            if (data.img) {
-                while (profileMenuButton.firstChild) {
-                    profileMenuButton.removeChild(profileMenuButton.firstChild);
+            // if (data.img) {
+            //     while (profileMenuButton.firstChild) {
+            //         profileMenuButton.removeChild(profileMenuButton.firstChild);
+            //     }
+            //     const img = document.createElement('img');
+            //     img.src = data.img;
+            //     img.alt = 'avatar';
+            //     img.className = 'avatar-img';
+            //     profileMenuButton.appendChild(img);
+            // } else {
+            //     avatarLetter.textContent = data.name[0]?.toUpperCase();
+            // }
+            profileMenuButton.forEach((btn) => {
+                ; // clear previous content
+
+                if (data.img) {
+                    while (btn.firstChild) {
+                        btn.removeChild(btn.firstChild);
+                    }
+                    const img = document.createElement('img');
+                    img.src = data.img;
+                    img.alt = 'avatar';
+                    img.className = 'avatar-img';
+                    btn.appendChild(img);
+                } else {
+                    avatarLetter.textContent = data.name[0]?.toUpperCase() || 'U';
                 }
-                const img = document.createElement('img');
-                img.src = data.img;
-                img.alt = 'avatar';
-                img.className = 'avatar-img';
-                profileMenuButton.appendChild(img);
-            } else {
-                avatarLetter.textContent = data.name[0]?.toUpperCase();
-            }
+            });
         });
 };
 
@@ -636,10 +670,7 @@ const createActionButtons = (job, onDelete, onUpdate) => {
 
     deleteButton.addEventListener('click', () => {
         if (confirm('Are you sure you want to delete this post?')) {
-            if (typeof onDelete === 'function')  onDelete();
-        }
-        if (job.length === 0) {
-            renderJobFeed();
+            if (typeof onDelete === 'function') onDelete();
         }
     });
 
@@ -901,10 +932,15 @@ routeToPage();
 // ==================== GLOBAL EVENTLISTENER  ====================
 
 // Hide the menu when click elsewhere on the page
-document.addEventListener('click', (event) => {
-    // --- Profile Menu hide ---
-    if (!profileMenu.classList.contains('hide')) {
-        profileMenu.classList.add('hide');
-    }
-})
+// document.addEventListener('click', (event) => {
+//     // --- Profile Menu hide ---
+//     if (!profileMenu.classList.contains('hide')) {
+//         profileMenu.classList.add('hide');
+//     }
+// })
+document.addEventListener('click', () => {
+    profileMenu.forEach((menu) => {
+        menu.classList.add('hide');
+    });
+});
 
