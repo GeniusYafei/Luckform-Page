@@ -37,14 +37,12 @@ const jobDescription = document.getElementById('jobDescription');
 const jobDescriptionUp = document.getElementById('jobDescription-update');
 const jobImage = document.getElementById('jobImage');
 const jobImageUp = document.getElementById('jobImage-update');
-const closeModal = document.getElementById('closeModal');
-const closeModalUp = document.getElementById('closeModal-update');
-const cancelPost = document.getElementById('cancelPost');
-const cancelPostUp = document.getElementById('cancelPost-update');
+const closeModal = document.querySelectorAll('.close-button');
+const cancelPost = document.querySelectorAll('.cancel');
 const confirmPost = document.getElementById('confirmPost');
-const confirmUpdate = document.getElementById('confirmUpdate');
+const confirmPostUp = document.getElementById('confirmUpdate')
 const previewContainer = document.getElementById('jobImagePreview');
-const previewContainerUP = document.getElementById('jobImagePreview-update');
+const previewContainerUp = document.getElementById('jobImagePreview-update');
 
 // Job feed Dom elements
 
@@ -133,6 +131,7 @@ const fetchFeed = () => {
     }
     apiCall({ url: `${BACKEND_URL}/job/feed?start=0` })
         .then(data => {
+            console.log(data)
             renderJobFeed(data);
             // Ensure sidebar is updated when rendering a job card
             renderSidebarUser();
@@ -298,7 +297,7 @@ const handleImagePreview = (inputElement, previewContainer) => {
 
 // Call for both uploaders
 handleImagePreview(jobImage, previewContainer);
-handleImagePreview(jobImageUp, previewContainerUP);
+handleImagePreview(jobImageUp, previewContainerUp);
 
 const validateJobForm = (dateStr) => {
     if (!dateStr) return { error: 'Job Start Date is required.' };
@@ -324,6 +323,17 @@ const validateJobForm = (dateStr) => {
     return { date: inputDate };
 }
 
+const DateToUTC = (dateObj) => {
+    if (!(dateObj instanceof Date)) {
+        throw new Error('Invalid date object');
+      }
+      return new Date(Date.UTC(
+        dateObj.getFullYear(),
+        dateObj.getMonth(),
+        dateObj.getDate()
+      )).toISOString();
+}
+
 // handleJob Post function
 const handleJobSubmit = ({ mode, jobId = null }) => {
     // Select input elements based on mode
@@ -341,19 +351,22 @@ const handleJobSubmit = ({ mode, jobId = null }) => {
 
     // === Validate ===
     if (!title) return showNotification('Job Title cannot be empty.', 'error');
-    if (!description) return showNotification('Job Description cannot be empty.', 'error');
-    if (!imageFile) return showNotification('Please upload a Job Image.', 'error');
-
     const result = validateJobForm(startDateStr);
     if (result.error) return showNotification(result.error, 'error');
     const inputDate = result.date;
+    if (!description) return showNotification('Job Description cannot be empty.', 'error');
+    if (!imageFile) return showNotification('Please upload a Job Image.', 'error');
+
+    // const result = validateJobForm(startDateStr);
+    // if (result.error) return showNotification(result.error, 'error');
+    // const inputDate = result.date;
 
     // === Convert Image and Submit ===
     fileToDataUrl(imageFile).then(imageBase64 => {
         const data = {
             title,
             description,
-            start: inputDate.toISOString(),
+            start: DateToUTC(inputDate),
             image: imageBase64
         };
 
@@ -381,24 +394,28 @@ confirmPost.addEventListener('click', () => {
     handleJobSubmit({ mode: 'post' });
 });
 
-
 // User can closed the modal of Post
-closeModal.addEventListener('click', () => {
-    postJobModal.classList.add('hide');
-});
-
-closeModalUp.addEventListener('click', () => {
-    updateJobModal.classList.add('hide');
+closeModal.forEach(btn => {
+    btn.addEventListener('click', () => {
+        postJobModal.classList.add('hide');
+        updateJobModal.classList.add('hide');
+    });
 });
 
 // User also can cancel Post
-cancelPost.addEventListener('click', () => {
-    postJobModal.classList.add('hide');
+// cancelPost.addEventListener('click', () => {
+//     postJobModal.classList.add('hide');
+// });
+cancelPost.forEach(btn => {
+    btn.addEventListener('click', () => {
+        postJobModal.classList.add('hide');
+        updateJobModal.classList.add('hide');
+    });
 });
 
-cancelPostUp.addEventListener('click', () => {
-    updateJobModal.classList.add('hide');
-});
+// cancelPostUp.addEventListener('click', () => {
+//     updateJobModal.classList.add('hide');
+// });
 
 // Registration submission
 submitButton.addEventListener('click', () => {
@@ -491,19 +508,51 @@ const formatTime = (createdAtStr) => {
     const now = new Date();
     const jobDate = new Date(createdAtStr);
     const diffMs = now - jobDate;
-    const diffHours = Math.floor(diffMs / 3600000); // 1hours = 3600000 millisecond
 
-    // Determine the time of job Posting
-    if (diffHours < 24) {
-        const diffMinutes = Math.floor((diffMs % 3600000) / 60000); // become the minutes
-        return `${diffHours}hour${diffMinutes}minutes ago`;
-    } else {
+    // If the time is in the future, show the date directly
+    if (diffMs < 0) {
         const day = String(jobDate.getDate()).padStart(2, '0');
         const month = String(jobDate.getMonth() + 1).padStart(2, '0');
         const year = jobDate.getFullYear();
         return `${day}/${month}/${year}`;
     }
-}
+
+    const diffHours = Math.floor(diffMs / 3600000); // 1 hour = 3600000ms
+
+    if (diffHours < 1) {
+        const diffMinutes = Math.floor(diffMs / 60000);
+        return `${diffMinutes} minute${diffMinutes !== 1 ? 's' : ''} ago`;
+    }
+
+    if (diffHours < 24) {
+        const diffMinutes = Math.floor((diffMs % 3600000) / 60000);
+        return `${diffHours} hour${diffHours !== 1 ? 's' : ''} ${diffMinutes} minute${diffMinutes !== 1 ? 's' : ''} ago`;
+    }
+
+    const day = String(jobDate.getDate()).padStart(2, '0');
+    const month = String(jobDate.getMonth() + 1).padStart(2, '0');
+    const year = jobDate.getFullYear();
+    return `${day}/${month}/${year}`;
+};
+
+const formatCreatedTime = (createdAtStr) => {
+    const now = new Date();
+    const createdDate = new Date(createdAtStr);
+
+    const diffMs = now - createdDate;
+    const diffHours = Math.floor(diffMs / 3600000);
+
+
+};
+
+const formatDateOnly = (dateStr) => {
+    const date = new Date(dateStr);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+};
+
 
 // ==================== Render sidebar user profile ====================
 const renderSidebarUser = () => {
@@ -597,7 +646,7 @@ const renderJobHeader = (job, headerElement) => {
             name.className = 'author-name';
 
             const time = document.createElement('p');
-            time.textContent = formatTime(job.createdAt);
+            time.textContent = formatCreatedTime(job.createdAt);
             time.className = 'post-time';
 
             authorInfo.appendChild(name);
@@ -637,13 +686,8 @@ const createActionButtons = (job, onDelete, onUpdate) => {
 
     updateOption.addEventListener('click', () => {
         updateDropdown.classList.add('hide');
-        if (typeof onUpdate === 'function') onUpdate();
+        if (typeof onUpdate === 'function') onUpdate(job);
     });
-
-    confirmUpdate.onclick = () => {
-        showModal('update');
-        handleJobSubmit({ mode: 'update', jobId: job.id });
-    };
 
     const updateWrapper = document.createElement('div');
     updateWrapper.className = 'update-wrapper';
@@ -840,9 +884,13 @@ const createJobCard = (job) => {
     const card = document.createElement('div');
     card.className = 'job-card';
 
-    const title = document.createElement('h2');
+    const title = document.createElement('h1');
     title.textContent = job.title;
     card.appendChild(title);
+
+    const startingDate = document.createElement('h6');
+    startingDate.textContent = `Job StartDate: ${formatDateOnly(job.start)}`;
+    card.appendChild(startingDate);
 
     const header = document.createElement('div');
     header.className = 'header-information';
@@ -878,7 +926,16 @@ const createJobCard = (job) => {
                     fetchFeed();
                 });
             },
-            () => showModal('update')
+            (job) => {
+                jobTitleUp.value = job.title;
+                jobStartDateUp.value = formatDateOnly(job.start);
+                jobDescriptionUp.value = job.description;
+                previewContainerUp
+                showModal('update');
+                confirmPostUp.onclick = () => {
+                    handleJobSubmit({ mode: 'update', jobId: job.id });
+                };
+            }
         );
         card.appendChild(actionButtons);
     }
