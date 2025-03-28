@@ -97,7 +97,7 @@
 #homePage .update-wrapper {
     position: relative;
     display: inline-block;
-  }
+}
 
 #homePage .update-dropdown {
     position: absolute;
@@ -199,7 +199,7 @@
     height: auto;
 }
 
-#homePage #postJobButton {
+#homePage .postJobButton {
     background-color: #0a66c2;
     color: white;
     padding: 8px 16px;
@@ -212,8 +212,41 @@
     transition: background-color 0.3s;
 }
 
-#homePage #postJobButton:hover {
+#homePage .postJobButton:hover {
     background-color: #004182;
+}
+
+#homePage #emptyJobCard {
+    display: flex;
+    justify-content: left;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    text-align: left;
+    margin-bottom: 20px;
+}
+
+#homePage #emptyJobCard .header-information {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+#homePage #emptyJobCard h2 {
+    padding-left: 3px;
+    font-size: 180%;
+    font-weight: 700;
+    color: #0a66c2;
+}
+
+#homePage #emptyJobCard .illustration {
+    max-width: 100%;
+    height: auto;
+    border: 1px solid #ddd;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.01);
+    border-radius: 12px;
 }
 
 #homePage .modal {
@@ -450,7 +483,7 @@
     margin-bottom: 4px;
 }
 
-#homePage  .sidebarInformation {
+#homePage .sidebarInformation {
     width: 240px;
     padding: 15px;
     border: 1px solid #ddd;
