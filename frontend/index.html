@@ -10,6 +10,7 @@
   <link rel="stylesheet" type="text/css" media="screen" href="styles/global.css" />
   <link rel="stylesheet" type="text/css" media="screen" href="styles/auth.css" />
   <link rel="stylesheet" type="text/css" media="screen" href="styles/jobfeed.css" />
+  <link rel="stylesheet" type="text/css" media="screen" href="styles/profile.css" />
   <!-- Brootstrap Frame-->
   <link rel="stylesheet" type="text/css" media="screen" href="styles/bootstrapmin.css" />
   <link rel="icon" type="image/svg+xml" href="styles/lu-favicon.svg" sizes="any" alt="img-avatar">
@@ -66,9 +67,15 @@
   <!-- Homepage -->
   <div id="homePage" class="page hide" page="homePage">
     <header class="jobfeed-header">
-      <div class="logo">
+      <div class="left-container">
         <img src="styles/lu-favicon.svg" alt="logo icon" class="logo-icon" />
-        LurkForWork
+        <p>LurkForWork</p>
+        <div class="search-container">
+          <input class="searchUser" type="text" placeholder="Search user">
+          <button class="search-button" aria-label="Search">
+            <img src="styles/search.svg" alt="Search" class="search-icon">
+          </button>
+        </div>
       </div>
       <!-- Button post modal -->
       <button class="postJobButton">Post a Job</button>
@@ -140,7 +147,7 @@
       <!-- Sidebar -->
       <div class="Sidebar">
         <aside class="sidebarUser">
-          <div id="userSidebar"></div>
+          <div class="userSidebar"></div>
         </aside>
         <!-- Sidebar connection -->
         <div class="sidebarInformation">
@@ -166,25 +173,61 @@
   <!-- Profile Page -->
   <div id="profilePage" class="page hide" page="profilePage">
     <header class="jobfeed-header">
-      <div class="logo">
+      <div class="left-container">
         <img src="styles/lu-favicon.svg" alt="logo icon" class="logo-icon" />
-        LurkForWork
-      </div>
-      <div class="nav-icons">
-        <button id="profileMenuButton" class="avatar-button">
-          <span class="avatar-letter" id="avatarLetter"></span>
-        </button>
-        <!-- <div id="profileMenu" class="profile-dropdown hide"> -->
-        <div class="profile-dropdown hide">
-          <p id="profileName"></p>
-          <button class="ViewProfile">View Profile</button>
-          <button class="LogoutButton">Sign Out</button>
+        <p>LurkForWork</p>
+        <div class="search-container">
+          <input class="searchUser" type="text" placeholder="Search user">
+          <button class="search-button" aria-label="Search">
+            <img src="styles/search.svg" alt="Search" class="search-icon">
+          </button>
         </div>
       </div>
-    </header>
-
+      <!-- <div id="profileMenu" class="profile-dropdown hide"> -->
+      <div class="profile-dropdown hide">
+        <p id="profileName"></p>
+        <button class="ViewProfile">View Profile</button>
+        <button class="LogoutButton">Sign Out</button>
+      </div>
   </div>
+  </header>
 
+  <main class="jobfeed-main">
+    <!-- Sidebar -->
+    <section class="Sidebar">
+      <div class="sidebarUser" id="profileSidebar">
+        <div class="userSidebar"></div>
+        <div class="profileButton">
+          <button class="Updating hide">Updating your profile</button>
+        </div>
+      </div>
+      <!-- Update Job Modal -->
+      <div id="updateProfileModal" class="modal hide">
+        <div class="modal-content">
+          <span class="close-button" id="closeModal-update">&times;</span>
+          <h2>Updating a Job</h2>
+
+          <label for="jobTitle">Job Title</label>
+          <input type="text" id="jobTitle-update" placeholder="This is a new job" />
+
+          <label for="jobStartDate">Job StartDate</label>
+          <input type="text" id="jobStartDate-update" placeholder="DD/MM/YYYY" />
+
+          <label for="jobDescription">Job Description</label>
+          <textarea id="jobDescription-update" rows="4" placeholder="Please enter a job description..."></textarea>
+
+          <label for="jobImage">Job Image</label>
+          <input type="file" id="jobImage-update" accept="image/*" />
+          <div id="jobImagePreview-update"></div>
+
+          <div class="modal-actions">
+            <button class="cancel" id="cancelPost-update">Cancel Change</button>
+            <button class="confirm" id="confirmUpdate">Update</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
 
   <script src="/src/bootstrapmin.js"></script>
   <script type="module" src="/src/main.js"></script>
