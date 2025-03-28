@@ -889,8 +889,18 @@ function createInteractionSection(job, currentUserId, currentUserName) {
     send.textContent = 'Send';
     send.addEventListener('click', () => {
         const text = input.value.trim();
-        if (!text) return;
-        showNotification('Comment added (not yet implemented)', 'success');
+        if (!text) {
+            showNotification('Comment not added', 'info');
+            return;
+        }
+        apiCall({
+            url: `${BACKEND_URL}/job/comment`,
+            method: 'POST',
+            body: { id: job.id, comment: text }
+        }).then(() => {
+            fetchFeed();
+            showNotification('Comment added!', 'success');
+        });
         input.value = '';
     });
 
