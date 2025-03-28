@@ -28,7 +28,7 @@ const profileMenu = document.getElementById('profileMenu');
 // Post Job DOM elements
 const postJobModal = document.getElementById('postJobModal');
 const updateJobModal = document.getElementById('updateJobModal');
-const btnPostJob = document.getElementById('postJobButton');
+const btnPostJob = document.querySelectorAll('.postJobButton');
 const jobTitle = document.getElementById('jobTitle');
 const jobTitleUp = document.getElementById('jobTitle-update')
 const jobStartDate = document.getElementById('jobStartDate');
@@ -132,6 +132,8 @@ const fetchFeed = () => {
     apiCall({ url: `${BACKEND_URL}/job/feed?start=0` })
         .then(data => {
             renderJobFeed(data);
+                // Ensure sidebar is updated when rendering a job card
+            renderSidebarUser();
         });
 };
 
@@ -147,8 +149,8 @@ profileMenu.addEventListener('click', (event) => {
 });
 
 // Show the selected page and optionally update the URL hash
-let currentPage = null;
 const showPage = (pageName, updateHash = true) => {
+    let currentPage = null;
     if (currentPage === pageName) {
         return;
     }
@@ -245,7 +247,9 @@ toggleConfirmPassword.addEventListener('click', (e) => {
 
 
 // When user want post a new job click the Post a Job button
-btnPostJob.addEventListener('click', () => showModal('post'));
+btnPostJob.forEach(btn => {
+    btn.addEventListener('click', () => showModal('post'));
+});
 
 // When a user selects an image file, preview it before posting
 // ==================== IMAGE PREVIEW HANDLER ====================
@@ -673,7 +677,10 @@ const createActionButtons = (job, onDelete, onUpdate) => {
 
     deleteButton.addEventListener('click', () => {
         if (confirm('Are you sure you want to delete this post?')) {
-            if (typeof onDelete === 'function') onDelete();
+            if (typeof onDelete === 'function')  onDelete();
+        }
+        if (job.length === 0) {
+            renderJobFeed();
         }
     });
 
@@ -928,9 +935,6 @@ function createInteractionSection(job, currentUserId, currentUserName) {
 const createJobCard = (job) => {
     const currentUserId = localStorage.getItem('userId');
 
-    // Ensure sidebar is updated when rendering a job card
-    renderSidebarUser();
-
     const card = document.createElement('div');
     card.className = 'job-card';
 
@@ -1000,18 +1004,27 @@ const createJobCard = (job) => {
 // Clears and repopulates job feed container with fresh job cards
 const renderJobFeed = (jobs) => {
     const container = document.getElementById('feedContainer');
+    const emptyCard = document.getElementById('emptyJobCard');
 
-    // Clear previous content
-    while (container.firstChild) {
-        container.removeChild(container.firstChild);
+    // If there is a Job, remove the empty card and render the Job list
+    if (jobs.length > 0) {
+        if (emptyCard) {
+            emptyCard.remove();
+        }
+
+        container.replaceChildren(); // empty container
+        jobs.forEach(job => {
+            const jobCard = createJobCard(job);
+            container.appendChild(jobCard);
+        });
+    } else {
+        // Append each job card to container
+        container.replaceChildren();
+        if (emptyCard) {
+            container.appendChild(emptyCard);
+        }
     }
-
-    // Append each job card to container
-    jobs.forEach((job) => {
-        const jobCard = createJobCard(job);
-        container.appendChild(jobCard);
-    });
-}
+};
 
 // ==================== INITIALIZATION ====================
 
