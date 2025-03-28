@@ -10,7 +10,7 @@ const loginEmail = document.getElementById('LoginEmail');
 const loginPassword = document.getElementById('LoginPassword');
 const loginButton = document.getElementById('LoginButton');
 const registerButton = document.getElementById('RegisterButton');
-const logoutButton = document.querySelectorAll('.LogoutButton')
+const logoutButton = document.querySelectorAll('.LogoutButton');
 
 // Register page elements
 const registerEmail = document.getElementById('registerEmail');
@@ -30,7 +30,7 @@ const postJobModal = document.getElementById('postJobModal');
 const updateJobModal = document.getElementById('updateJobModal');
 const btnPostJob = document.querySelectorAll('.postJobButton');
 const jobTitle = document.getElementById('jobTitle');
-const jobTitleUp = document.getElementById('jobTitle-update')
+const jobTitleUp = document.getElementById('jobTitle-update');
 const jobStartDate = document.getElementById('jobStartDate');
 const jobStartDateUp = document.getElementById('jobStartDate-update');
 const jobDescription = document.getElementById('jobDescription');
@@ -42,7 +42,7 @@ const closeModalUp = document.getElementById('closeModal-update');
 const cancelPost = document.getElementById('cancelPost');
 const cancelPostUp = document.getElementById('cancelPost-update');
 const confirmPost = document.getElementById('confirmPost');
-const confirmUpdate = document.getElementById('confirmUpdate')
+const confirmUpdate = document.getElementById('confirmUpdate');
 const previewContainer = document.getElementById('jobImagePreview');
 const previewContainerUP = document.getElementById('jobImagePreview-update');
 
@@ -53,6 +53,7 @@ const previewContainerUP = document.getElementById('jobImagePreview-update');
 const loginPage = document.getElementById('loginPage');
 const registerPage = document.getElementById('registerPage');
 const homePage = document.getElementById('homePage');
+const profilePage = document.getElementById('profilePage');
 
 // ==================== apiCall FUNCTION ====================
 const apiCall = ({ url, method = 'GET', token = true, body = null }) => {
@@ -76,19 +77,21 @@ const apiCall = ({ url, method = 'GET', token = true, body = null }) => {
         headers: headers,
         body: body ? JSON.stringify(body) : null
     })
-        .then(res => res.json())
-        .then(data => {
-            if (data.error) {
-                showNotification(data.error, 'error');
-                return Promise.reject(data.error);
-            }
-            return data;
+        .then(res => {
+            return res.json().then(data => {
+                if (!res.ok) {
+                    const errorMsg = data.error || 'Unexpected error';
+                    showNotification(errorMsg, 'error');
+                    return Promise.reject(new Error(errorMsg));
+                }
+                return data;
+            });
         })
         .catch(err => {
-            // Handle network or unexpected errors
             showNotification(err.message || 'Network error', 'error');
             return Promise.reject(err);
         });
+
 };
 
 
@@ -104,6 +107,7 @@ const ROUTES = {
     login: '/auth/login',
     register: '/auth/register',
     home: '/job/feed',
+    profile: '/user'
 };
 
 // Store page DOM elements in an object for easier access
@@ -111,6 +115,7 @@ const pages = {
     login: loginPage,
     register: registerPage,
     home: homePage,
+    profile: profilePage
 };
 
 const showModal = (type) => {
@@ -472,6 +477,12 @@ loginButton.addEventListener('click', () => {
             showNotification('Logged in!', 'success');
             // updateUser();
             showPage('home');
+        })
+        .catch(err => {
+            // Catch login error like "invalid Email & password"
+            if (err === 'Invalid Email & password' || err === 'Invalid input') {
+                showNotification('Invalid email or password.', 'error');
+            }
         });
 });
 
@@ -496,7 +507,7 @@ const formatTime = (createdAtStr) => {
 
 // ==================== Render sidebar user profile ====================
 const renderSidebarUser = () => {
-    const sidebarUser = document.getElementById('userSidebar');
+    const sidebarUser = document.querySelectorAll('.userSidebar');
     const currentUserId = localStorage.getItem('userId');
 
     apiCall({ url: `${BACKEND_URL}/user/?userId=${currentUserId}` })
@@ -506,55 +517,44 @@ const renderSidebarUser = () => {
                 return;
             }
 
-            // Clear existing sidebar content
-            while (sidebarUser.firstChild) {
-                sidebarUser.removeChild(sidebarUser.firstChild);
-            }
+            sidebarUser.forEach(btn => {
+                // Clear existing sidebar content
+                while (btn.firstChild) {
+                    btn.removeChild(btn.firstChild);
+                }
 
-            // Render avatar or fallback letter
-            if (data.img) {
-                const img = document.createElement('img');
-                img.src = data.img;
-                img.alt = 'User Avatar';
-                img.className = 'avatar-img';
-                sidebarUser.appendChild(img);
-            } else {
-                const fallback = document.createElement('div');
-                fallback.className = 'avatar-fallback';
-                fallback.textContent = data.name[0]?.toUpperCase();
-                sidebarUser.appendChild(fallback);
-            }
+                // Render avatar or fallback letter
+                if (data.img) {
+                    const img = document.createElement('img');
+                    img.src = data.img;
+                    img.alt = 'User Avatar';
+                    img.className = 'avatar-img';
+                    btn.appendChild(img);
+                } else {
+                    const fallback = document.createElement('div');
+                    fallback.className = 'avatar-fallback';
+                    fallback.textContent = data.name[0]?.toUpperCase();
+                    btn.appendChild(fallback);
+                }
 
-            // Append name and email
-            const name = document.createElement('h2');
-            name.textContent = data.name || 'User';
-            sidebarUser.appendChild(name);
+                // Append name and email
+                const name = document.createElement('h2');
+                name.textContent = data.name || 'User';
+                btn.appendChild(name);
 
-            const email = document.createElement('p');
-            email.textContent = data.email || '';
-            sidebarUser.appendChild(email);
+                const email = document.createElement('p');
+                email.textContent = data.email || '';
+                btn.appendChild(email);
+            })
 
             // // Update top-right avatar menu
             const profileMenuButton = document.querySelectorAll('.avatar-button');
             const avatarLetter = document.getElementById('avatarLetter');
-            // if (data.img) {
-            //     while (profileMenuButton.firstChild) {
-            //         profileMenuButton.removeChild(profileMenuButton.firstChild);
-            //     }
-            //     const img = document.createElement('img');
-            //     img.src = data.img;
-            //     img.alt = 'avatar';
-            //     img.className = 'avatar-img';
-            //     profileMenuButton.appendChild(img);
-            // } else {
-            //     avatarLetter.textContent = data.name[0]?.toUpperCase();
-            // }
-            profileMenuButton.forEach((btn) => {
-                ; // clear previous content
 
+            profileMenuButton.forEach((btn) => {
                 if (data.img) {
                     while (btn.firstChild) {
-                        btn.removeChild(btn.firstChild);
+                        btn.removeChild(btn.firstChild); // clear previous content
                     }
                     const img = document.createElement('img');
                     img.src = data.img;
