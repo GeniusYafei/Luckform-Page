@@ -82,26 +82,53 @@
           <input type="text" id="jobTitle" placeholder="This is a new job" />
 
           <label for="jobStartDate">Job StartDate</label>
-          <input type="date" id="jobStartDate" />
+          <input type="text" id="jobStartDate" placeholder="DD/MM/YYYY" />
 
           <label for="jobDescription">Job Description</label>
           <textarea id="jobDescription" rows="4" placeholder="Please enter a job description..."></textarea>
 
           <label for="jobImage">Job Image</label>
           <input type="file" id="jobImage" accept="image/*" />
+          <div id="jobImagePreview"></div>
 
           <div class="modal-actions">
-            <button id="cancelPost">Cancel Post</button>
-            <button id="confirmPost">Post</button>
+            <button class="cancel" id="cancelPost">Cancel Post</button>
+            <button class="confirm" id="confirmPost">Post</button>
+          </div>
+        </div>
+      </div>
+      <!-- Update Job Modal -->
+      <div id="updateJobModal" class="modal hide">
+        <div class="modal-content">
+          <span class="close-button" id="closeModal-update">&times;</span>
+          <h2>Updating a Job</h2>
+
+          <label for="jobTitle">Job Title</label>
+          <input type="text" id="jobTitle-update" placeholder="This is a new job" />
+
+          <label for="jobStartDate">Job StartDate</label>
+          <input type="text" id="jobStartDate-update" placeholder="DD/MM/YYYY" />
+
+          <label for="jobDescription">Job Description</label>
+          <textarea id="jobDescription-update" rows="4" placeholder="Please enter a job description..."></textarea>
+
+          <label for="jobImage">Job Image</label>
+          <input type="file" id="jobImage-update" accept="image/*" />
+          <div id="jobImagePreview-update"></div>
+
+          <div class="modal-actions">
+            <button class="cancel" id="cancelPost-update">Cancel Change</button>
+            <button class="confirm" id="confirmUpdate">Update</button>
           </div>
         </div>
       </div>
       <div class="nav-icons">
         <button id="profileMenuButton" class="avatar-button">
-          <span class="avatar-letter" id="avatarLetter">U</span>
+          <span class="avatar-letter" id="avatarLetter"></span>
         </button>
         <div id="profileMenu" class="profile-dropdown hide">
           <p id="profileName"></p>
+          <button id="ViewProfile">View Profile</button>
           <button id="LogoutButton">Sign Out</button>
         </div>
       </div>
@@ -109,22 +136,19 @@
 
     <main class="jobfeed-main">
       <!-- Sidebar -->
-      <aside class="sidebar" id="userSidebar">
-        <!-- <img id="userAvatar" src="default-avatar.png" alt="Avatar" /> -->
-        <h2 id="userName">User</h2>
-        <p id="userLocation"></p>
-        <p id="userOrg"></p>
-      </aside>
+      <div class="sidebarUser">
+        <aside class="" id="userSidebar"></aside>
+      </div>
 
       <!-- Feed Section -->
       <section class="feed-container" id="feedContainer"></section>
     </main>
   </div>
 
-
+  <!--
   <footer>
     <p>&copy; lurkforwork.com</p>
-  </footer>
+  </footer> -->
   <script src="/src/bootstrapmin.js"></script>
   <script type="module" src="/src/main.js"></script>
 </body>
