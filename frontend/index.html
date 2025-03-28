@@ -12,7 +12,7 @@
   <link rel="stylesheet" type="text/css" media="screen" href="styles/jobfeed.css" />
   <!-- Brootstrap Frame-->
   <link rel="stylesheet" type="text/css" media="screen" href="styles/bootstrapmin.css" />
-  <link rel="icon" type="image/svg+xml" href="styles/lu-favicon.svg" sizes="any">
+  <link rel="icon" type="image/svg+xml" href="styles/lu-favicon.svg" sizes="any" alt="img-avatar">
 </head>
 
 <body>
@@ -71,7 +71,7 @@
         LurkForWork
       </div>
       <!-- Button post modal -->
-      <button id="postJobButton">Post a Job</button>
+      <button class="postJobButton">Post a Job</button>
       <!-- Post Job Modal -->
       <div id="postJobModal" class="modal hide">
         <div class="modal-content">
@@ -123,32 +123,69 @@
         </div>
       </div>
       <div class="nav-icons">
-        <button id="profileMenuButton" class="avatar-button">
+        <!-- <button id="profileMenuButton" class="avatar-button"> -->
+        <button class="avatar-button">
           <span class="avatar-letter" id="avatarLetter"></span>
         </button>
-        <div id="profileMenu" class="profile-dropdown hide">
+        <!-- <div id="profileMenu" class="profile-dropdown hide"> -->
+        <div class="profile-dropdown hide">
           <p id="profileName"></p>
-          <button id="ViewProfile">View Profile</button>
-          <button id="LogoutButton">Sign Out</button>
+          <button class="ViewProfile">View Profile</button>
+          <button class="LogoutButton">Sign Out</button>
         </div>
       </div>
     </header>
 
     <main class="jobfeed-main">
       <!-- Sidebar -->
-      <div class="sidebarUser">
-        <aside class="" id="userSidebar"></aside>
+      <div class="Sidebar">
+        <aside class="sidebarUser">
+          <div id="userSidebar"></div>
+        </aside>
+        <!-- Sidebar connection -->
+        <div class="sidebarInformation">
+          <aside id="userConnection">
+            <h2>Connections</h2>
+            <p>Connect with alumni</p>
+          </aside>
+        </div>
       </div>
 
       <!-- Feed Section -->
-      <section class="feed-container" id="feedContainer"></section>
+      <section class="feed-container" id="feedContainer">
+        <div id="emptyJobCard" class="job-card">
+          <div class="header-information">
+            <h2>Are you ready to create a job?</h2>
+            <img src="styles/illustration.png" class="illustration" alt="img-illustration" />
+            <button class="postJobButton">Post a Job</button>
+          </div>
+      </section>
     </main>
   </div>
 
-  <!--
-  <footer>
-    <p>&copy; lurkforwork.com</p>
-  </footer> -->
+  <!-- Profile Page -->
+  <div id="profilePage" class="page hide" page="profilePage">
+    <header class="jobfeed-header">
+      <div class="logo">
+        <img src="styles/lu-favicon.svg" alt="logo icon" class="logo-icon" />
+        LurkForWork
+      </div>
+      <div class="nav-icons">
+        <button id="profileMenuButton" class="avatar-button">
+          <span class="avatar-letter" id="avatarLetter"></span>
+        </button>
+        <!-- <div id="profileMenu" class="profile-dropdown hide"> -->
+        <div class="profile-dropdown hide">
+          <p id="profileName"></p>
+          <button class="ViewProfile">View Profile</button>
+          <button class="LogoutButton">Sign Out</button>
+        </div>
+      </div>
+    </header>
+
+  </div>
+
+
   <script src="/src/bootstrapmin.js"></script>
   <script type="module" src="/src/main.js"></script>
 </body>
