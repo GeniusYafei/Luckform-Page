@@ -542,7 +542,16 @@ const formatCreatedTime = (createdAtStr) => {
     const diffMs = now - createdDate;
     const diffHours = Math.floor(diffMs / 3600000);
 
+    if (diffHours < 24) {
+        const diffMinutes = Math.floor((diffMs % 3600000) / 60000);
+        return `${diffHours} hour${diffHours !== 1 ? 's' : ''} ${diffMinutes} minute${diffMinutes !== 1 ? 's' : ''} ago`;
+    }
 
+    // Else return formatted date
+    const day = String(createdDate.getDate()).padStart(2, '0');
+    const month = String(createdDate.getMonth() + 1).padStart(2, '0');
+    const year = createdDate.getFullYear();
+    return `${day}/${month}/${year}`;
 };
 
 const formatDateOnly = (dateStr) => {
