@@ -75,4 +75,101 @@
     position: relative;
 }
 
+#profilePage .avatar-button {
+    background-color: #e6f0f6;
+    color: #0073b1;
+    border: none;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    font-weight: bold;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.05);
+    transition: background-color 0.2s;
+}
 
+#profilePage .avatar-button:hover {
+    background-color: #d0e6f7;
+}
+
+#profilePage .profile-dropdown {
+    position: absolute;
+    top: 45px;
+    right: 0;
+    background: white;
+    border: 1px solid #ccc;
+    padding: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    min-width: 160px;
+    border-radius: 8px;
+}
+
+#profilePage .profile-dropdown button {
+    background-color: transparent;
+    border: none;
+    padding: 6px 12px;
+    width: 100%;
+    text-align: left;
+    font-size: 14px;
+    color: #333;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#profilePage .profile-dropdown button:hover {
+    background-color: #f3f2ef;
+    color: #0073b1;
+}
+
+#profilePage .profile-dropdown.hide {
+    display: none;
+}
+
+#profilePage .Sidebar {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 240px;
+    gap: 10px;
+}
+
+
+#profilePage .sidebarUser {
+    width: 240px;
+    padding: 20px;
+    border: 1px solid #ddd;
+    background-color: white;
+    border-radius: 12px;
+    margin-left: 20px;
+    margin-right: 10px;
+    text-align: center;
+    font-size: 14px;
+    color: #333;
+}
+
+#profilePage .sidebarUser .avatar-img {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 10px;
+}
+
+#profilePage .sidebarUser .avatar-fallback {
+    width: 72px;
+    height: 72px;
+    background-color: #d0e6f7;
+    color: #0a66c2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    font-weight: bold;
+    border-radius: 50%;
+    margin: 0 auto 10px;
+}
