@@ -21,9 +21,10 @@ const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
 const submitButton = document.getElementById('SubmitButton');
 const goToLoginButton = document.getElementById('GoToLogin');
 
-// Job page elements
+// UserButton DOM elements
 const profileButton = document.querySelectorAll('.avatar-button');
 const profileMenu = document.querySelectorAll('.profile-dropdown');
+const viewProfile = document.querySelectorAll('.viewProfile');
 
 // Post Job DOM elements
 const postJobModal = document.getElementById('postJobModal');
@@ -46,12 +47,16 @@ const previewContainerUp = document.getElementById('jobImagePreview-update');
 
 // Job feed Dom elements
 
+// profile Page elements
+const profileModel = document.getElementById('updateProfileModal')
+const updatingButton = document.querySelector('.Updating');
 
 // Page containers
 const loginPage = document.getElementById('loginPage');
 const registerPage = document.getElementById('registerPage');
 const homePage = document.getElementById('homePage');
 const profilePage = document.getElementById('profilePage');
+
 
 // ==================== apiCall FUNCTION ====================
 const apiCall = ({ url, method = 'GET', token = true, body = null }) => {
@@ -97,7 +102,8 @@ const apiCall = ({ url, method = 'GET', token = true, body = null }) => {
 // Define the Modal for post and update
 const modals = {
     post: postJobModal,
-    update: updateJobModal
+    update: updateJobModal,
+    profile: profileModel
 };
 
 // Define the hash routes for each page
@@ -122,7 +128,7 @@ const showModal = (type) => {
 }
 
 // Define the function that loads the JobFeed (homepage)
-const fetchFeed = () => {
+const homeFeed = () => {
     const token = localStorage.getItem('token');
     if (!token) {
         showNotification('Please log in first', 'error');
@@ -138,36 +144,29 @@ const fetchFeed = () => {
         });
 };
 
-// Toggle on click
-// profileButton.addEventListener('click', (event) => {
-//     event.stopPropagation(); // Prevents bubbling, preventing click events that trigger the document
-//     profileMenu.classList.toggle('hide');
-// });
-profileButton.forEach((btn, index) => {
-    btn.addEventListener('click', (event) => {
-        event.stopPropagation();
-        profileMenu[index].classList.toggle('hide');
-    });
-});
+// Define the function that loads the userProfile (profilePage)
+const userProfile = () => {
+    const token = localStorage.getItem('token');
+    const userId = localStorage.getItem('userId');
 
-// Preventing clicking on the menu itself also triggers hiding
-// profileMenu.addEventListener('click', (event) => {
-//     event.stopPropagation();
-// });
-profileMenu.forEach((menu) => {
-    menu.addEventListener('click', (event) => {
-        event.stopPropagation();
-    });
-});
+    apiCall({ url: `${BACKEND_URL}/job/feed?start=0` })
+        .then(data => {
+            console.log(data)
+            renderJobFeed(data);
+            // Ensure sidebar is updated when rendering a job card
+            renderSidebarUser();
+        });
+};
 
 // Show the selected page and optionally update the URL hash
 const showPage = (pageName, updateHash = true) => {
-    let currentPage = null;
-    if (currentPage === pageName) {
-        return;
-    }
+    // let currentPage = null;
+    // if (currentPage === pageName) {
+    //     return;
+    // }
     // Hide all pages
-    Object.values(pages).forEach(page => (page.style.display = 'none'));
+    Object.values(pages).forEach(page => page.classList.add('hide'));
+    pages[pageName].classList.remove('hide');
 
     // Update URL hash if needed
     if (updateHash) {
@@ -177,14 +176,13 @@ const showPage = (pageName, updateHash = true) => {
         }
     }
 
-    // Display the selected page
-    pages[pageName].style.display = 'block';
-    currentPage = pageName;
+    // // Display the selected page
+    // pages[pageName].style.display = 'block';
+    // currentPage = pageName;
 
     // If the home page is displayed, load the job feed
-    if (pageName === 'home') {
-        fetchFeed();
-    }
+    if (pageName === 'home') homeFeed();
+    if (pageName === 'profile') userProfile();
 };
 
 // Route to the correct page based on the current URL hash
@@ -216,10 +214,15 @@ const routeToPage = () => {
 
 // On page load, set the default hash if needed and route accordingly
 window.addEventListener('load', () => {
-    if (!window.location.hash || window.location.hash === '#') {
-        window.location.hash = ROUTES.login;
+    if (!window.location.hash) {
+        // Default jump if there is no hash
+        if (localStorage.getItem('token')) {
+            window.location.hash = '/job/feed';
+        } else {
+            window.location.hash = '/auth/login';
+        }
     } else {
-        routeToPage();
+        routeToPage(); // Current hash jump
     }
 });
 
@@ -273,6 +276,35 @@ btnPostJob.forEach(btn => {
     btn.addEventListener('click', () => showModal('post'));
 });
 
+// When user updating their profile
+updatingButton.addEventListener('click', () => showModal('profile'))
+
+// Toggle on click
+// profileButton.addEventListener('click', (event) => {
+//     event.stopPropagation(); // Prevents bubbling, preventing click events that trigger the document
+//     profileMenu.classList.toggle('hide');
+// });
+profileButton.forEach((btn, index) => {
+    btn.addEventListener('click', (event) => {
+        event.stopPropagation();
+        profileMenu[index].classList.toggle('hide');
+    });
+});
+
+// Preventing clicking on the menu itself also triggers hiding
+// profileMenu.addEventListener('click', (event) => {
+//     event.stopPropagation();
+// });
+profileMenu.forEach((menu) => {
+    menu.addEventListener('click', (event) => {
+        event.stopPropagation();
+    });
+});
+
+viewProfile.forEach(btn => {
+    btn.addEventListener('click', () => showPage('profile'))
+})
+
 // When a user selects an image file, preview it before posting
 // ==================== IMAGE PREVIEW HANDLER ====================
 const handleImagePreview = (inputElement, previewContainer) => {
@@ -321,7 +353,7 @@ const validateJobForm = (dateStr) => {
     }
 
     return { date: inputDate };
-}
+};
 
 const DateToUTC = (dateObj) => {
     if (!(dateObj instanceof Date)) {
@@ -332,7 +364,7 @@ const DateToUTC = (dateObj) => {
         dateObj.getMonth(),
         dateObj.getDate()
       )).toISOString();
-}
+};
 
 // handleJob Post function
 const handleJobSubmit = ({ mode, jobId = null }) => {
@@ -384,7 +416,7 @@ const handleJobSubmit = ({ mode, jobId = null }) => {
                 'success'
             );
             console.log('job id:', data.id);
-            fetchFeed();
+            homeFeed();
             modalToHide.classList.add('hide');
         });
     });
@@ -399,6 +431,7 @@ closeModal.forEach(btn => {
     btn.addEventListener('click', () => {
         postJobModal.classList.add('hide');
         updateJobModal.classList.add('hide');
+        profileModel.classList.add('hide');
     });
 });
 
@@ -410,6 +443,7 @@ cancelPost.forEach(btn => {
     btn.addEventListener('click', () => {
         postJobModal.classList.add('hide');
         updateJobModal.classList.add('hide');
+        profileModel.classList.add('hide');
     });
 });
 
@@ -503,38 +537,7 @@ loginButton.addEventListener('click', () => {
         });
 });
 
-// Defines a time formatting function
-const formatTime = (createdAtStr) => {
-    const now = new Date();
-    const jobDate = new Date(createdAtStr);
-    const diffMs = now - jobDate;
-
-    // If the time is in the future, show the date directly
-    if (diffMs < 0) {
-        const day = String(jobDate.getDate()).padStart(2, '0');
-        const month = String(jobDate.getMonth() + 1).padStart(2, '0');
-        const year = jobDate.getFullYear();
-        return `${day}/${month}/${year}`;
-    }
-
-    const diffHours = Math.floor(diffMs / 3600000); // 1 hour = 3600000ms
-
-    if (diffHours < 1) {
-        const diffMinutes = Math.floor(diffMs / 60000);
-        return `${diffMinutes} minute${diffMinutes !== 1 ? 's' : ''} ago`;
-    }
-
-    if (diffHours < 24) {
-        const diffMinutes = Math.floor((diffMs % 3600000) / 60000);
-        return `${diffHours} hour${diffHours !== 1 ? 's' : ''} ${diffMinutes} minute${diffMinutes !== 1 ? 's' : ''} ago`;
-    }
-
-    const day = String(jobDate.getDate()).padStart(2, '0');
-    const month = String(jobDate.getMonth() + 1).padStart(2, '0');
-    const year = jobDate.getFullYear();
-    return `${day}/${month}/${year}`;
-};
-
+// Defines a time formatting function for createdAtStr time
 const formatCreatedTime = (createdAtStr) => {
     const now = new Date();
     const createdDate = new Date(createdAtStr);
@@ -554,6 +557,7 @@ const formatCreatedTime = (createdAtStr) => {
     return `${day}/${month}/${year}`;
 };
 
+// Defines a time formatting function for dataStart time
 const formatDateOnly = (dateStr) => {
     const date = new Date(dateStr);
     const day = String(date.getDate()).padStart(2, '0');
@@ -567,6 +571,8 @@ const formatDateOnly = (dateStr) => {
 const renderSidebarUser = () => {
     const sidebarUser = document.querySelectorAll('.userSidebar');
     const currentUserId = localStorage.getItem('userId');
+
+    updatingButton.classList.remove('hide');
 
     apiCall({ url: `${BACKEND_URL}/user/?userId=${currentUserId}` })
         .then(data => {
@@ -860,7 +866,7 @@ function createInteractionSection(job, currentUserId, currentUserName) {
             method: 'POST',
             body: { id: job.id, comment: text }
         }).then(() => {
-            fetchFeed();
+            homeFeed();
             showNotification('Comment added!', 'success');
         });
         input.value = '';
@@ -932,14 +938,13 @@ const createJobCard = (job) => {
                     body: { id: job.id }
                 }).then(() => {
                     showNotification('Successfully deleted!', 'success');
-                    fetchFeed();
+                    homeFeed();
                 });
             },
             (job) => {
                 jobTitleUp.value = job.title;
                 jobStartDateUp.value = formatDateOnly(job.start);
                 jobDescriptionUp.value = job.description;
-                previewContainerUp
                 showModal('update');
                 confirmPostUp.onclick = () => {
                     handleJobSubmit({ mode: 'update', jobId: job.id });
@@ -990,10 +995,10 @@ const renderJobFeed = (jobs) => {
 // ==================== INITIALIZATION ====================
 
 // Determine initial page based on URL or saved token
-if (localStorage.getItem('token')) {
-    window.location.hash = '/job/feed';
-}
-routeToPage();
+// if (localStorage.getItem('token')) {
+//     window.location.hash = '/job/feed';
+// }
+// routeToPage();
 
 // ==================== GLOBAL EVENTLISTENER  ====================
 
