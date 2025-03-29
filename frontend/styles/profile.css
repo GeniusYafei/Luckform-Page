@@ -1,0 +1,78 @@
+#profilePage {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background-color: #f4f2ee;
+}
+
+#profilePage .jobfeed-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background-color: white;
+    padding: 10px 20px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+#profilePage .left-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-left: 10px;
+}
+
+#profilePage .logo-icon {
+    height: 1.5rem;
+    width: auto;
+}
+
+#profilePage .left-container p {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
+    color: #0a66c2;
+}
+
+#profilePage .searchUser {
+    height: 32px;
+    padding: 4px 12px;
+    border: 1px solid #ccc;
+    border-radius: 16px;
+    font-size: 14px;
+    outline: none;
+    transition: border 0.2s;
+    width: 200px;
+}
+
+#profilePage .searchUser:focus {
+    border-color: #0a66c2;
+    box-shadow: 0 0 0 2px rgba(10, 102, 194, 0.2);
+}
+
+#profilePage .search-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+}
+
+#profilePage .search-icon {
+    height: 18px;
+    width: 18px;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+}
+
+#profilePage .search-button:hover .search-icon {
+    opacity: 1;
+}
+
+#profilePage .nav-icons {
+    position: relative;
+}
+
+
