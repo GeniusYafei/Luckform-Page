@@ -137,7 +137,7 @@
         <!-- <div id="profileMenu" class="profile-dropdown hide"> -->
         <div class="profile-dropdown hide">
           <p id="profileName"></p>
-          <button class="ViewProfile">View Profile</button>
+          <button class="viewProfile">View Profile</button>
           <button class="LogoutButton">Sign Out</button>
         </div>
       </div>
@@ -190,8 +190,8 @@
         </button>
         <!-- <div id="profileMenu" class="profile-dropdown hide"> -->
         <div class="profile-dropdown hide">
-          <p id="profileName"></p>
-          <button class="ViewProfile">View Profile</button>
+          <!-- <p id="profileName"></p> -->
+          <button class="viewProfile">View Profile</button>
           <button class="LogoutButton">Sign Out</button>
         </div>
       </div>
@@ -219,11 +219,19 @@
           <label for="name">Update Name</label>
           <input type="text" id="updaterName" name="Name" placeholder="Username" />
 
-          <label for="password">Update Password</label>
+          <!-- <label for="password">Update Password</label>
           <input type="password" id="updaterPassword" name="updatePassword" placeholder="Password" />
 
           <input type="password" id="UpConfirmPassword" name="ConfirmPassword" placeholder="Confirm Password" />
-          <button type="button" id="toggleConfirmPassword" class="toggle-btn">Show</button>
+          <button type="button" id="toggleConfirmPassword" class="toggle-btn">Show</button> -->
+          <div class="inputContainer">
+            <label for="password">Update Password</label>
+            <input type="password" id="updaterPassword" name="updaterPassword" placeholder="Password" />
+          </div>
+          <div class="inputContainer">
+            <input type="password" id="UpConfirmPassword" name="UpConfirmPassword" placeholder="Confirm Password" />
+            <button type="button" id="toggleConfirmPasswordUpdate" class="toggle-btn">Show</button>
+          </div>
 
           <label for="jobImage">Avatar Setting</label>
           <input type="file" id="jobImage-update" accept="image/*" />
