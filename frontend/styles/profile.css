@@ -238,7 +238,7 @@
     object-fit: cover;
 }
 
-#profilePage .jobfeed-main {
+/* #profilePage .jobfeed-main {
     display: flex;
     flex: 1;
     overflow-y: auto;
@@ -247,7 +247,7 @@
     align-items: flex-start;
     gap: 20px;
     min-height: 0;
-}
+} */
 
 #profilePage .modal {
     position: fixed;
@@ -295,8 +295,7 @@
     font-weight: 600;
 }
 
-#profilePage .modal-content input,
-#profilePage .modal-content textarea {
+#profilePage .modal-content input {
     width: 100%;
     padding: 8px;
     margin-top: 5px;
@@ -358,172 +357,4 @@
     display: flex;
     gap: 6px;
     /* space between update and delete */
-}
-
-#profilePage .profile-layout {
-    display: grid;
-    grid-template-columns: 1fr 300px;
-    gap: 2rem;
-    padding: 2rem;
-    box-sizing: border-box;
-    background-color: #f4f4f4;
-}
-
-#profilePage .user-job-feed {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-}
-
-#profilePage .profile-suggested {
-    background: #f7f7f7;
-    padding: 1rem;
-    border-radius: 10px;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-    height: fit-content;
-}
-
-#profilePage .suggested-user {
-    background-color: white;
-    padding: 0.5rem;
-    margin: 0.5rem 0;
-    border-radius: 8px;
-    box-shadow: 0 0 3px rgba(0, 0, 0, 0.1);
-}
-
-#profilePage .profile-main {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-}
-
-#profilePage .profile-banner {
-    background: white;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-}
-
-#profilePage .banner-background {
-    height: 160px;
-    background: linear-gradient(to right, #0366d6, #54a0ff);
-    background-size: cover;
-}
-
-#profilePage .profile-info {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    padding: 0 24px;
-    position: relative;
-    top: -40px;
-}
-
-#profilePage .profile-avatar {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    background-color: #ccc;
-    border: 4px solid white;
-    background-size: cover;
-    background-position: center;
-}
-
-#profilePage .profile-text h2 {
-    font-size: 20px;
-    margin: 0;
-}
-
-#profilePage .profile-text p {
-    font-size: 14px;
-    color: #555;
-    margin: 4px 0 0;
-}
-
-#userJobFeed {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-}
-
-#profilePage .job-card {
-    background: white;
-    border-radius: 12px;
-    padding: 1.2rem;
-    box-shadow: 0 0 6px rgba(0, 0, 0, 0.06);
-    transition: box-shadow 0.3s ease;
-}
-
-#profilePage .job-card:hover {
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.12);
-}
-
-#profilePage .profile-suggested {
-    background: white;
-    border-radius: 12px;
-    padding: 1.2rem;
-    box-shadow: 0 0 6px rgba(0, 0, 0, 0.06);
-    height: fit-content;
-}
-
-#profilePage .profile-suggested h3 {
-    font-size: 16px;
-    margin-bottom: 12px;
-    color: #333;
-}
-
-#profilePage .suggested-user {
-    padding: 0.5rem 0.75rem;
-    margin: 0.5rem 0;
-    background-color: #f9f9f9;
-    border-radius: 8px;
-    font-size: 14px;
-    color: #333;
-    transition: background 0.2s;
-}
-
-#profilePage .suggested-user:hover {
-    background-color: #eee;
-    cursor: pointer;
-}
-
-/* ================= Buttons ================= */
-#profilePage button {
-    border: none;
-    border-radius: 6px;
-    padding: 0.5rem 1rem;
-    font-size: 14px;
-    background-color: #0366d6;
-    color: white;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-}
-
-#profilePage button:hover {
-    background-color: #024a9e;
-}
-
-#profilePage .Updating {
-    margin-top: 1rem;
-}
-
-#profilePage .toggle-btn {
-    margin-top: 0.5rem;
-    background-color: #ddd;
-    color: #333;
-}
-
-#profilePage .toggle-btn:hover {
-    background-color: #bbb;
-}
-
-/* Responsive: single column on narrow viewports */
-@media (max-width: 900px) {
-    #profilePage .profile-layout {
-        grid-template-columns: 1fr;
-    }
-
-    #profilePage .profile-suggested {
-        display: none;
-    }
 }
