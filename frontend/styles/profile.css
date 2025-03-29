@@ -254,3 +254,101 @@
     justify-content: center;
     z-index: 2000;
 }
+
+#profilePage .modal.hide {
+    display: none;
+}
+
+#profilePage .modal-content {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    width: 400px;
+    max-width: 90%;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    position: relative;
+}
+
+#profilePage .modal-content h2 {
+    margin-top: 0;
+}
+
+#profilePage .preview-image {
+    max-width: 100%;
+    height: 50%;
+    margin-top: 10px;
+    border-radius: 8px;
+    object-fit: contain;
+    display: block;
+}
+
+#profilePage .modal-content label {
+    display: block;
+    margin-top: 10px;
+    font-weight: 600;
+}
+
+#profilePage .modal-content input,
+#profilePage .modal-content textarea {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+#profilePage .modal-actions {
+    margin-top: 20px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+#profilePage .modal-actions button {
+    padding: 8px 12px;
+    font-size: 14px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+#profilePage .cancel {
+    background-color: #e4e6eb;
+    color: #333;
+}
+
+#profilePage .cancel:hover {
+    background-color: #b5b5b5;
+}
+
+#profilePage .confirm {
+    background-color: #0a66c2;
+    color: white;
+}
+
+#profilePage .confirm:hover {
+    background-color: #004182;
+}
+
+#profilePage .close-button {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 20px;
+    cursor: pointer;
+    color: #999;
+}
+
+#profilePage .close-button:hover {
+    color: #333;
+}
+
+#profilePage .action-buttons {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    gap: 6px;
+    /* space between update and delete */
+}
