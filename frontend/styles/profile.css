@@ -151,8 +151,8 @@
 }
 
 #profilePage .sidebarUser .avatar-img {
-    width: auto;
-    height: auto;
+    width: 80px;
+    height: 80px;
     border-radius: 50%;
     object-fit: cover;
     margin-bottom: 10px;
@@ -383,6 +383,36 @@
     padding: 20px;
 }
 
+#profilePage .profile-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+#profilePage .profile-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background-color: #d0e6f7;
+    background-size: cover;
+    background-position: center;
+}
+
+#profilePage .profile-text h2 {
+    font-size: 16px;
+    margin: 0.2rem 0;
+    font-weight: bold;
+}
+
+#profilePage .profile-text p {
+    font-size: 13px;
+    color: #666;
+    margin: 0;
+}
+
+
 #profileSidebar {
     grid-area: sidebar;
     background-color: white;
@@ -407,6 +437,71 @@
     border-radius: 12px;
     padding: 20px;
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+}
+
+#profilePage .job-card {
+    position: relative;
+    background-color: #fff;
+    padding: 15px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+#profilePage .id-img {
+    width: 10%;
+    height: auto;
+}
+
+#profilePage .postJobButton {
+    background-color: #0a66c2;
+    color: white;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 20px;
+    font-size: 14px;
+    cursor: pointer;
+    margin-left: auto;
+    margin-right: 20px;
+    transition: background-color 0.3s;
+}
+
+#profilePage .postJobButton:hover {
+    background-color: #004182;
+}
+
+#profilePage #emptyJobCard {
+    display: flex;
+    justify-content: left;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    text-align: left;
+    margin-bottom: 20px;
+}
+
+#profilePage #emptyJobCard .header-information {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+#profilePage #emptyJobCard h2 {
+    padding-left: 3px;
+    font-size: 180%;
+    font-weight: 700;
+    color: #0a66c2;
+}
+
+#profilePage #emptyJobCard .illustration {
+    max-width: 100%;
+    height: auto;
+    border: 1px solid #ddd;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.01);
+    border-radius: 12px;
 }
 
 /* === Suggestions Sidebar === */
