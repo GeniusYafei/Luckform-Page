@@ -261,15 +261,32 @@ logoutButton.forEach(btn => {
     })
 })
 
+
+// toggleConfirmPassword.addEventListener('click', (e) => {
+//     let confirmType = confirmPassword.getAttribute('type') === 'password' ? 'text' : 'password';
+//     let registerType = registerPassword.getAttribute('type') === 'password' ? 'text' : 'password';
+//     confirmPassword.setAttribute('type', confirmType);
+//     registerPassword.setAttribute('type', registerType);
+//     e.currentTarget.textContent = confirmType === 'password' ? 'Show' : 'Hide';
+// });
+
 // Toggle password visibility for registration
+const togglePasswordVisibility = (password, passwordConfirm, toggleBtn) => {
+    const type = password.type === 'password' ? 'text' : 'password';
+    password.type = type;
+    passwordConfirm.type = type;
+    toggleBtn.textContent = type === 'password' ? 'Show' : 'Hide';
+};
+
+// registerPage format
 toggleConfirmPassword.addEventListener('click', (e) => {
-    let confirmType = confirmPassword.getAttribute('type') === 'password' ? 'text' : 'password';
-    let registerType = registerPassword.getAttribute('type') === 'password' ? 'text' : 'password';
-    confirmPassword.setAttribute('type', confirmType);
-    registerPassword.setAttribute('type', registerType);
-    e.currentTarget.textContent = confirmType === 'password' ? 'Show' : 'Hide';
+    togglePasswordVisibility(registerPassword, confirmPassword, e.currentTarget);
 });
 
+// Profile Modal format
+toggleConfirmPasswordUpdate.addEventListener('click', (e) => {
+    togglePasswordVisibility(updaterPassword, UpConfirmPassword, e.currentTarget);
+});
 
 // When user want post a new job click the Post a Job button
 btnPostJob.forEach(btn => {
@@ -451,6 +468,37 @@ cancelPost.forEach(btn => {
 //     updateJobModal.classList.add('hide');
 // });
 
+// validate user form
+const validateForm = (email, name, password, confirm) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    // Email validation
+    if (!emailRegex.test(email)) {
+        showNotification('Please enter a valid email address.', 'warning');
+        return false;
+    }
+
+    // Name length validation
+    if (name.length < 3 || name.length > 50) {
+        showNotification('Full name must be between 3 and 50 characters.', 'warning');
+        return false;
+    }
+
+    // Password strength validation
+    if (password.length < 6) {
+        showNotification('Password must be at least 6 characters long.', 'warning');
+        return false;
+    }
+
+    // Password consistency check
+    if (password !== confirm) {
+        showNotification('Passwords do not match.', 'warning');
+        return false;
+    }
+
+    return true;
+};
+
 // Registration submission
 submitButton.addEventListener('click', () => {
     const email = registerEmail.value.trim();
@@ -458,25 +506,7 @@ submitButton.addEventListener('click', () => {
     const password = registerPassword.value;
     const confirm = confirmPassword.value;
 
-    // Email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-        showNotification('Please enter a valid email address.', 'warning');
-        return;
-    }
-    // Name length validation
-    if (name.length < 3 || name.length > 50) {
-        showNotification('Full name must be between 3 and 50 characters.', 'warning');
-        return;
-    }
-    // Password strength validation
-    if (password.length < 6) {
-        showNotification('Password must be at least 6 characters long.', 'warning');
-        return;
-    }
-    // Password consistency check
-    if (password !== confirm) {
-        showNotification('Passwords do not match.', 'warning');
+    if (!validateForm(email, name, password, confirm)) {
         return;
     }
 
