@@ -173,3 +173,84 @@
     border-radius: 50%;
     margin: 0 auto 10px;
 }
+
+#profilePage .sidebarUser h2 {
+    font-size: 16px;
+    margin-bottom: 4px;
+}
+
+#profilePage .sidebarInformation {
+    width: 240px;
+    padding: 15px;
+    border: 1px solid #ddd;
+    background-color: white;
+    border-radius: 12px;
+    margin-left: 20px;
+    margin-right: 10px;
+    text-align: center;
+    font-size: 14px;
+    color: #333;
+    text-align: left;
+}
+
+#profilePage .sidebarInformation h2 {
+    font-size: 13px;
+    font-weight: 600;
+    color: #191919;
+    margin-top: 4px;
+    line-height: normal;
+}
+
+#profilePage .sidebarInformation p {
+    font-size: 13px;
+    font-weight: 600;
+    color: #666;
+    margin-top: 4px;
+}
+
+#profilePage .sidebarInformation:hover p,
+#profilePage .sidebarInformation:hover h2 {
+    text-decoration: underline;
+}
+
+#profilePage .sidebarUser p {
+    margin: 0;
+    color: #666;
+    font-size: 13px;
+}
+
+#profilePage .sidebarUserWatch {
+    width: 240px;
+    padding: 20px;
+    border: 1px solid #ddd;
+    background-color: white;
+    border-radius: 12px;
+    margin-left: 10px;
+    margin-right: 20px;
+    font-size: 14px;
+    color: #333;
+}
+
+#profilePage .jobfeed-main {
+    display: flex;
+    flex: 1;
+    overflow-y: auto;
+    margin-top: 20px;
+    padding: 0 20px;
+    align-items: flex-start;
+    gap: 20px;
+    min-height: 0;
+}
+
+#profilePage .modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+}
