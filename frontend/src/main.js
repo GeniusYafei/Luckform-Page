@@ -41,15 +41,17 @@ const jobImageUp = document.getElementById('jobImage-update');
 const closeModal = document.querySelectorAll('.close-button');
 const cancelPost = document.querySelectorAll('.cancel');
 const confirmPost = document.getElementById('confirmPost');
-const confirmPostUp = document.getElementById('confirmUpdate')
+const confirmPostUp = document.getElementById('confirmUpdate');
 const previewContainer = document.getElementById('jobImagePreview');
 const previewContainerUp = document.getElementById('jobImagePreview-update');
 
 // Job feed Dom elements
 
 // profile Page elements
-const profileModel = document.getElementById('updateProfileModal')
-const updatingButton = document.querySelector('.Updating');
+const profileModel = document.getElementById('updateProfileModal');
+const updateViewButton = document.querySelector('.Updating');
+const confirmUpProfile = document.getElementById('confirmUserUpdate');
+const userImage = document.getElementById('userImage');
 
 // Page containers
 const loginPage = document.getElementById('loginPage');
@@ -294,7 +296,7 @@ btnPostJob.forEach(btn => {
 });
 
 // When user updating their profile
-updatingButton.addEventListener('click', () => showModal('profile'))
+updateViewButton.addEventListener('click', () => showModal('profile'))
 
 // Toggle on click
 // profileButton.addEventListener('click', (event) => {
@@ -375,12 +377,12 @@ const validateJobForm = (dateStr) => {
 const DateToUTC = (dateObj) => {
     if (!(dateObj instanceof Date)) {
         throw new Error('Invalid date object');
-      }
-      return new Date(Date.UTC(
+    }
+    return new Date(Date.UTC(
         dateObj.getFullYear(),
         dateObj.getMonth(),
         dateObj.getDate()
-      )).toISOString();
+    )).toISOString();
 };
 
 // handleJob Post function
@@ -464,6 +466,63 @@ cancelPost.forEach(btn => {
     });
 });
 
+// updating Profile EventListener
+confirmUpProfile.addEventListener('click', () => {
+    const updateEmail = document.getElementById('updateEmail').value.trim();
+    const updateName = document.getElementById('updateName').value.trim();
+    const updatePassword = document.getElementById('updaterPassword').value;
+    const confirm = document.getElementById('UpConfirmPassword').value;
+    const imageInput = document.getElementById('userImage').files[0];
+
+    // validate user input
+    if (!validateForm(updateEmail, updateName, updatePassword, confirm)) {
+        return;
+    }
+
+    // Submit update user profile request
+    const data = {};
+    if (updateEmail) data.email = updateEmail;
+    if (updatePassword) data.password = updatePassword;
+    if (updateName) data.name = updateName;
+
+    // if user upload the image
+    if (imageInput) {
+        fileToDataUrl(imageInput)
+            .then(imageBase64 => {
+                data.image = imageBase64;
+
+                return apiCall({
+                    url: `${BACKEND_URL}/user`,
+                    method: 'PUT',
+                    body: data
+                });
+            })
+            .then(() => {
+                showNotification('Update user profile successful!', 'success');
+                profileModel.classList.add('hide');
+                renderSidebarUser();
+            })
+            .catch(err => {
+                showNotification(err.message || 'Failed to update profile', 'error');
+            });
+    } else {
+        // Send the API request directly without uploading the image
+        apiCall({
+            url: `${BACKEND_URL}/user`,
+            method: 'PUT',
+            body: data
+        })
+            .then(() => {
+                showNotification('Update user profile successful!', 'success');
+                profileModel.classList.add('hide');
+                renderSidebarUser();
+            })
+            .catch(err => {
+                showNotification(err.message || 'Failed to update profile', 'error');
+            });
+    }
+});
+
 // cancelPostUp.addEventListener('click', () => {
 //     updateJobModal.classList.add('hide');
 // });
@@ -520,6 +579,8 @@ submitButton.addEventListener('click', () => {
         .then(data => {
             localStorage.setItem('token', data.token);
             showNotification('Registered!', 'success');
+            loginEmail.value = email;
+            loginPassword.value = password;
             showPage('login');
         });
 });
@@ -602,7 +663,7 @@ const renderSidebarUser = () => {
     const sidebarUser = document.querySelectorAll('.userSidebar');
     const currentUserId = localStorage.getItem('userId');
 
-    updatingButton.classList.remove('hide');
+    updateViewButton.classList.remove('hide');
 
     apiCall({ url: `${BACKEND_URL}/user/?userId=${currentUserId}` })
         .then(data => {
