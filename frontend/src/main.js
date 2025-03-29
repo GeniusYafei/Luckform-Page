@@ -49,9 +49,10 @@ const previewContainerUp = document.getElementById('jobImagePreview-update');
 
 // profile Page elements
 const profileModel = document.getElementById('updateProfileModal');
-const updateViewButton = document.querySelector('.Updating');
-const confirmUpProfile = document.getElementById('confirmUserUpdate');
+const updateButton = document.querySelector('.Updating');
+const confirmUpButton = document.getElementById('confirmUserUpdate');
 const userImage = document.getElementById('userImage');
+const userImagePreview = document.getElementById('avatarImagePreview')
 
 // Page containers
 const loginPage = document.getElementById('loginPage');
@@ -142,7 +143,7 @@ const homeFeed = () => {
             console.log(data)
             renderJobFeed(data);
             // Ensure sidebar is updated when rendering a job card
-            renderSidebarUser();
+            renderUser();
         });
 };
 
@@ -156,7 +157,7 @@ const userProfile = () => {
             console.log(data)
             renderJobFeed(data);
             // Ensure sidebar is updated when rendering a job card
-            renderSidebarUser();
+            renderUser();
         });
 };
 
@@ -296,7 +297,7 @@ btnPostJob.forEach(btn => {
 });
 
 // When user updating their profile
-updateViewButton.addEventListener('click', () => showModal('profile'))
+updateButton.addEventListener('click', () => showModal('profile'))
 
 // Toggle on click
 // profileButton.addEventListener('click', (event) => {
@@ -349,6 +350,7 @@ const handleImagePreview = (inputElement, previewContainer) => {
 // Call for both uploaders
 handleImagePreview(jobImage, previewContainer);
 handleImagePreview(jobImageUp, previewContainerUp);
+handleImagePreview(userImage, userImagePreview)
 
 const validateJobForm = (dateStr) => {
     if (!dateStr) return { error: 'Job Start Date is required.' };
@@ -467,7 +469,7 @@ cancelPost.forEach(btn => {
 });
 
 // updating Profile EventListener
-confirmUpProfile.addEventListener('click', () => {
+confirmUpButton.addEventListener('click', () => {
     const updateEmail = document.getElementById('updateEmail').value.trim();
     const updateName = document.getElementById('updateName').value.trim();
     const updatePassword = document.getElementById('updaterPassword').value;
@@ -500,7 +502,7 @@ confirmUpProfile.addEventListener('click', () => {
             .then(() => {
                 showNotification('Update user profile successful!', 'success');
                 profileModel.classList.add('hide');
-                renderSidebarUser();
+                renderUser();
             })
             .catch(err => {
                 showNotification(err.message || 'Failed to update profile', 'error');
@@ -515,7 +517,7 @@ confirmUpProfile.addEventListener('click', () => {
             .then(() => {
                 showNotification('Update user profile successful!', 'success');
                 profileModel.classList.add('hide');
-                renderSidebarUser();
+                renderUser();
             })
             .catch(err => {
                 showNotification(err.message || 'Failed to update profile', 'error');
@@ -659,11 +661,11 @@ const formatDateOnly = (dateStr) => {
 
 
 // ==================== Render sidebar user profile ====================
-const renderSidebarUser = () => {
+const renderUser = () => {
     const sidebarUser = document.querySelectorAll('.userSidebar');
     const currentUserId = localStorage.getItem('userId');
 
-    updateViewButton.classList.remove('hide');
+    updateButton.classList.remove('hide');
 
     apiCall({ url: `${BACKEND_URL}/user/?userId=${currentUserId}` })
         .then(data => {
@@ -679,9 +681,9 @@ const renderSidebarUser = () => {
                 }
 
                 // Render avatar or fallback letter
-                if (data.img) {
+                if (data.image) {
                     const img = document.createElement('img');
-                    img.src = data.img;
+                    img.src = data.image;
                     img.alt = 'User Avatar';
                     img.className = 'avatar-img';
                     btn.appendChild(img);
@@ -700,40 +702,43 @@ const renderSidebarUser = () => {
                 const email = document.createElement('p');
                 email.textContent = data.email || '';
                 btn.appendChild(email);
-            })
+            });
 
             // // Update top-right avatar menu
             const profileMenuButton = document.querySelectorAll('.avatar-button');
-            const avatarLetter = document.getElementById('avatarLetter');
-
+            // const avatarLetter = document.getElementById('avatarLetter');
+            console.log(data.image) // 输出了
             profileMenuButton.forEach((btn) => {
-                if (data.img) {
-                    while (btn.firstChild) {
-                        btn.removeChild(btn.firstChild); // clear previous content
-                    }
+                while (btn.firstChild) {
+                    btn.removeChild(btn.firstChild); // clear previous content
+                }
+                if (data.image) {
                     const img = document.createElement('img');
-                    img.src = data.img;
+                    img.src = data.image;
                     img.alt = 'avatar';
                     img.className = 'avatar-img';
                     btn.appendChild(img);
                 } else {
-                    avatarLetter.textContent = data.name[0]?.toUpperCase() || 'U';
+                    const span = document.createElement('span');
+                    span.className = 'avatar-letter';
+                    span.textContent = data.name[0]?.toUpperCase() || 'U';
+                    btn.appendChild(span);
                 }
             });
         });
 };
 
 // ==================== Render job card header (author info) ====================
-const renderJobHeader = (job, headerElement) => {
+const renderJobCardHeader = (job, headerElement) => {
     apiCall({ url: `${BACKEND_URL}/user?userId=${job.creatorId}` })
         .then(data => {
             console.log(data)
             const avatarWrapper = document.createElement('div');
             avatarWrapper.className = 'avatar-wrapper';
 
-            if (data.img) {
+            if (data.image) {
                 const avatar = document.createElement('img');
-                avatar.src = data.img;
+                avatar.src = data.image;
                 avatar.alt = 'avatar';
                 avatar.className = 'user-avatar';
                 avatarWrapper.appendChild(avatar);
@@ -1001,7 +1006,7 @@ const createJobCard = (job) => {
     const header = document.createElement('div');
     header.className = 'header-information';
     card.insertBefore(header, title);
-    renderJobHeader(job, header);
+    renderJobCardHeader(job, header);
 
     if (job.image) {
         const img = document.createElement('img');
