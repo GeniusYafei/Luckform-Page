@@ -555,6 +555,59 @@
     background-color: #004182;
 }
 
+#profilePage .like-list,
+#profilePage .comment-section {
+    padding-left: 10px;
+    margin-top: 8px;
+}
+
+#profilePage .like-item,
+#profilePage .comment-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 2px 0;
+}
+
+#profilePage .avatar-letter {
+    width: 24px;
+    height: 24px;
+    background-color: #e6f0f6;
+    color: #0073b1;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+#profilePage .comment-input {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+#profilePage .comment-input input {
+    flex: 1;
+    padding: 6px 10px;
+    border: 1px solid #ccc;
+    border-radius: 16px;
+}
+
+#profilePage .comment-input button {
+    padding: 6px 12px;
+    background-color: #0073b1;
+    color: white;
+    border: none;
+    border-radius: 16px;
+    cursor: pointer;
+}
+
+#profilePage .comment-input button:hover {
+    background-color: #005f99;
+}
 
 #profileSidebar {
     grid-area: sidebar;
