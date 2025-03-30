@@ -148,25 +148,14 @@ const homeFeed = () => {
 };
 
 // Define the function that loads the userProfile (profilePage)
-const userProfile = () => {
-    const token = localStorage.getItem('token');
-    const userId = localStorage.getItem('userId');
-
-    apiCall({ url: `${BACKEND_URL}/job/feed?start=0` })
-        .then(data => {
-            console.log(data)
-            renderJobFeed(data);
-            // Ensure sidebar is updated when rendering a job card
-            renderUser();
-        });
-};
-
+let currentPage = null;
 // Show the selected page and optionally update the URL hash
 const showPage = (pageName, updateHash = true) => {
-    // let currentPage = null;
-    // if (currentPage === pageName) {
-    //     return;
-    // }
+    // Prevent re-render
+    if (currentPage === pageName) return;
+    // Update current page
+    currentPage = pageName;
+
     // Hide all pages
     Object.values(pages).forEach(page => page.classList.add('hide'));
     pages[pageName].classList.remove('hide');
@@ -185,7 +174,10 @@ const showPage = (pageName, updateHash = true) => {
 
     // If the home page is displayed, load the job feed
     if (pageName === 'home') homeFeed();
-    if (pageName === 'profile') userProfile();
+    if (pageName === 'profile') {
+        renderUser();
+        renderProfileJobs();
+    };
 };
 
 // Route to the correct page based on the current URL hash
@@ -217,6 +209,11 @@ const routeToPage = () => {
 
 // On page load, set the default hash if needed and route accordingly
 window.addEventListener('load', () => {
+    const loader = document.getElementById('loading');
+    setTimeout(() => {
+        loader.style.display = 'none';
+    }, 1000);
+
     if (!window.location.hash) {
         // Default jump if there is no hash
         if (localStorage.getItem('token')) {
@@ -659,8 +656,34 @@ const formatDateOnly = (dateStr) => {
     return `${day}/${month}/${year}`;
 };
 
+// ==================== Render userProfiles Job ====================
+// Only the jobs posted by the user are displayed on the profile page
+const renderProfileJobs = () => {
+    const container = document.getElementById('userJobFeed');
+    container.replaceChildren(); // clear old content
 
-// ==================== Render sidebar user profile ====================
+    const currentUserId = localStorage.getItem('userId');
+
+    apiCall({ url: `${BACKEND_URL}/job/feed?start=0` }).then(allJobs => {
+        // Only the jobs published by the user are kept
+        const userJobs = allJobs.filter(job => job.creatorId === Number(currentUserId));
+
+        if (userJobs.length === 0) {
+            const empty = document.createElement('p');
+            empty.textContent = 'You have not posted any jobs yet.';
+            empty.className = 'empty-jobs-message';
+            container.appendChild(empty);
+            return;
+        }
+
+        userJobs.forEach(job => {
+            const jobCard = createJobCard(job);
+            container.appendChild(jobCard);
+        });
+    });
+};
+
+// ==================== Render user profile ====================
 const renderUser = () => {
     const sidebarUser = document.querySelectorAll('.userSidebar');
     const currentUserId = localStorage.getItem('userId');
@@ -707,7 +730,6 @@ const renderUser = () => {
             // // Update top-right avatar menu
             const profileMenuButton = document.querySelectorAll('.avatar-button');
             // const avatarLetter = document.getElementById('avatarLetter');
-            console.log(data.image) // 输出了
             profileMenuButton.forEach((btn) => {
                 while (btn.firstChild) {
                     btn.removeChild(btn.firstChild); // clear previous content
@@ -730,6 +752,9 @@ const renderUser = () => {
 
 // ==================== Render job card header (author info) ====================
 const renderJobCardHeader = (job, headerElement) => {
+    // Prevent multiple renders
+    // if (headerElement.querySelector('.avatar-wrapper')) return;
+
     apiCall({ url: `${BACKEND_URL}/user?userId=${job.creatorId}` })
         .then(data => {
             console.log(data)
@@ -874,6 +899,7 @@ function createInteractionSection(job, currentUserId, currentUserName) {
             liked = !liked;
             likeCount += liked ? 1 : -1;
             updateLikeButton();
+            homeFeed();
             showNotification(liked ? 'Liked!' : 'Unliked!', 'success');
         });
     });
@@ -995,37 +1021,16 @@ const createJobCard = (job) => {
     const card = document.createElement('div');
     card.className = 'job-card';
 
-    const title = document.createElement('h1');
-    title.textContent = job.title;
-    card.appendChild(title);
-
-    const startingDate = document.createElement('h6');
-    startingDate.textContent = `Job StartDate: ${formatDateOnly(job.start)}`;
-    card.appendChild(startingDate);
-
+    // ----- Header -----
     const header = document.createElement('div');
     header.className = 'header-information';
-    card.insertBefore(header, title);
     renderJobCardHeader(job, header);
+    card.appendChild(header);
 
-    if (job.image) {
-        const img = document.createElement('img');
-        img.className = 'id-img';
-        img.src = job.image;
-        img.alt = 'Job image';
-        card.appendChild(img);
-    }
-
-    const desc = document.createElement('p');
-    desc.textContent = job.description;
-    card.appendChild(desc);
-
-    // const likeButton = createLikeButton(job, currentUserId);
-    // card.appendChild(likeButton);
-
-    // Only show update/delete for creator
+    // ----- Action buttons -----
+    let actionButtons;
     if (Number(currentUserId) === job.creatorId) {
-        const actionButtons = createActionButtons(
+        actionButtons = createActionButtons(
             job,
             () => {
                 apiCall({
@@ -1050,6 +1055,37 @@ const createJobCard = (job) => {
         card.appendChild(actionButtons);
     }
 
+    // ----- Content section -----
+    const content = document.createElement('div');
+    content.className = 'job-content';
+
+    const title = document.createElement('h1');
+    title.textContent = job.title;
+    content.appendChild(title);
+
+    const startingDate = document.createElement('h6');
+    startingDate.textContent = `Job StartDate: ${formatDateOnly(job.start)}`;
+    content.appendChild(startingDate);
+
+    // const header = document.createElement('div');
+    // header.className = 'header-information';
+    // card.insertBefore(header, title);
+    // renderJobCardHeader(job, header);
+
+    if (job.image) {
+        const img = document.createElement('img');
+        img.className = 'id-img';
+        img.src = job.image;
+        img.alt = 'Job image';
+        content.appendChild(img);
+    }
+
+    const desc = document.createElement('p');
+    desc.textContent = job.description;
+    content.appendChild(desc);
+    card.appendChild(content);
+    
+    // ----- Interaction section -----
     // Get the current user name and insert it into the interactive bar
     apiCall({
         url: `${BACKEND_URL}/user/?userId=${currentUserId}`,
