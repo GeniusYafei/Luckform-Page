@@ -897,58 +897,99 @@ const renderProfileJobs = (userId) => {
 // ==================== Render user watch list ====================
 const renderUserWatchlist = (userId) => {
     const watchList = document.querySelector('.watch-list');
-    // const watchList = document.createElement('div');
-    // watchList.className = 'watch-list'
+    watchList.replaceChildren();
 
-    apiCall({ url: `${BACKEND_URL}/user/?userId=${userId}` })
-        .then(data => {
-            if (data.error) {
-                showNotification(data.error, 'error');
-                return;
-            };
+    getUsersFollow((followedUsers) => {
+        if (!followedUsers.length) {
+            const emptyMsg = document.createElement('p');
+            emptyMsg.textContent = 'You are not watching anyone yet.';
+            emptyMsg.className = 'empty-follow-message';
+            watchList.appendChild(emptyMsg);
+            return;
+        }
 
-            const WatchMeUser = data.usersWhoWatchMeUserIds
-            console.log('WatchMeUserId:', WatchMeUser);
+        followedUsers.forEach(user => {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'avatar-wrapper';
 
-            if (WatchMeUser) {
-                WatchMeUser.forEach(id => {
-                    const watchMeUserId = id;
-                    console.log(watchMeUserId)
-                    apiCall({ url: `${BACKEND_URL}/user/?userId=${watchMeUserId}` })
-                        .then(data => {
-                            const avatarWrapper = document.createElement('div');
-
-                            avatarWrapper.className = 'avatar-wrapper';
-                            // Render avatar or fallback letter
-                            if (data.image) {
-                                const img = document.createElement('img');
-                                img.src = data.image;
-                                img.alt = 'User Avatar';
-                                img.className = 'avatar-img';
-                                avatarWrapper.appendChild(img);
-                            } else {
-                                const avatarLetter = document.createElement('div');
-                                avatarLetter.className = 'avatar-button';
-                                avatarLetter.textContent = data.name[0].toUpperCase();
-                                avatarWrapper.appendChild(avatarLetter);
-                            }
-
-                            // Append name and email
-                            const name = document.createElement('h2');
-                            name.textContent = data.name || 'User';
-                            avatarWrapper.appendChild(name);
-
-                            const email = document.createElement('p');
-                            email.textContent = data.email || '';
-                            avatarWrapper.appendChild(email);
-
-                            watchList.appendChild(avatarWrapper);
-
-                            // Append  Watching / Unwatching
-                        });
-                })
+            // Avatar
+            if (user.image) {
+                const img = document.createElement('img');
+                img.src = user.image;
+                img.alt = 'User Avatar';
+                img.className = 'avatar-img';
+                wrapper.appendChild(img);
+            } else {
+                const letter = document.createElement('div');
+                letter.className = 'avatar-button';
+                letter.textContent = user.name[0]?.toUpperCase() || 'U';
+                wrapper.appendChild(letter);
             }
-        })
+
+            // Name + Email
+            const name = document.createElement('h2');
+            name.textContent = user.name || 'User';
+            wrapper.appendChild(name);
+
+            const email = document.createElement('p');
+            email.textContent = user.email || '';
+            wrapper.appendChild(email);
+
+            // (Optional) Add Watch/Unwatch button here later...
+
+            watchList.appendChild(wrapper);
+        });
+    });
+
+//     apiCall({ url: `${BACKEND_URL}/user/?userId=${userId}` })
+//         .then(data => {
+//             if (data.error) {
+//                 showNotification(data.error, 'error');
+//                 return;
+//             };
+
+//             const watchers = data.usersWhoWatchMeUserIds || [];
+//             console.log('[WatchMeUserIds]', watchers);
+
+//             if (WatchMeUser) {
+//                 WatchMeUser.forEach(id => {
+//                     const watchMeUserId = id;
+//                     console.log(watchMeUserId)
+//                     apiCall({ url: `${BACKEND_URL}/user/?userId=${watchMeUserId}` })
+//                         .then(data => {
+//                             const avatarWrapper = document.createElement('div');
+
+//                             avatarWrapper.className = 'avatar-wrapper';
+//                             // Render avatar or fallback letter
+//                             if (data.image) {
+//                                 const img = document.createElement('img');
+//                                 img.src = data.image;
+//                                 img.alt = 'User Avatar';
+//                                 img.className = 'avatar-img';
+//                                 avatarWrapper.appendChild(img);
+//                             } else {
+//                                 const avatarLetter = document.createElement('div');
+//                                 avatarLetter.className = 'avatar-button';
+//                                 avatarLetter.textContent = data.name[0].toUpperCase();
+//                                 avatarWrapper.appendChild(avatarLetter);
+//                             }
+
+//                             // Append name and email
+//                             const name = document.createElement('h2');
+//                             name.textContent = data.name || 'User';
+//                             avatarWrapper.appendChild(name);
+
+//                             const email = document.createElement('p');
+//                             email.textContent = data.email || '';
+//                             avatarWrapper.appendChild(email);
+
+//                             watchList.appendChild(avatarWrapper);
+
+//                             // Append  Watching / Unwatching
+//                         });
+//                 })
+//             }
+//         })
 }
 
 // ==================== Render user profile ====================
