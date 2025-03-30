@@ -105,6 +105,88 @@ const apiCall = ({ url, method = 'GET', token = true, body = null }) => {
 
 };
 
+// Build a list of userIds I follow by exploring job feed and user data
+const getUsersFollow = (callback) => {
+    const visitedUserIds = {}; // Set-like object
+    const usersIFollow = {};   // Mapping userId -> userInfo
+    const queue = [];          // IDs to visit
+    const currentUserId = Number(localStorage.getItem('userId'));
+
+    // Step 1: fetch /job/feed and extract userIds
+    apiCall({ url: `${BACKEND_URL}/job/feed?start=0` })
+        .then(feed => {
+            feed.forEach(job => {
+                if (job.creatorId != null && !visitedUserIds[job.creatorId]) {
+                    queue.push(job.creatorId);
+                    visitedUserIds[job.creatorId] = true;
+                }
+                if (job.likes) {
+                    job.likes.forEach(like => {
+                        if (!visitedUserIds[like.userId]) {
+                            queue.push(like.userId);
+                            visitedUserIds[like.userId] = true;
+                        }
+                    });
+                }
+                if (job.comments) {
+                    job.comments.forEach(comment => {
+                        if (!visitedUserIds[comment.userId]) {
+                            queue.push(comment.userId);
+                            visitedUserIds[comment.userId] = true;
+                        }
+                    });
+                }
+            });
+
+            // Step 2: recursively explore /user to get usersWhoWatchMeUserIds
+            processQueue(queue, visitedUserIds, usersIFollow, currentUserId, callback);
+        })
+        .catch(err => {
+            showNotification('Failed to fetch feed users', 'error');
+            console.error(err);
+        });
+}
+
+const processQueue = (queue, visitedUserIds, usersIFollow, currentUserId, callback) => {
+    if (queue.length === 0) {
+        // All done
+        const result = Object.values(usersIFollow);
+        callback(result);
+        return;
+    }
+
+    const userId = queue.shift();
+
+    apiCall({ url: `${BACKEND_URL}/user?userId=${userId}` })
+        .then(data => {
+            // Check if current user is in usersWhoWatchMeUserIds -> means currentUser follows this user
+            if (data.usersWhoWatchMeUserIds && data.usersWhoWatchMeUserIds.includes(currentUserId)) {
+                usersIFollow[data.id] = {
+                    id: data.id,
+                    name: data.name,
+                    email: data.email,
+                    image: data.image
+                };
+            }
+
+            // Continue exploring recursively
+            if (data.usersWhoWatchMeUserIds) {
+                data.usersWhoWatchMeUserIds.forEach(newId => {
+                    if (!visitedUserIds[newId]) {
+                        queue.push(newId);
+                        visitedUserIds[newId] = true;
+                    }
+                });
+            }
+
+            processQueue(queue, visitedUserIds, usersIFollow, currentUserId, callback);
+        })
+        .catch(err => {
+            console.warn(`Failed to fetch user ${userId}`, err);
+            processQueue(queue, visitedUserIds, usersIFollow, currentUserId, callback);
+        });
+}
+
 // ==================== PAGE NAVIGATION ====================
 // Define the Modal for post and update
 const modals = {
@@ -154,6 +236,9 @@ const homeFeed = () => {
     apiCall({ url: `${BACKEND_URL}/job/feed?start=0` })
         .then(data => {
             console.log(data)
+            getUsersFollow((result) => {
+                console.log('[Watchlist] updated:', result);
+            });
             renderJobFeed(data);
             // Ensure sidebar is updated when rendering a job card
             renderUser(userId);
@@ -180,6 +265,10 @@ const userFeed = (userId, setHash = true) => {
         showPage('home');
         return;
     }
+
+    getUsersFollow(() => {
+        console.log('[Watchlist] updated after user search');
+    });
 
     localStorage.setItem('lastViewedUserId', targetUserId);
 
@@ -441,7 +530,7 @@ profileMenu.forEach((menu) => {
 viewProfile.forEach(btn => {
     btn.addEventListener('click', () => {
         const userId = localStorage.getItem('userId');
-        userFeed(userId); ;
+        userFeed(userId);;
     });
 });
 
