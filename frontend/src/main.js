@@ -25,6 +25,7 @@ const goToLoginButton = document.getElementById('GoToLogin');
 const profileButton = document.querySelectorAll('.avatar-button');
 const profileMenu = document.querySelectorAll('.profile-dropdown');
 const viewProfile = document.querySelectorAll('.viewProfile');
+const toggleConfirmPasswordUpdate = document.getElementById('toggleConfirmPasswordUpdate');
 
 // Post Job DOM elements
 const postJobModal = document.getElementById('postJobModal');
@@ -45,9 +46,11 @@ const confirmPostUp = document.getElementById('confirmUpdate');
 const previewContainer = document.getElementById('jobImagePreview');
 const previewContainerUp = document.getElementById('jobImagePreview-update');
 
-// Job feed Dom elements
-const searchUser = document.querySelector('.searchUser')
-const searchButton = document.querySelector('.search-button');
+// Job feed header Dom elements
+const searchUserHome = document.getElementById('searchUser-home');
+const searchUserProfile = document.getElementById('searchUser-profile');
+const searchButtonHome = document.querySelector('#homePage .search-button');
+const searchButtonProfile = document.querySelector('#profilePage .search-button');
 
 // profile Page elements
 const profileModel = document.getElementById('updateProfileModal');
@@ -101,7 +104,6 @@ const apiCall = ({ url, method = 'GET', token = true, body = null }) => {
         });
 
 };
-
 
 // ==================== PAGE NAVIGATION ====================
 // Define the Modal for post and update
@@ -258,6 +260,41 @@ window.addEventListener('load', () => {
 window.addEventListener('hashchange', routeToPage);
 
 // ==================== NAVIGATION BUTTON EVENT LISTENERS ====================
+
+// User using the search button to view userprofile
+const SearchView = (input, button) => {
+    if (!input || !button) return;
+
+    button.addEventListener('click', () => {
+        const userInput = input.value.trim();
+        const emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
+        const numberRegex = /^[0-9]+$/;
+
+        if (userInput.length < 5) {
+            showNotification('Please enter the user ID or email', 'info');
+            return;
+        }
+
+        if (numberRegex.test(userInput)) {
+            apiCall({ url: `${BACKEND_URL}/user?userId=${userInput}` })
+                .then(data => {
+                    if (data && data.id) {
+                        userFeed(data.id);
+                    }
+                })
+                .catch(() => {
+                    showNotification('Invalid user ID.', 'error');
+                });
+        } else if (emailRegex.test(userInput)) {
+            showNotification('Follow by email not implemented yet.', 'info');
+        } else {
+            showNotification('Invalid input format.', 'error');
+        }
+    });
+};
+
+SearchView(searchUserHome, searchButtonHome);
+SearchView(searchUserProfile, searchButtonProfile);
 
 // When the register button is clicked, update the hash to trigger the register page
 registerButton.addEventListener('click', () => {
@@ -493,6 +530,37 @@ cancelPost.forEach(btn => {
     });
 });
 
+// validate user form
+const validateForm = (email, name, password, confirm) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    // Email validation
+    if (!emailRegex.test(email)) {
+        showNotification('Please enter a valid email address.', 'warning');
+        return false;
+    }
+
+    // Name length validation
+    if (name.length < 3 || name.length > 50) {
+        showNotification('Full name must be between 3 and 50 characters.', 'warning');
+        return false;
+    }
+
+    // Password strength validation
+    if (password.length < 6) {
+        showNotification('Password must be at least 6 characters long.', 'warning');
+        return false;
+    }
+
+    // Password consistency check
+    if (password !== confirm) {
+        showNotification('Passwords do not match.', 'warning');
+        return false;
+    }
+
+    return true;
+};
+
 // updating Profile EventListener
 confirmUpButton.addEventListener('click', () => {
     const updateEmail = document.getElementById('updateEmail').value.trim();
@@ -553,37 +621,6 @@ confirmUpButton.addEventListener('click', () => {
 // cancelPostUp.addEventListener('click', () => {
 //     updateJobModal.classList.add('hide');
 // });
-
-// validate user form
-const validateForm = (email, name, password, confirm) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    // Email validation
-    if (!emailRegex.test(email)) {
-        showNotification('Please enter a valid email address.', 'warning');
-        return false;
-    }
-
-    // Name length validation
-    if (name.length < 3 || name.length > 50) {
-        showNotification('Full name must be between 3 and 50 characters.', 'warning');
-        return false;
-    }
-
-    // Password strength validation
-    if (password.length < 6) {
-        showNotification('Password must be at least 6 characters long.', 'warning');
-        return false;
-    }
-
-    // Password consistency check
-    if (password !== confirm) {
-        showNotification('Passwords do not match.', 'warning');
-        return false;
-    }
-
-    return true;
-};
 
 // Registration submission
 submitButton.addEventListener('click', () => {
