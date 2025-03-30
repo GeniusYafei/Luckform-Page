@@ -356,12 +356,47 @@
     /* space between update and delete */
 }
 
-#homePage .update-wrapper {
+#profilePage .update-button,
+#profilePage .delete-button {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: none;
+    background: none;
+    cursor: pointer;
+}
+
+#profilePage .update-icon,
+#profilePage .delete-icon,
+#profilePage .delete-icon-hover {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+#profilePage .delete-icon-hover {
+    display: none;
+}
+
+#profilePage .delete-button:hover .delete-icon {
+    display: none;
+}
+
+#profilePage .delete-button:hover .delete-icon-hover {
+    display: block;
+}
+
+#profilePage .update-button:hover {
+    background-color: #f3f2ef;
+    border-radius: 50%;
+}
+
+#profilePage .update-wrapper {
     position: relative;
     display: inline-block;
 }
 
-#homePage .update-dropdown {
+#profilePage .update-dropdown {
     position: absolute;
     padding: 5px;
     top: 33px;
@@ -373,7 +408,7 @@
     z-index: 10;
 }
 
-#homePage .dropdown-item {
+#profilePage .dropdown-item {
     padding: 3px 10px;
     border: none;
     background: none;
@@ -384,7 +419,7 @@
     cursor: pointer;
 }
 
-#homePage .dropdown-item:hover {
+#profilePage .dropdown-item:hover {
     background-color: #f3f2ef;
     color: #0a66c2;
 }
@@ -481,6 +516,43 @@
     font-size: 12px;
     color: gray;
     margin: 0;
+}
+
+#profilePage .interaction-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+#profilePage .like-button,
+#profilePage .comment-button,
+#profilePage .toggle-likes-button {
+    background-color: transparent;
+    border: 1px solid #0073b1;
+    color: #0073b1;
+    font-size: 14px;
+    cursor: pointer;
+    margin-right: 10px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    transition: all 0.2s;
+}
+
+#profilePage .like-button:hover,
+#profilePage .comment-button:hover,
+#profilePage .toggle-likes-button:hover {
+    background-color: #eef3f8;
+}
+
+#profilePage .btn-primary {
+    background-color: #0a66c2;
+    color: white;
+    border: 1px solid transparent;
+}
+
+#profilePage .btn-primary:hover {
+    background-color: #004182;
 }
 
 
