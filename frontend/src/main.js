@@ -153,12 +153,20 @@ const homeFeed = () => {
         });
 };
 
+let lastRenderedUserId = null;
 // Define the function that loads the user information (userpage)
-const userFeed = (userId) => {
+const userFeed = (userId, setHash = true) => {
     const loggedInUserId = localStorage.getItem('userId');
 
     // Default renders itself if no parameters are given
     const targetUserId = userId || loggedInUserId;
+
+    if (String(targetUserId) === String(lastRenderedUserId)) {
+        console.log(`[userFeed] Skipping repeated render for userId: ${targetUserId}`);
+        return;
+    }
+
+    lastRenderedUserId = targetUserId;
 
     if (!targetUserId) {
         showNotification('The user was not found', 'error');
@@ -166,7 +174,16 @@ const userFeed = (userId) => {
         return;
     }
 
-    showPage('profile');
+    localStorage.setItem('lastViewedUserId', targetUserId);
+
+    if (setHash) {
+        window.location.hash = `/user?id=${targetUserId}`;
+    }
+
+    // Avoid repeated rendering of the current user
+    currentPage = 'profile';
+    Object.values(pages).forEach(page => page.classList.add('hide'));
+    pages['profile'].classList.remove('hide');
 
     renderUser(targetUserId);         // display user information
     renderProfileJobs(targetUserId);  // display job-card
@@ -206,7 +223,9 @@ const showPage = (pageName, updateHash = true) => {
 
     // If the home page is displayed, load the job feed
     if (pageName === 'home') homeFeed();
-    if (pageName === 'profile') userFeed();
+    // if (pageName === 'profile' && !window._skipAutoUserFeed) {
+    //     userFeed(); // only run if not overridden
+    // }
 
 };
 
@@ -214,9 +233,32 @@ const showPage = (pageName, updateHash = true) => {
 const routeToPage = () => {
     const hash = window.location.hash;
     const token = localStorage.getItem('token');
+
     // If hash is empty or just '#', go to login
     if (!hash || hash === '#') {
         window.location.hash = ROUTES.login;
+        return;
+    }
+
+    if (hash.startsWith('#/user?id=')) {
+        const query = new URLSearchParams(hash.split('?')[1]);
+        const id = query.get('id');
+        if (id) {
+            showPage('profile', false);
+            userFeed(id, false); // Do not repeat Settings hash
+        }
+        return;
+    }
+
+    if (hash === '#/user') {
+        const id = localStorage.getItem('userId');
+        if (id) {
+            showPage('profile', false);
+            userFeed(id, false);
+        } else {
+            showNotification('Please log in first.', 'error');
+            window.location.hash = ROUTES.login;
+        }
         return;
     }
 
@@ -258,6 +300,9 @@ window.addEventListener('load', () => {
 
 // Listen for hash changes (e.g., when using back/forward buttons)
 window.addEventListener('hashchange', routeToPage);
+window.addEventListener('hashchange', () => {
+    lastRenderedUserId = null;
+});
 
 // ==================== NAVIGATION BUTTON EVENT LISTENERS ====================
 
@@ -267,7 +312,7 @@ const SearchView = (input, button) => {
 
     button.addEventListener('click', () => {
         const userInput = input.value.trim();
-        const emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         const numberRegex = /^[0-9]+$/;
 
         if (userInput.length < 5) {
@@ -288,7 +333,7 @@ const SearchView = (input, button) => {
         } else if (emailRegex.test(userInput)) {
             showNotification('Follow by email not implemented yet.', 'info');
         } else {
-            showNotification('Invalid input format.', 'error');
+            showNotification('Please enter the user ID or email', 'info');
         }
     });
 };
@@ -384,8 +429,11 @@ profileMenu.forEach((menu) => {
 });
 
 viewProfile.forEach(btn => {
-    btn.addEventListener('click', () => showPage('profile'))
-})
+    btn.addEventListener('click', () => {
+        const userId = localStorage.getItem('userId');
+        userFeed(userId); ;
+    });
+});
 
 // When a user selects an image file, preview it before posting
 // ==================== IMAGE PREVIEW HANDLER ====================
