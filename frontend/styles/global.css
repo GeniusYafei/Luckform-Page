@@ -8,7 +8,10 @@ body {
 }
 
 /* page hide */
-.hide {
+#homePage.hide,
+#profilePage.hide,
+#loginPage.hide,
+#registerPage.hide {
   display: none;
 }
 
@@ -20,7 +23,7 @@ body {
   padding: 12px 20px;
   border-radius: 8px;
   z-index: 1000;
-  box-shadow: 0 0 10px rgba(0,0,0,0.3);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
   /* display: flex;
   align-items: center; */
   gap: 10px;
@@ -38,10 +41,40 @@ body {
   cursor: pointer;
 }
 
-/* footer */
-footer {
-  background: #333;
-  color: #f9f9f9;
-  text-align: center;
-  padding: 1rem;
+#loading {
+  display: none;
+  width: 100%;
+  height: 100%;
+  justify-content: center;
+  align-items: center;
 }
+
+.tooltip-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.tooltip-wrapper .tooltip-text {
+  visibility: hidden;
+  width: 260px;
+  background-color: #333;
+  color: #fff;
+  text-align: center;
+  font-size: 12px;
+  padding: 6px 8px;
+  border-radius: 4px;
+
+  position: absolute;
+  z-index: 100;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.tooltip-wrapper:hover .tooltip-text {
+  visibility: visible;
+  opacity: 1;
+}
+

@@ -17,10 +17,10 @@
 </head>
 
 <body>
-  <!-- Error Pages -->
-  <div id="errorPopup" class="popup hide">
-    <span id="errorMessage"></span>
-    <button id="closeErrorPopup">X</button>
+  <!-- loading page-->
+  <div class="loading" id="loading">
+    <div id="spinner"></div>
+    <p>loading...</p>
   </div>
 
   <!-- Login Pages -->
@@ -71,7 +71,10 @@
         <img src="styles/lu-favicon.svg" alt="logo icon" class="logo-icon" />
         <p>LurkForWork</p>
         <div class="search-container">
-          <input class="searchUser" type="text" placeholder="Search user">
+          <div class="tooltip-wrapper">
+            <input class="searchUser" id="searchUser-home" type="text" placeholder="Follow user & Search user">
+            <span class="tooltip-text">If you know their userId, you can directly view the user profile</span>
+          </div>
           <button class="search-button" aria-label="Search">
             <img src="styles/search.svg" alt="Search" class="search-icon">
           </button>
@@ -175,8 +178,11 @@
         <img src="styles/lu-favicon.svg" alt="logo icon" class="logo-icon" />
         <p>LurkForWork</p>
         <div class="search-container">
-          <input class="searchUser" type="text" placeholder="Search user">
-          <button class="search-button" aria-label="Search">
+          <div class="tooltip-wrapper">
+            <input class="searchUser" id="searchUser-profile" type="text" placeholder="Follow user & Search user">
+            <span class="tooltip-text">If you know their userId, you can directly view the user profile</span>
+          </div>
+          <button class="search-button"  aria-label="Search">
             <img src="styles/search.svg" alt="Search" class="search-icon">
           </button>
         </div>
@@ -193,8 +199,8 @@
       </div>
     </header>
 
-    <main class="jobfeed-main">
-      <!-- Sidebar -->
+    <main class="jobfeed-main profile-layout">
+      <!-- userbar -->
       <section class="Sidebar">
         <div class="sidebarUser" id="profileSidebar">
           <div class="userSidebar"></div>
@@ -202,6 +208,11 @@
             <button class="Updating hide">Updating your profile</button>
           </div>
         </div>
+      </section>
+
+      <!-- Job Feed Section -->
+      <section class="user-job-feed" id="userJobFeed">
+        <!-- JS will populate this -->
       </section>
       <!-- Update profile Modal -->
       <section id="updateProfileModal" class="modal hide">
@@ -215,11 +226,6 @@
           <label for="name">Update Name</label>
           <input type="text" id="updateName" name="Name" placeholder="Username" />
 
-          <!-- <label for="password">Update Password</label>
-          <input type="password" id="updaterPassword" name="updatePassword" placeholder="Password" />
-
-          <input type="password" id="UpConfirmPassword" name="ConfirmPassword" placeholder="Confirm Password" />
-          <button type="button" id="toggleConfirmPassword" class="toggle-btn">Show</button> -->
           <div class="inputContainer">
             <label for="password">Update Password</label>
             <input type="password" id="updaterPassword" name="updaterPassword" placeholder="Password" />
@@ -239,6 +245,18 @@
           </div>
         </div>
       </section>
+      <!-- Right-side suggestion box -->
+      <aside class="profile-suggested">
+        <h3>People you may know</h3>
+        <ul>
+          <li>
+            <div class="suggested-user">👤 Eric Howzed WS</div>
+          </li>
+          <li>
+            <div class="suggested-user">👤 Jenny Chen</div>
+          </li>
+        </ul>
+      </aside>
     </main>
   </div>
 
