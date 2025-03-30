@@ -46,13 +46,15 @@ const previewContainer = document.getElementById('jobImagePreview');
 const previewContainerUp = document.getElementById('jobImagePreview-update');
 
 // Job feed Dom elements
+const searchUser = document.querySelector('.searchUser')
+const searchButton = document.querySelector('.search-button');
 
 // profile Page elements
 const profileModel = document.getElementById('updateProfileModal');
 const updateButton = document.querySelector('.Updating');
 const confirmUpButton = document.getElementById('confirmUserUpdate');
 const userImage = document.getElementById('userImage');
-const userImagePreview = document.getElementById('avatarImagePreview')
+const userImagePreview = document.getElementById('avatarImagePreview');
 
 // Page containers
 const loginPage = document.getElementById('loginPage');
@@ -133,6 +135,8 @@ const showModal = (type) => {
 // Define the function that loads the JobFeed (homepage)
 const homeFeed = () => {
     const token = localStorage.getItem('token');
+    const userId = localStorage.getItem('userId');
+
     if (!token) {
         showNotification('Please log in first', 'error');
         showPage('login');
@@ -143,8 +147,34 @@ const homeFeed = () => {
             console.log(data)
             renderJobFeed(data);
             // Ensure sidebar is updated when rendering a job card
-            renderUser();
+            renderUser(userId);
         });
+};
+
+// Define the function that loads the user information (userpage)
+const userFeed = (userId) => {
+    const loggedInUserId = localStorage.getItem('userId');
+
+    // Default renders itself if no parameters are given
+    const targetUserId = userId || loggedInUserId;
+
+    if (!targetUserId) {
+        showNotification('The user was not found', 'error');
+        showPage('home');
+        return;
+    }
+
+    showPage('profile');
+
+    renderUser(targetUserId);         // display user information
+    renderProfileJobs(targetUserId);  // display job-card
+
+    //  Whether the "Update data" button is displayed
+    if (String(loggedInUserId) === String(targetUserId)) {
+        updateButton.classList.remove('hide');
+    } else {
+        updateButton.classList.add('hide');
+    }
 };
 
 // Define the function that loads the userProfile (profilePage)
@@ -174,10 +204,8 @@ const showPage = (pageName, updateHash = true) => {
 
     // If the home page is displayed, load the job feed
     if (pageName === 'home') homeFeed();
-    if (pageName === 'profile') {
-        renderUser();
-        renderProfileJobs();
-    };
+    if (pageName === 'profile') userFeed();
+
 };
 
 // Route to the correct page based on the current URL hash
@@ -658,19 +686,18 @@ const formatDateOnly = (dateStr) => {
 
 // ==================== Render userProfiles Job ====================
 // Only the jobs posted by the user are displayed on the profile page
-const renderProfileJobs = () => {
+const renderProfileJobs = (userId) => {
     const container = document.getElementById('userJobFeed');
     container.replaceChildren(); // clear old content
 
-    const currentUserId = localStorage.getItem('userId');
+    // const currentUserId = localStorage.getItem('userId');
 
-    apiCall({ url: `${BACKEND_URL}/job/feed?start=0` }).then(allJobs => {
+    apiCall({ url: `${BACKEND_URL}/user?userId=${userId}` }).then(data => {
+        const userJobs = data.jobs || [];
         // Only the jobs published by the user are kept
-        const userJobs = allJobs.filter(job => job.creatorId === Number(currentUserId));
-
         if (userJobs.length === 0) {
             const empty = document.createElement('p');
-            empty.textContent = 'You have not posted any jobs yet.';
+            empty.textContent = 'This user has not posted any jobs yet.';
             empty.className = 'empty-jobs-message';
             container.appendChild(empty);
             return;
@@ -684,13 +711,12 @@ const renderProfileJobs = () => {
 };
 
 // ==================== Render user profile ====================
-const renderUser = () => {
+const renderUser = (userId) => {
     const sidebarUser = document.querySelectorAll('.userSidebar');
-    const currentUserId = localStorage.getItem('userId');
 
-    updateButton.classList.remove('hide');
+    // updateButton.classList.remove('hide');
 
-    apiCall({ url: `${BACKEND_URL}/user/?userId=${currentUserId}` })
+    apiCall({ url: `${BACKEND_URL}/user/?userId=${userId}` })
         .then(data => {
             if (data.error) {
                 showNotification(data.error, 'error');
@@ -728,25 +754,28 @@ const renderUser = () => {
             });
 
             // // Update top-right avatar menu
-            const profileMenuButton = document.querySelectorAll('.avatar-button');
-            // const avatarLetter = document.getElementById('avatarLetter');
-            profileMenuButton.forEach((btn) => {
-                while (btn.firstChild) {
-                    btn.removeChild(btn.firstChild); // clear previous content
-                }
-                if (data.image) {
-                    const img = document.createElement('img');
-                    img.src = data.image;
-                    img.alt = 'avatar';
-                    img.className = 'avatar-img';
-                    btn.appendChild(img);
-                } else {
-                    const span = document.createElement('span');
-                    span.className = 'avatar-letter';
-                    span.textContent = data.name[0]?.toUpperCase() || 'U';
-                    btn.appendChild(span);
-                }
-            });
+            const currentUserId = localStorage.getItem('userId');
+            if (String(currentUserId) === String(userId)) {
+                const profileMenuButton = document.querySelectorAll('.avatar-button');
+                // const avatarLetter = document.getElementById('avatarLetter');
+                profileMenuButton.forEach((btn) => {
+                    while (btn.firstChild) {
+                        btn.removeChild(btn.firstChild); // clear previous content
+                    }
+                    if (data.image) {
+                        const img = document.createElement('img');
+                        img.src = data.image;
+                        img.alt = 'avatar';
+                        img.className = 'avatar-img';
+                        btn.appendChild(img);
+                    } else {
+                        const span = document.createElement('span');
+                        span.className = 'avatar-letter';
+                        span.textContent = data.name[0]?.toUpperCase() || 'U';
+                        btn.appendChild(span);
+                    }
+                });
+            }
         });
 };
 
@@ -1040,6 +1069,7 @@ const createJobCard = (job) => {
                 }).then(() => {
                     showNotification('Successfully deleted!', 'success');
                     homeFeed();
+                    // renderJobFeed();
                 });
             },
             (job) => {
@@ -1084,7 +1114,7 @@ const createJobCard = (job) => {
     desc.textContent = job.description;
     content.appendChild(desc);
     card.appendChild(content);
-    
+
     // ----- Interaction section -----
     // Get the current user name and insert it into the interactive bar
     apiCall({
