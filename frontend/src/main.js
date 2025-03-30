@@ -130,6 +130,13 @@ const pages = {
 };
 
 const showModal = (type) => {
+    if (type === 'update') {
+        // If you are not currently on the home page, "borrow" the homePage modal
+        if (currentPage !== 'home') {
+            homePage.classList.remove('hide');
+            homePage.classList.add('fake-hide');
+        }
+    }
     Object.values(modals).forEach(m => m.classList.add('hide'));
     modals[type].classList.remove('hide');
 }
@@ -187,6 +194,7 @@ const userFeed = (userId, setHash = true) => {
 
     renderUser(targetUserId);         // display user information
     renderProfileJobs(targetUserId);  // display job-card
+    renderUserWatchlist(targetUserId);
 
     //  Whether the "Update data" button is displayed
     if (String(loggedInUserId) === String(targetUserId)) {
@@ -217,12 +225,12 @@ const showPage = (pageName, updateHash = true) => {
         }
     }
 
-    // // Display the selected page
-    // pages[pageName].style.display = 'block';
-    // currentPage = pageName;
-
     // If the home page is displayed, load the job feed
-    if (pageName === 'home') homeFeed();
+    if (pageName === 'home') {
+        const homePage = document.getElementById('homePage');
+        homePage.classList.remove('fake-hide');
+        homeFeed();
+    }
     // if (pageName === 'profile' && !window._skipAutoUserFeed) {
     //     userFeed(); // only run if not overridden
     // }
@@ -282,25 +290,27 @@ const routeToPage = () => {
 // On page load, set the default hash if needed and route accordingly
 window.addEventListener('load', () => {
     const loader = document.getElementById('loading');
-    setTimeout(() => {
-        loader.style.display = 'none';
-    }, 1000);
+    // The delay makes loading disappear, making sure it actually shows up
+    // setTimeout(() => {
+    //     loader.classList.add('hidden');
+    // }, 1000);
 
+    // Page routing jumps are then processed
     if (!window.location.hash) {
-        // Default jump if there is no hash
         if (localStorage.getItem('token')) {
             window.location.hash = '/job/feed';
         } else {
             window.location.hash = '/auth/login';
         }
     } else {
-        routeToPage(); // Current hash jump
+        routeToPage();
     }
 });
 
 // Listen for hash changes (e.g., when using back/forward buttons)
-window.addEventListener('hashchange', routeToPage);
+// window.addEventListener('hashchange', routeToPage);
 window.addEventListener('hashchange', () => {
+    routeToPage();
     lastRenderedUserId = null;
 });
 
@@ -795,6 +805,63 @@ const renderProfileJobs = (userId) => {
     });
 };
 
+// ==================== Render user watch list ====================
+const renderUserWatchlist = (userId) => {
+    const watchList = document.querySelector('.watch-list');
+    // const watchList = document.createElement('div');
+    // watchList.className = 'watch-list'
+
+    apiCall({ url: `${BACKEND_URL}/user/?userId=${userId}` })
+        .then(data => {
+            if (data.error) {
+                showNotification(data.error, 'error');
+                return;
+            };
+
+            const WatchMeUser = data.usersWhoWatchMeUserIds
+            console.log('WatchMeUserId:', WatchMeUser);
+
+            if (WatchMeUser) {
+                WatchMeUser.forEach(id => {
+                    const watchMeUserId = id;
+                    console.log(watchMeUserId)
+                    apiCall({ url: `${BACKEND_URL}/user/?userId=${watchMeUserId}` })
+                        .then(data => {
+                            const avatarWrapper = document.createElement('div');
+
+                            avatarWrapper.className = 'avatar-wrapper';
+                            // Render avatar or fallback letter
+                            if (data.image) {
+                                const img = document.createElement('img');
+                                img.src = data.image;
+                                img.alt = 'User Avatar';
+                                img.className = 'avatar-img';
+                                avatarWrapper.appendChild(img);
+                            } else {
+                                const avatarLetter = document.createElement('div');
+                                avatarLetter.className = 'avatar-button';
+                                avatarLetter.textContent = data.name[0].toUpperCase();
+                                avatarWrapper.appendChild(avatarLetter);
+                            }
+
+                            // Append name and email
+                            const name = document.createElement('h2');
+                            name.textContent = data.name || 'User';
+                            avatarWrapper.appendChild(name);
+
+                            const email = document.createElement('p');
+                            email.textContent = data.email || '';
+                            avatarWrapper.appendChild(email);
+
+                            watchList.appendChild(avatarWrapper);
+
+                            // Append  Watching / Unwatching
+                        });
+                })
+            }
+        })
+}
+
 // ==================== Render user profile ====================
 const renderUser = (userId) => {
     const sidebarUser = document.querySelectorAll('.userSidebar');
@@ -808,10 +875,10 @@ const renderUser = (userId) => {
                 return;
             }
 
-            sidebarUser.forEach(btn => {
+            sidebarUser.forEach(avatar => {
                 // Clear existing sidebar content
-                while (btn.firstChild) {
-                    btn.removeChild(btn.firstChild);
+                while (avatar.firstChild) {
+                    avatar.removeChild(avatar.firstChild);
                 }
 
                 // Render avatar or fallback letter
@@ -820,22 +887,22 @@ const renderUser = (userId) => {
                     img.src = data.image;
                     img.alt = 'User Avatar';
                     img.className = 'avatar-img';
-                    btn.appendChild(img);
+                    avatar.appendChild(img);
                 } else {
                     const fallback = document.createElement('div');
                     fallback.className = 'avatar-fallback';
                     fallback.textContent = data.name[0]?.toUpperCase();
-                    btn.appendChild(fallback);
+                    avatar.appendChild(fallback);
                 }
 
                 // Append name and email
                 const name = document.createElement('h2');
                 name.textContent = data.name || 'User';
-                btn.appendChild(name);
+                avatar.appendChild(name);
 
                 const email = document.createElement('p');
                 email.textContent = data.email || '';
-                btn.appendChild(email);
+                avatar.appendChild(email);
             });
 
             // // Update top-right avatar menu
@@ -984,7 +1051,7 @@ const createActionButtons = (job, onDelete, onUpdate) => {
 };
 
 // ==================== Create Like and Comment Section ====================
-function createInteractionSection(job, currentUserId, currentUserName) {
+const createInteractionSection = (job, currentUserId, currentUserName) => {
     const wrapper = document.createElement('div');
     wrapper.className = 'interaction-wrapper';
 
