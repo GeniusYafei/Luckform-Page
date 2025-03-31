@@ -914,10 +914,14 @@ const renderUserWatchlist = (userId) => {
                                 img.src = data.image;
                                 img.alt = 'User Avatar';
                                 img.className = 'avatar-img';
+                                img.classList.add('avatar-img', 'clickable-user');
+                                img.setAttribute('data-user-id', data.id);
                                 avatarWrapper.appendChild(img);
                             } else {
                                 const avatarLetter = document.createElement('div');
                                 avatarLetter.className = 'avatar-button';
+                                avatarLetter.classList.add('avatar-img', 'clickable-user');
+                                avatarLetter.setAttribute('data-user-id', data.id);
                                 avatarLetter.textContent = data.name[0].toUpperCase();
                                 avatarWrapper.appendChild(avatarLetter);
                             }
@@ -994,6 +998,8 @@ const renderUser = (userId) => {
                 watchButton.classList.remove('hide');
 
                 const isFollowing = data.usersWhoWatchMeUserIds.includes(loggedInUserId);
+                watchButton.classList.remove('watch-mode', 'unwatch-mode');
+                watchButton.classList.add(isFollowing ? 'unwatch-mode' : 'watch-mode');
                 watchButton.textContent = isFollowing ? 'Unwatch' : 'Watch';
 
                 watchButton.onclick = () => {
@@ -1058,10 +1064,14 @@ const renderJobCardHeader = (job, headerElement) => {
                 avatar.src = data.image;
                 avatar.alt = 'avatar';
                 avatar.className = 'user-avatar';
+                avatar.setAttribute('data-user-id', data.id);
+                avatar.classList.add('clickable-user');
                 avatarWrapper.appendChild(avatar);
             } else {
                 const avatarLetter = document.createElement('div');
                 avatarLetter.className = 'avatar-button';
+                avatarLetter.setAttribute('data-user-id', data.id);
+                avatarLetter.classList.add('clickable-user');
                 avatarLetter.textContent = data.name[0].toUpperCase();
                 avatarWrapper.appendChild(avatarLetter);
             }
@@ -1220,6 +1230,8 @@ const createInteractionSection = (job, currentUserId, currentUserName) => {
 
                 const avatar = document.createElement('div');
                 avatar.className = 'avatar-letter';
+                avatar.setAttribute('data-user-id', user.userId);
+                avatar.classList.add('clickable-user');
                 avatar.textContent = user.userName?.[0]?.toUpperCase() || '?';
 
                 const name = document.createElement('span');
@@ -1247,13 +1259,17 @@ const createInteractionSection = (job, currentUserId, currentUserName) => {
         const item = document.createElement('div');
         item.className = 'comment-item';
 
-        const name = document.createElement('strong');
-        name.textContent = comment.userName;
+        // const name = document.createElement('strong');
+        // name.textContent = comment.userName;
+        const userName = document.createElement('span');
+        userName.textContent = comment.userName;
+        userName.setAttribute('data-user-id', comment.userId);
+        userName.classList.add('clickable-user');
 
         const content = document.createElement('span');
         content.textContent = `: ${comment.comment}`;
 
-        item.appendChild(name);
+        item.appendChild(userName);
         item.appendChild(content);
         commentList.appendChild(item);
     });
@@ -1430,7 +1446,12 @@ const renderJobFeed = (jobs) => {
 //         profileMenu.classList.add('hide');
 //     }
 // })
-document.addEventListener('click', () => {
+document.addEventListener('click', (e) => {
+    const target = e.target.closest('.clickable-user');
+    if (target && target.dataset.userId) {
+        const userId = target.dataset.userId;
+        userFeed(userId);
+    };
     profileMenu.forEach((menu) => {
         menu.classList.add('hide');
     });
