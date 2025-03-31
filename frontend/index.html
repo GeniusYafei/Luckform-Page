@@ -18,10 +18,10 @@
 
 <body>
   <!-- loading page-->
-  <div class="loading" id="loading">
+  <!-- <div class="loading" id="loading">
     <div id="spinner"></div>
     <p>loading...</p>
-  </div>
+  </div> -->
 
   <!-- Login Pages -->
   <div id="loginPage" class="page" page="loginPage">
@@ -68,20 +68,41 @@
   <div id="homePage" class="page hide" page="homePage">
     <header class="jobfeed-header">
       <div class="left-container">
-        <img src="styles/lu-favicon.svg" alt="logo icon" class="logo-icon" />
-        <p>LurkForWork</p>
+        <div class="logo-container">
+          <img src="styles/lu-favicon.svg" alt="logo icon" class="logo-icon" />
+          <p>LurkForWork</p>
+        </div>
         <div class="search-container">
           <div class="tooltip-wrapper">
             <input class="searchUser" id="searchUser-home" type="text" placeholder="Follow user & Search user">
-            <span class="tooltip-text">If you know their userId, you can directly view the user profile</span>
+            <span class="tooltip-text">You can view their profile by enter userId, if you enter email you can watching
+              the user</span>
+            <button class="search-button" aria-label="Search">
+              <img src="styles/search.svg" alt="Search" class="search-icon">
+            </button>
           </div>
-          <button class="search-button" aria-label="Search">
-            <img src="styles/search.svg" alt="Search" class="search-icon">
-          </button>
         </div>
       </div>
-      <!-- Button post modal -->
-      <button class="postJobButton">Post a Job</button>
+      <div class="right-container">
+        <div class="component">
+          <button class="home-button" aria-label="home">
+            <img src="styles/homeicon.svg" alt="Home" class="home-icon">
+          </button>
+          <button class="notification-button" aria-label="notification">
+            <img src="styles/notificationicon.svg" alt="Notification" class="notification">
+          </button>
+        </div>
+        <!-- Button post modal -->
+        <button class="postJobButton">Post a Job</button>
+        <div class="nav-icons">
+          <button class="avatar-button"></button>
+          <div class="profile-dropdown hide">
+            <!-- <p id="profileName"></p> -->
+            <button class="viewProfile">View Profile</button>
+            <button class="LogoutButton">Sign Out</button>
+          </div>
+        </div>
+      </div>
       <!-- Post Job Modal -->
       <div id="postJobModal" class="modal hide">
         <div class="modal-content">
@@ -132,16 +153,6 @@
           </div>
         </div>
       </div>
-      <div class="nav-icons">
-        <!-- <button id="profileMenuButton" class="avatar-button"> -->
-        <button class="avatar-button"></button>
-        <!-- <div id="profileMenu" class="profile-dropdown hide"> -->
-        <div class="profile-dropdown hide">
-          <!-- <p id="profileName"></p> -->
-          <button class="viewProfile">View Profile</button>
-          <button class="LogoutButton">Sign Out</button>
-        </div>
-      </div>
     </header>
 
     <main class="jobfeed-main">
@@ -175,26 +186,36 @@
   <div id="profilePage" class="page hide" page="profilePage">
     <header class="jobfeed-header">
       <div class="left-container">
-        <img src="styles/lu-favicon.svg" alt="logo icon" class="logo-icon" />
-        <p>LurkForWork</p>
+        <div class="logo-container">
+          <img src="styles/lu-favicon.svg" alt="logo icon" class="logo-icon" />
+          <p>LurkForWork</p>
+        </div>
         <div class="search-container">
           <div class="tooltip-wrapper">
             <input class="searchUser" id="searchUser-profile" type="text" placeholder="Follow user & Search user">
-            <span class="tooltip-text">If you know their userId, you can directly view the user profile</span>
+            <span class="tooltip-text">You can view their profile by enter userId, if you enter email you can watching
+              the user</span>
           </div>
-          <button class="search-button"  aria-label="Search">
+          <button class="search-button" aria-label="Search">
             <img src="styles/search.svg" alt="Search" class="search-icon">
           </button>
         </div>
       </div>
-      <div class="nav-icons">
-        <!-- <button id="profileMenuButton" class="avatar-button"> -->
-        <button class="avatar-button"></button>
-        <!-- <div id="profileMenu" class="profile-dropdown hide"> -->
-        <div class="profile-dropdown hide">
-          <!-- <p id="profileName"></p> -->
-          <button class="viewProfile">View Profile</button>
-          <button class="LogoutButton">Sign Out</button>
+      <div class="right-container">
+        <div class="component">
+          <button class="home-button" aria-label="home">
+            <img src="styles/homeicon.svg" alt="Home" class="home-icon" />
+          </button>
+          <button class="notification-button" aria-label="notification">
+            <img src="styles/notificationicon.svg" alt="Notification" class="notification" />
+          </button>
+        </div>
+        <div class="nav-icons">
+          <button class="avatar-button"></button>
+          <div class="profile-dropdown hide">
+            <button class="viewProfile">View Profile</button>
+            <button class="LogoutButton">Sign Out</button>
+          </div>
         </div>
       </div>
     </header>
@@ -206,6 +227,7 @@
           <div class="userSidebar"></div>
           <div class="profileButton">
             <button class="Updating hide">Updating your profile</button>
+            <button id="watchButton" class="Watching hide"></button>
           </div>
         </div>
       </section>
@@ -246,16 +268,13 @@
         </div>
       </section>
       <!-- Right-side suggestion box -->
-      <aside class="profile-suggested">
-        <h3>People you may know</h3>
-        <ul>
-          <li>
-            <div class="suggested-user">👤 Eric Howzed WS</div>
-          </li>
-          <li>
-            <div class="suggested-user">👤 Jenny Chen</div>
-          </li>
-        </ul>
+      <aside class="profile-watch">
+        <div class="Watch-header">
+          <h3>Users Watching</h3>
+          <p>From <span id="watchlistUserName"></span> watch list:</p>
+        </div>
+        <!-- watch user-->
+        <div class="watch-list"></div>
       </aside>
     </main>
   </div>
