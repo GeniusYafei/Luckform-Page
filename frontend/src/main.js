@@ -51,6 +51,8 @@ const searchUserHome = document.getElementById('searchUser-home');
 const searchUserProfile = document.getElementById('searchUser-profile');
 const searchButtonHome = document.querySelector('#homePage .search-button');
 const searchButtonProfile = document.querySelector('#profilePage .search-button');
+const logoPart = document.querySelectorAll('.logo-container');
+const homeButton = document.querySelectorAll('.home-icon');
 
 // profile Page elements
 const profileModel = document.getElementById('updateProfileModal');
@@ -332,11 +334,6 @@ const SearchView = (input, button) => {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         const numberRegex = /^[0-9]+$/;
 
-        if (userInput.length < 5) {
-            showNotification('Please enter the user ID or email', 'info');
-            return;
-        }
-
         if (numberRegex.test(userInput)) {
             apiCall({ url: `${BACKEND_URL}/user?userId=${userInput}` })
                 .then(data => {
@@ -348,15 +345,36 @@ const SearchView = (input, button) => {
                     showNotification('Invalid user ID.', 'error');
                 });
         } else if (emailRegex.test(userInput)) {
-            showNotification('Follow by email not implemented yet.', 'info');
+            apiCall({
+                url: `${BACKEND_URL}/user/watch`,
+                method: 'PUT',
+                body: { email: userInput, turnon: true }
+            })
+                .then(() => {
+                    showNotification('Watching by email successful.', 'success');
+                })
         } else {
             showNotification('Please enter the user ID or email', 'info');
+        }
+
+        if (userInput.length < 5) {
+            showNotification('Please enter the user ID or email', 'info');
+            return;
         }
     });
 };
 
 SearchView(searchUserHome, searchButtonHome);
 SearchView(searchUserProfile, searchButtonProfile);
+
+// jump to homePage button
+logoPart.forEach(btn => {
+    btn.addEventListener('click', () => showPage('home'));
+});
+
+homeButton.forEach(btn => {
+    btn.addEventListener('click', () => showPage('home'));
+});
 
 // When the register button is clicked, update the hash to trigger the register page
 registerButton.addEventListener('click', () => {
@@ -788,6 +806,37 @@ const formatDateOnly = (dateStr) => {
     return `${day}/${month}/${year}`;
 };
 
+// ==================== Render EmptyJobCar ====================
+// render a empty jobCar for their new register user
+const createEmptyJobCard = () => {
+    const card = document.createElement('div');
+    card.className = 'job-card';
+    card.id = 'emptyJobCard';
+
+    const header = document.createElement('div');
+    header.className = 'header-information';
+
+    const title = document.createElement('h2');
+    title.textContent = 'Are you ready to create a job?';
+
+    const img = document.createElement('img');
+    img.src = 'styles/illustration.png';
+    img.alt = 'img-illustration';
+    img.className = 'illustration';
+
+    const button = document.createElement('button');
+    button.className = 'postJobButton';
+    button.textContent = 'Post a Job';
+    button.addEventListener('click', () => showModal('post'));
+
+    header.appendChild(title);
+    header.appendChild(img);
+    header.appendChild(button);
+    card.appendChild(header);
+    return card;
+};
+
+
 // ==================== Render userProfiles Job ====================
 // Only the jobs posted by the user are displayed on the profile page
 const renderProfileJobs = (userId) => {
@@ -800,10 +849,29 @@ const renderProfileJobs = (userId) => {
         const userJobs = data.jobs || [];
         // Only the jobs published by the user are kept
         if (userJobs.length === 0) {
-            const empty = document.createElement('p');
-            empty.textContent = 'This user has not posted any jobs yet.';
-            empty.className = 'empty-jobs-message';
-            container.appendChild(empty);
+            // const empty = document.createElement('p');
+            // empty.textContent = 'This user has not posted any jobs yet.';
+            // empty.className = 'empty-jobs-message';
+            // container.appendChild(empty);
+            const emptyCard = document.createElement('div');
+            emptyCard.className = 'job-card empty-profile-job';
+
+            const header = document.createElement('div');
+            header.className = 'header-information';
+
+            const title = document.createElement('h2');
+            title.textContent = 'This user has not posted any jobs yet.';
+
+            const illustration = document.createElement('img');
+            illustration.src = 'styles/illustration_1.png';
+            illustration.alt = 'Empty Illustration';
+            illustration.className = 'illustration';
+
+            header.appendChild(title);
+            header.appendChild(illustration);
+            emptyCard.appendChild(header);
+
+            container.appendChild(emptyCard);
             return;
         }
 
@@ -1331,26 +1399,18 @@ const createJobCard = (job) => {
 // Clears and repopulates job feed container with fresh job cards
 const renderJobFeed = (jobs) => {
     const container = document.getElementById('feedContainer');
-    const emptyCard = document.getElementById('emptyJobCard');
+    container.replaceChildren(); // Always clear first
 
-    // If there is a Job, remove the empty card and render the Job list
-    if (jobs.length > 0) {
-        if (emptyCard) {
-            emptyCard.remove();
-        }
-
-        container.replaceChildren(); // empty container
-        jobs.forEach(job => {
-            const jobCard = createJobCard(job);
-            container.appendChild(jobCard);
-        });
-    } else {
-        // Append each job card to container
-        container.replaceChildren();
-        if (emptyCard) {
-            container.appendChild(emptyCard);
-        }
+    if (jobs.length === 0) {
+        const emptyCard = createEmptyJobCard();
+        container.appendChild(emptyCard);
+        return;
     }
+
+    jobs.forEach(job => {
+        const jobCard = createJobCard(job);
+        container.appendChild(jobCard);
+    });
 };
 
 // ==================== INITIALIZATION ====================
