@@ -55,6 +55,7 @@ const searchButtonProfile = document.querySelector('#profilePage .search-button'
 // profile Page elements
 const profileModel = document.getElementById('updateProfileModal');
 const updateButton = document.querySelector('.Updating');
+const watchButton = document.querySelector('.Watching');
 const confirmUpButton = document.getElementById('confirmUserUpdate');
 const userImage = document.getElementById('userImage');
 const userImagePreview = document.getElementById('avatarImagePreview');
@@ -148,12 +149,14 @@ const homeFeed = () => {
 
     if (!token) {
         showNotification('Please log in first', 'error');
+
         showPage('login');
         return;
     }
     apiCall({ url: `${BACKEND_URL}/job/feed?start=0` })
         .then(data => {
             console.log(data)
+            updateTopAvatar();
             renderJobFeed(data);
             // Ensure sidebar is updated when rendering a job card
             renderUser(userId);
@@ -192,6 +195,7 @@ const userFeed = (userId, setHash = true) => {
     Object.values(pages).forEach(page => page.classList.add('hide'));
     pages['profile'].classList.remove('hide');
 
+    updateTopAvatar();
     renderUser(targetUserId);         // display user information
     renderProfileJobs(targetUserId);  // display job-card
     renderUserWatchlist(targetUserId);
@@ -199,8 +203,10 @@ const userFeed = (userId, setHash = true) => {
     //  Whether the "Update data" button is displayed
     if (String(loggedInUserId) === String(targetUserId)) {
         updateButton.classList.remove('hide');
+        watchButton.classList.add('hide');
     } else {
         updateButton.classList.add('hide');
+        watchButton.classList.remove('hide');
     }
 };
 
@@ -231,6 +237,7 @@ const showPage = (pageName, updateHash = true) => {
         homePage.classList.remove('fake-hide');
         homeFeed();
     }
+    updateTopAvatar();
     // if (pageName === 'profile' && !window._skipAutoUserFeed) {
     //     userFeed(); // only run if not overridden
     // }
@@ -845,7 +852,9 @@ const renderUserWatchlist = (userId) => {
 
                             // Append name and email
                             const userInfo = document.createElement('div');
-                            const name = document.createElement('h2');
+                            userInfo.className = 'author-info';
+                            const name = document.createElement('h5');
+                            name.className = 'author-name'
                             name.textContent = data.name || 'User';
                             userInfo.appendChild(name);
 
@@ -853,20 +862,18 @@ const renderUserWatchlist = (userId) => {
                             email.textContent = data.email || '';
                             userInfo.appendChild(email);
 
+                            watchList.appendChild(avatarWrapper);
                             watchList.appendChild(userInfo);
 
-                            // Append  Watching / Unwatching
                         });
                 })
             }
         })
 }
 
-// ==================== Render user profile ====================
+// ==================== Render user profile sidebar ====================
 const renderUser = (userId) => {
     const sidebarUser = document.querySelectorAll('.userSidebar');
-
-    // updateButton.classList.remove('hide');
 
     apiCall({ url: `${BACKEND_URL}/user/?userId=${userId}` })
         .then(data => {
@@ -877,9 +884,7 @@ const renderUser = (userId) => {
 
             sidebarUser.forEach(avatar => {
                 // Clear existing sidebar content
-                while (avatar.firstChild) {
-                    avatar.removeChild(avatar.firstChild);
-                }
+                avatar.innerHTML = '';
 
                 // Render avatar or fallback letter
                 if (data.image) {
@@ -904,32 +909,35 @@ const renderUser = (userId) => {
                 email.textContent = data.email || '';
                 avatar.appendChild(email);
             });
-
-            // // Update top-right avatar menu
-            const currentUserId = localStorage.getItem('userId');
-            if (String(currentUserId) === String(userId)) {
-                const profileMenuButton = document.querySelectorAll('.avatar-button');
-                // const avatarLetter = document.getElementById('avatarLetter');
-                profileMenuButton.forEach((btn) => {
-                    while (btn.firstChild) {
-                        btn.removeChild(btn.firstChild); // clear previous content
-                    }
-                    if (data.image) {
-                        const img = document.createElement('img');
-                        img.src = data.image;
-                        img.alt = 'avatar';
-                        img.className = 'avatar-img';
-                        btn.appendChild(img);
-                    } else {
-                        const span = document.createElement('span');
-                        span.className = 'avatar-letter';
-                        span.textContent = data.name[0]?.toUpperCase() || 'U';
-                        btn.appendChild(span);
-                    }
-                });
-            }
         });
 };
+
+// ==================== Render login user avatar ====================
+const updateTopAvatar = () => {
+    const currentUserId = localStorage.getItem('userId');
+    if (!currentUserId) return;
+
+    apiCall({ url: `${BACKEND_URL}/user/?userId=${currentUserId}` })
+        .then(data => {
+            const profileMenuButtons = document.querySelectorAll('.avatar-button');
+            profileMenuButtons.forEach(btn => {
+                btn.innerHTML = '';
+                if (data.image) {
+                    const img = document.createElement('img');
+                    img.src = data.image;
+                    img.alt = 'avatar';
+                    img.className = 'avatar-img';
+                    btn.appendChild(img);
+                } else {
+                    const span = document.createElement('span');
+                    span.className = 'avatar-letter';
+                    span.textContent = data.name[0]?.toUpperCase() || 'U';
+                    btn.appendChild(span);
+                }
+            });
+        });
+};
+
 
 // ==================== Render job card header (author info) ====================
 const renderJobCardHeader = (job, headerElement) => {
