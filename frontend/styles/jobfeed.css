@@ -26,7 +26,42 @@
     display: flex;
     align-items: center;
     gap: 12px;
+}
+
+#homePage .right-container {
+    display: flex;
+    align-items: center;
+}
+
+#homePage .logo-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
     padding-left: 10px;
+    cursor: pointer;
+}
+
+#homePage .component {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-right: 10px;
+}
+
+#homePage .component button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 50%;
+    transition: background-color 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#homePage .component button:hover {
+    background-color: #f3f2ef;
 }
 
 #homePage .logo-icon {
