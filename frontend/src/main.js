@@ -55,7 +55,7 @@ const searchButtonProfile = document.querySelector('#profilePage .search-button'
 // profile Page elements
 const profileModel = document.getElementById('updateProfileModal');
 const updateButton = document.querySelector('.Updating');
-const watchButton = document.querySelector('.Watching');
+const watchButton = document.getElementById('watchButton');
 const confirmUpButton = document.getElementById('confirmUserUpdate');
 const userImage = document.getElementById('userImage');
 const userImagePreview = document.getElementById('avatarImagePreview');
@@ -200,14 +200,14 @@ const userFeed = (userId, setHash = true) => {
     renderProfileJobs(targetUserId);  // display job-card
     renderUserWatchlist(targetUserId);
 
-    //  Whether the "Update data" button is displayed
-    if (String(loggedInUserId) === String(targetUserId)) {
-        updateButton.classList.remove('hide');
-        watchButton.classList.add('hide');
-    } else {
-        updateButton.classList.add('hide');
-        watchButton.classList.remove('hide');
-    }
+    //  Whether the "Update data" "watch" button is displayed
+    // if (String(loggedInUserId) === String(targetUserId)) {
+    //     updateButton.classList.remove('hide');
+    //     watchButton.classList.add('hide');
+    // } else {
+    //     updateButton.classList.add('hide');
+    //     watchButton.classList.remove('hide');
+    // }
 };
 
 // Define the function that loads the userProfile (profilePage)
@@ -564,7 +564,9 @@ const handleJobSubmit = ({ mode, jobId = null }) => {
                 'success'
             );
             console.log('job id:', data.id);
+            const userId = localStorage.getItem('userId');
             homeFeed();
+            renderProfileJobs(userId);
             modalToHide.classList.add('hide');
         });
     });
@@ -814,6 +816,7 @@ const renderProfileJobs = (userId) => {
 
 // ==================== Render user watch list ====================
 const renderUserWatchlist = (userId) => {
+    const watchlistUserName = document.getElementById('watchlistUserName');
     const watchList = document.querySelector('.watch-list');
     watchList.replaceChildren();
 
@@ -823,6 +826,7 @@ const renderUserWatchlist = (userId) => {
                 showNotification(data.error, 'error');
                 return;
             };
+            watchlistUserName.textContent = data.name;
 
             const WatchMeUser = data.usersWhoWatchMeUserIds || [];
             console.log('[WatchMeUserIds]', WatchMeUser);
@@ -874,6 +878,7 @@ const renderUserWatchlist = (userId) => {
 // ==================== Render user profile sidebar ====================
 const renderUser = (userId) => {
     const sidebarUser = document.querySelectorAll('.userSidebar');
+    const loggedInUserId = Number(localStorage.getItem('userId'));
 
     apiCall({ url: `${BACKEND_URL}/user/?userId=${userId}` })
         .then(data => {
@@ -882,9 +887,10 @@ const renderUser = (userId) => {
                 return;
             }
 
+            // ========== Render Sidebar ==========
             sidebarUser.forEach(avatar => {
                 // Clear existing sidebar content
-                avatar.innerHTML = '';
+                avatar.replaceChildren();
 
                 // Render avatar or fallback letter
                 if (data.image) {
@@ -909,6 +915,35 @@ const renderUser = (userId) => {
                 email.textContent = data.email || '';
                 avatar.appendChild(email);
             });
+
+
+            // ========== Handle Buttons ==========
+            if (String(loggedInUserId) === String(userId)) {
+                updateButton.classList.remove('hide');
+                watchButton.classList.add('hide');
+            } else {
+                updateButton.classList.add('hide');
+                watchButton.classList.remove('hide');
+
+                const isFollowing = data.usersWhoWatchMeUserIds.includes(loggedInUserId);
+                watchButton.textContent = isFollowing ? 'Unwatch' : 'Watch';
+
+                watchButton.onclick = () => {
+                    const turnOn = watchButton.textContent === 'Watch';
+                    apiCall({
+                        url: `${BACKEND_URL}/user/watch`,
+                        method: 'PUT',
+                        body: {
+                            email: data.email,
+                            turnon: turnOn
+                        }
+                    }).then(() => {
+                        showNotification(`${turnOn ? 'Watching' : 'Unwatched'} successfully`, 'success');
+                        renderUser(userId, false);
+                        renderUserWatchlist(userId);
+                    });
+                };
+            }
         });
 };
 
@@ -921,7 +956,7 @@ const updateTopAvatar = () => {
         .then(data => {
             const profileMenuButtons = document.querySelectorAll('.avatar-button');
             profileMenuButtons.forEach(btn => {
-                btn.innerHTML = '';
+                btn.replaceChildren();
                 if (data.image) {
                     const img = document.createElement('img');
                     img.src = data.image;
@@ -1089,6 +1124,8 @@ const createInteractionSection = (job, currentUserId, currentUserName) => {
             likeCount += liked ? 1 : -1;
             updateLikeButton();
             homeFeed();
+            const userId = localStorage.getItem('userId');
+            renderProfileJobs(userId);
             showNotification(liked ? 'Liked!' : 'Unliked!', 'success');
         });
     });
@@ -1178,6 +1215,8 @@ const createInteractionSection = (job, currentUserId, currentUserName) => {
             body: { id: job.id, comment: text }
         }).then(() => {
             homeFeed();
+            const userId = localStorage.getItem('userId');
+            renderProfileJobs(userId);
             showNotification('Comment added!', 'success');
         });
         input.value = '';
