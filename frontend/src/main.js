@@ -174,6 +174,40 @@ const homeFeed = () => {
 
 };
 
+// Gain all jobs creatorId
+const fetchAllFeedCreatorIds = (callback) => {
+    const allCreatorIds = new Set();
+    let start = 0;
+
+    const fetchNextBatch = () => {
+        apiCall({ url: `${BACKEND_URL}/job/feed?start=${start}` })
+            .then(jobs => {
+                if (!jobs.length) {
+                    // ends
+                    callback([...allCreatorIds]);
+                    return;
+                }
+
+                jobs.forEach(job => {
+                    if (job.creatorId != null) {
+                        allCreatorIds.add(job.creatorId);
+                    }
+                });
+
+                start += jobs.length;
+                fetchNextBatch(); // The recursion continues to pull
+            })
+            .catch(err => {
+                showNotification('Failed to load feed data', 'error');
+                console.error(err);
+            });
+    };
+
+    fetchNextBatch();
+};
+
+
+// infinite scroll features function
 const loadMoreJobs = () => {
     if (isLoadingJobs || allJobsLoaded) return;
     isLoadingJobs = true;
@@ -209,7 +243,11 @@ const loadMoreJobs = () => {
 
 const handleScroll = () => {
     const bottomOffset = 300; // Load 300px early
-    if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - bottomOffset) {
+    const scrollTop = document.documentElement.scrollTop;
+    const scrollHeight = document.documentElement.scrollHeight;
+    const clientHeight = document.documentElement.clientHeight;
+
+    if (scrollTop + clientHeight >= scrollHeight - bottomOffset) {
         loadMoreJobs();
     }
 };
@@ -251,14 +289,25 @@ const userFeed = (userId, setHash = true) => {
     renderProfileJobs(targetUserId);  // display job-card
     renderWhoWatchlist(targetUserId);
 
-    //  Whether the "Update data" "watch" button is displayed
-    // if (String(loggedInUserId) === String(targetUserId)) {
-    //     updateButton.classList.remove('hide');
-    //     watchButton.classList.add('hide');
-    // } else {
-    //     updateButton.classList.add('hide');
-    //     watchButton.classList.remove('hide');
-    // }
+    // Display only your own User Watching list
+    const userWatchList = document.getElementById('userWatching');
+    const userWatchName = document.getElementById('UserWatchlistName');
+    if (String(loggedInUserId) === String(targetUserId)) {
+        // Clear and display your list
+        userWatchList.replaceChildren();
+        userWatchName.textContent = 'your';
+        // Get the creatorId list first and then render it
+        fetchAllFeedCreatorIds((creatorIds) => {
+            renderUserWatchlist(creatorIds);
+        });
+    } else {
+        userWatchList.replaceChildren();
+        const message = document.createElement('p');
+        message.className = 'privacy-message';
+        message.textContent = 'This user\'s followings are private.';
+        userWatchList.appendChild(message);
+        userWatchName.textContent = 'this user';
+    }
 };
 
 // Define the function that loads the userProfile (profilePage)
@@ -923,6 +972,7 @@ const renderProfileJobs = (userId) => {
             container.appendChild(emptyCard);
             return;
         }
+        userJobs.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
         userJobs.forEach(job => {
             const jobCard = createJobCard(job);
@@ -934,9 +984,9 @@ const renderProfileJobs = (userId) => {
 // ==================== Render UserWatch list ====================
 const renderedUserIds = new Set();
 const renderUserWatchlist = (userId) => {
-    // const UserWatchlistName = document.getElementById('UserWatchlistName');
     const userWatchList = document.getElementById('userWatching');
-    // userWatchList.replaceChild();
+    userWatchList.replaceChildren(); // It is cleared with each refresh
+    renderedUserIds.clear(); // Clear the rendered ID record
 
     userId.forEach(id => {
         if (renderedUserIds.has(id)) return;
@@ -947,47 +997,43 @@ const renderUserWatchlist = (userId) => {
                 if (data.error) {
                     showNotification(data.error, 'error');
                     return;
-                };
-                // UserWatchlistName.textContent = data.name;
+                }
 
                 const avatarWrapper = document.createElement('div');
                 avatarWrapper.className = 'avatar-wrapper';
 
-                // Render avatar or fallback letter
                 if (data.image) {
                     const img = document.createElement('img');
                     img.src = data.image;
                     img.alt = 'User Avatar';
-                    img.className = 'avatar-img';
-                    img.classList.add('avatar-img', 'clickable-user');
+                    img.className = 'avatar-img clickable-user';
                     img.setAttribute('data-user-id', data.id);
                     avatarWrapper.appendChild(img);
                 } else {
                     const avatarLetter = document.createElement('div');
-                    avatarLetter.className = 'avatar-button';
-                    avatarLetter.classList.add('avatar-img', 'clickable-user');
+                    avatarLetter.className = 'avatar-button clickable-user';
                     avatarLetter.setAttribute('data-user-id', data.id);
                     avatarLetter.textContent = data.name[0].toUpperCase();
                     avatarWrapper.appendChild(avatarLetter);
                 }
 
-                // Append name and email
                 const userInfo = document.createElement('div');
                 userInfo.className = 'author-info';
+
                 const name = document.createElement('h5');
-                name.className = 'author-name'
+                name.className = 'author-name';
                 name.textContent = data.name || 'User';
-                userInfo.appendChild(name);
 
                 const email = document.createElement('p');
                 email.textContent = data.email || '';
+
+                userInfo.appendChild(name);
                 userInfo.appendChild(email);
 
                 userWatchList.appendChild(avatarWrapper);
                 userWatchList.appendChild(userInfo);
-
-            })
-    })
+            });
+    });
 }
 
 // ==================== Render user WhoWatch list ====================
@@ -1050,9 +1096,9 @@ const renderWhoWatchlist = (userId) => {
                             whoWatchList.appendChild(userInfo);
 
                         });
-                })
+                });
             }
-        })
+        });
 }
 
 // ==================== Render user profile sidebar ====================
