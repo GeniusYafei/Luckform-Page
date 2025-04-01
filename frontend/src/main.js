@@ -144,6 +144,10 @@ const showModal = (type) => {
     modals[type].classList.remove('hide');
 }
 
+let currentStartIndex = 0;
+let isLoadingJobs = false;
+let allJobsLoaded = false;
+const loadedJobs = [];
 // Define the function that loads the JobFeed (homepage)
 const homeFeed = () => {
     const token = localStorage.getItem('token');
@@ -155,14 +159,56 @@ const homeFeed = () => {
         showPage('login');
         return;
     }
-    apiCall({ url: `${BACKEND_URL}/job/feed?start=0` })
-        .then(data => {
-            console.log(data)
-            updateTopAvatar();
-            renderJobFeed(data);
-            // Ensure sidebar is updated when rendering a job card
-            renderUser(userId);
+
+    currentStartIndex = 0;
+    isLoadingJobs = false;
+    allJobsLoaded = false;
+    loadedJobs.length = 0;
+
+    document.getElementById('feedContainer').replaceChildren();
+
+    updateTopAvatar();
+    renderUser(userId);
+    loadMoreJobs(); // load first page
+    window.addEventListener('scroll', handleScroll); // start eventlistener for scroll
+
+};
+
+const loadMoreJobs = () => {
+    if (isLoadingJobs || allJobsLoaded) return;
+    isLoadingJobs = true;
+
+    apiCall({ url: `${BACKEND_URL}/job/feed?start=${currentStartIndex}` })
+        .then(jobs => {
+            if (!jobs.length) {
+                allJobsLoaded = true;
+                return;
+            }
+
+            // Cumulative creatorId (for renderUserWatchlist)
+            const creatorIds = [];
+            jobs.forEach(job => {
+                if (!loadedJobs.find(j => j.id === job.id)) {
+                    loadedJobs.push(job);
+                    creatorIds.push(job.creatorId);
+                }
+            });
+
+            renderJobFeed(jobs);
+            renderUserWatchlist([...new Set(creatorIds)]); // Display after removing the weight
+
+            currentStartIndex += jobs.length; // Add up the offset
+        })
+        .finally(() => {
+            isLoadingJobs = false;
         });
+};
+
+const handleScroll = () => {
+    const bottomOffset = 300; // Load 300px early
+    if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - bottomOffset) {
+        loadMoreJobs();
+    }
 };
 
 let lastRenderedUserId = null;
@@ -200,7 +246,7 @@ const userFeed = (userId, setHash = true) => {
     updateTopAvatar();
     renderUser(targetUserId);         // display user information
     renderProfileJobs(targetUserId);  // display job-card
-    renderUserWatchlist(targetUserId);
+    renderWhoWatchlist(targetUserId);
 
     //  Whether the "Update data" "watch" button is displayed
     // if (String(loggedInUserId) === String(targetUserId)) {
@@ -882,11 +928,29 @@ const renderProfileJobs = (userId) => {
     });
 };
 
-// ==================== Render user watch list ====================
+// ==================== Render UserWatch list ====================
 const renderUserWatchlist = (userId) => {
-    const watchlistUserName = document.getElementById('watchlistUserName');
-    const watchList = document.querySelector('.watch-list');
-    watchList.replaceChildren();
+    const UserWatchlistName = document.getElementById('UserWatchlistName');
+    const userWatchList = document.getElementById('userWatching');
+    // userWatchList.replaceChild();
+
+    userId.forEach(id => {
+        console.log(id)
+        apiCall({ url: `${BACKEND_URL}/user/?userId=${id}` })
+            .then(data => {
+                if (data.error) {
+                    showNotification(data.error, 'error');
+                    return;
+                };
+                const avatarWrapper = document.createElement('div');
+
+
+
+// ==================== Render user WhoWatch list ====================
+const renderWhoWatchlist = (userId) => {
+    // const WhoWatchlistName = document.getElementById('WhoWatchlistName');
+    const whoWatchList = document.getElementById('whoWatching');
+    whoWatchList.replaceChildren();
 
     apiCall({ url: `${BACKEND_URL}/user/?userId=${userId}` })
         .then(data => {
@@ -894,7 +958,7 @@ const renderUserWatchlist = (userId) => {
                 showNotification(data.error, 'error');
                 return;
             };
-            watchlistUserName.textContent = data.name;
+            // WhoWatchlistName.textContent = data.name;
 
             const WatchMeUser = data.usersWhoWatchMeUserIds || [];
             console.log('[WatchMeUserIds]', WatchMeUser);
@@ -938,8 +1002,8 @@ const renderUserWatchlist = (userId) => {
                             email.textContent = data.email || '';
                             userInfo.appendChild(email);
 
-                            watchList.appendChild(avatarWrapper);
-                            watchList.appendChild(userInfo);
+                            whoWatchList.appendChild(avatarWrapper);
+                            whoWatchList.appendChild(userInfo);
 
                         });
                 })
@@ -963,6 +1027,16 @@ const renderUser = (userId) => {
             sidebarUser.forEach(avatar => {
                 // Clear existing sidebar content
                 avatar.replaceChildren();
+
+                const UserWatched = data.usersWhoWatchMeUserIds;
+                const WatchNumber = UserWatched.length;
+
+                const headerInfo = document.createElement('div');
+                headerInfo.className = 'header-info';
+                const watchInfo = document.createElement('p');
+                watchInfo.textContent = `Number of people who watched me: ${WatchNumber}`;
+                headerInfo.appendChild(watchInfo);
+                avatar.appendChild(headerInfo);
 
                 // Render avatar or fallback letter
                 if (data.image) {
@@ -1014,7 +1088,7 @@ const renderUser = (userId) => {
                     }).then(() => {
                         showNotification(`${turnOn ? 'Watching' : 'Unwatched'} successfully`, 'success');
                         renderUser(userId, false);
-                        renderUserWatchlist(userId);
+                        renderWhoWatchlist(userId);
                     });
                 };
             }
@@ -1283,6 +1357,7 @@ const createInteractionSection = (job, currentUserId, currentUserName) => {
 
     const input = document.createElement('input');
     input.type = 'text';
+    input.name = 'comment';
     input.placeholder = 'Add a comment...';
 
     const send = document.createElement('button');
