@@ -215,6 +215,10 @@ const loadMoreJobs = () => {
         .then(jobs => {
             if (!jobs.length) {
                 allJobsLoaded = true;
+                if (currentStartIndex === 0) {
+                    // empty when first loaded -> Show empty card
+                    renderJobFeed([], false);
+                }
                 return;
             }
 
@@ -228,11 +232,11 @@ const loadMoreJobs = () => {
             // In descending order of createdAt time
             loadedJobs.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
-            renderJobFeed(jobs, true);
             // Collect all Creatorids and pass them in
             const allCreatorIds = loadedJobs.map(j => j.creatorId);
             renderUserWatchlist([...new Set(allCreatorIds)]);
 
+            renderJobFeed(jobs, currentStartIndex > 0); // Sets append=false for the first round only
             currentStartIndex += jobs.length; // Add up the offset
         })
         .finally(() => {
@@ -298,6 +302,14 @@ const startJobPolling = () => {
     }, 5000);
 };
 
+// stop job Polling
+const stopJobPolling = () => {
+    if (pollingInterval) {
+        clearInterval(pollingInterval);
+        pollingInterval = null;
+        console.log('[Polling] Stopped');
+    }
+};
 
 // Define the function that loads the user information (userPage)
 let lastRenderedUserId = null;
@@ -543,6 +555,8 @@ goToLoginButton.addEventListener('click', () => {
 logoutButton.forEach(btn => {
     btn.addEventListener('click', () => {
         showNotification('Logged out!', 'info')
+        stopJobPolling(); // Stop background polling
+
         setTimeout(() => {
             localStorage.removeItem('token'); // Clear saved token
             localStorage.removeItem('userId') // Clear saved userId
@@ -730,6 +744,7 @@ const handleJobSubmit = ({ mode, jobId = null }) => {
             const userId = localStorage.getItem('userId');
             homeFeed();
             renderProfileJobs(userId);
+
             modalToHide.classList.add('hide');
         });
     });
@@ -809,7 +824,7 @@ confirmUpButton.addEventListener('click', () => {
     if (updateEmail) data.email = updateEmail;
     if (updatePassword) data.password = updatePassword;
     if (updateName) data.name = updateName;
-
+    const userId = localStorage.getItem('userId');
     // if user upload the image
     if (imageInput) {
         fileToDataUrl(imageInput)
@@ -825,7 +840,8 @@ confirmUpButton.addEventListener('click', () => {
             .then(() => {
                 showNotification('Update user profile successful!', 'success');
                 profileModel.classList.add('hide');
-                renderUser();
+                renderUser(userId);
+                renderProfileJobs(userId);
             })
             .catch(err => {
                 showNotification(err.message || 'Failed to update profile', 'error');
@@ -840,7 +856,8 @@ confirmUpButton.addEventListener('click', () => {
             .then(() => {
                 showNotification('Update user profile successful!', 'success');
                 profileModel.classList.add('hide');
-                renderUser();
+                renderUser(userId);
+                renderProfileJobs(userId);
             })
             .catch(err => {
                 showNotification(err.message || 'Failed to update profile', 'error');
@@ -1601,8 +1618,11 @@ const createJobCard = (job) => {
                     body: { id: job.id }
                 }).then(() => {
                     showNotification('Successfully deleted!', 'success');
-                    homeFeed();
-                    // renderJobFeed();
+                    if (currentPage === 'profile') {
+                        renderProfileJobs(currentUserId);
+                    } else {
+                        homeFeed();  // will call renderJobFeed inside
+                    }
                 });
             },
             (job) => {
