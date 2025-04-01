@@ -278,7 +278,7 @@ const startJobPolling = () => {
 
                                 if (likesChanged || commentsChanged) {
                                     console.log(`[Polling] Job ${newJob.id} updated`);
-                                    updateJobCard(newJob);
+                                    updateJobInteractions(newJob);
                                     Object.assign(existing, newJob);  // update localstorage
                                 }
                             }
@@ -1171,7 +1171,7 @@ const renderUser = (userId) => {
                 const headerInfo = document.createElement('div');
                 headerInfo.className = 'header-info';
                 const watchInfo = document.createElement('p');
-                watchInfo.textContent = `Number of people who watched me: ${WatchNumber}`;
+                watchInfo.textContent = `Number of people who watched: ${WatchNumber}`;
                 headerInfo.appendChild(watchInfo);
                 avatar.appendChild(headerInfo);
 
@@ -1418,15 +1418,30 @@ const createInteractionSection = (job, currentUserId, currentUserName) => {
             likeCount += liked ? 1 : -1;
             likeCountSpan.textContent = `${likeCount} Likes`;
             updateLikeButton();
-            // homeFeed();
-            // Update local data & re-render this card manually
-            job.likes.push({
-                userId: Number(currentUserId),
-                userName: currentUserName,
-            });
-            updateJobCard(job);
+
+            const existingIndex = job.likes.findIndex(like => like.userId === Number(currentUserId));
+            if (liked) {
+                if (existingIndex === -1) {
+                    job.likes.push({
+                        userId: Number(currentUserId),
+                        userName: currentUserName,
+                    });
+                }
+            } else {
+                if (existingIndex !== -1) {
+                    job.likes.splice(existingIndex, 1);
+                }
+            }
+
+
+            // // Update local data & re-render this card manually
+            // job.likes.push({
+            //     userId: Number(currentUserId),
+            //     userName: currentUserName,
+            // });
+            updateJobInteractions(job);
             const userId = localStorage.getItem('userId');
-            renderProfileJobs(userId);
+            // renderProfileJobs(userId);
             showNotification(liked ? 'Liked!' : 'Unliked!', 'success');
         });
     });
@@ -1532,9 +1547,9 @@ const createInteractionSection = (job, currentUserId, currentUserName) => {
                 userName: currentUserName,
                 comment: text
             });
-            updateJobCard(job);
+            updateJobInteractions(job);
             const userId = localStorage.getItem('userId');
-            renderProfileJobs(userId);
+            // renderProfileJobs(userId);
             showNotification('Comment added!', 'success');
         });
         input.value = '';
@@ -1654,6 +1669,68 @@ const updateJobCard = (job) => {
 
     const newCard = createJobCard(job);
     oldCard.replaceWith(newCard);
+};
+
+const updateJobInteractions = (job) => {
+    const card = document.querySelector(`.job-card[data-job-id="${job.id}"]`);
+    if (!card) return;
+
+    // Update Like Count
+    const likeCountSpan = card.querySelector('.like-count');
+    if (likeCountSpan) {
+        likeCountSpan.textContent = `${job.likes.length} Likes`;
+    }
+
+    // Update Like List (if visible)
+    const likeList = card.querySelector('.like-list');
+    if (likeList && !likeList.classList.contains('hide')) {
+        likeList.replaceChildren();
+        job.likes.forEach(user => {
+            const item = document.createElement('div');
+            item.className = 'like-item';
+
+            const avatar = document.createElement('div');
+            avatar.className = 'avatar-letter';
+            avatar.textContent = user.userName?.[0]?.toUpperCase() || '?';
+            avatar.setAttribute('data-user-id', user.userId);
+            avatar.classList.add('clickable-user');
+
+            const name = document.createElement('span');
+            name.textContent = user.userName || user.userEmail;
+
+            item.appendChild(avatar);
+            item.appendChild(name);
+            likeList.appendChild(item);
+        });
+    }
+
+    // Update Comment Section (if visible)
+    const commentList = card.querySelector('.comment-list');
+    if (commentList && !commentList.closest('.comment-section')?.classList.contains('hide')) {
+        commentList.replaceChildren();
+        job.comments.forEach(comment => {
+            const item = document.createElement('div');
+            item.className = 'comment-item';
+
+            const userName = document.createElement('span');
+            userName.textContent = comment.userName;
+            userName.setAttribute('data-user-id', comment.userId);
+            userName.classList.add('clickable-user');
+
+            const content = document.createElement('span');
+            content.textContent = `: ${comment.comment}`;
+
+            item.appendChild(userName);
+            item.appendChild(content);
+            commentList.appendChild(item);
+        });
+    }
+
+    // ✅ Update comment count number
+    const commentToggleBtn = card.querySelector('.comment-button');
+    if (commentToggleBtn) {
+        commentToggleBtn.textContent = `Comment 💬 ${job.comments.length}`;
+    }
 };
 
 
