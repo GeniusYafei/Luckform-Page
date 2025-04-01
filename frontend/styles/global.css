@@ -15,14 +15,6 @@ body {
   display: none;
 }
 
-#notification-container {
-  position: fixed;
-  top: 0;
-  right: 0;
-  padding: 0;
-  z-index: 99999;
-}
-
 .popup {
   position: relative;
   /* right: center; */
@@ -177,6 +169,10 @@ body {
   display: inline-block;
 }
 
+.component{
+  position: relative;
+}
+
 .clickable-user:hover {
   background-color: #f3f2ef;
   color: #0a66c2;
@@ -184,4 +180,80 @@ body {
 
 .clickable-user:active {
   opacity: 0.8;
+}
+
+#notification-container {
+  position: fixed;
+  top: 0;
+  right: 0;
+  padding: 0;
+  z-index: 99999;
+}
+
+.notification-button.new::after {
+  content: '';
+  position: absolute;
+  top: 6%;
+  right: 6%;
+  width: 10px;
+  height: 10px;
+  background-color: red;
+  border-radius: 50%;
+}
+
+
+.notification-popup {
+  position: fixed;
+  top: 90px;
+  right: 20px;
+  background-color: #fff;
+  color: #333;
+  border: 1px solid #ccc;
+  padding: 12px 18px;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  font-size: 14px;
+  z-index: 9999;
+  animation: fadeIn 0.4s ease;
+  cursor: pointer;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.notification-panel {
+  position: fixed;
+  top: 60px;
+  right: 20px;
+  width: 280px;
+  max-height: 320px;
+  overflow-y: auto;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 12px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+  padding: 10px;
+  z-index: 9999;
+}
+
+.notification-panel.hide {
+  display: none;
+}
+
+.notification-item {
+  padding: 8px;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+}
+
+.notification-item:hover {
+  background-color: #f7f7f7;
+}
+
+.notification-empty {
+  text-align: center;
+  padding: 12px;
+  color: #888;
 }
