@@ -164,14 +164,13 @@ const homeFeed = () => {
     isLoadingJobs = false;
     allJobsLoaded = false;
     loadedJobs.length = 0;
-
     document.getElementById('feedContainer').replaceChildren();
 
     updateTopAvatar();
     renderUser(userId);
     loadMoreJobs(); // load first page
     window.addEventListener('scroll', handleScroll); // start eventlistener for scroll
-
+    startJobPolling();
 };
 
 // Gain all jobs creatorId
@@ -252,8 +251,56 @@ const handleScroll = () => {
     }
 };
 
+// Define the function that job Polling
+let pollingInterval = null;
+const startJobPolling = () => {
+    if (pollingInterval) clearInterval(pollingInterval);
+
+    pollingInterval = setInterval(() => {
+        console.log('[Polling] Checking updates...');
+
+        const jobIdsToWatch = new Set(loadedJobs.map(job => job.id));
+
+        let start = 0;
+
+        const fetchNextBatch = () => {
+            apiCall({ url: `${BACKEND_URL}/job/feed?start=${start}` })
+                .then(jobs => {
+                    if (!jobs.length) return;
+
+                    jobs.forEach(newJob => {
+                        // Only jobs that have been loaded on the current page are processed
+                        if (jobIdsToWatch.has(newJob.id)) {
+                            const existing = loadedJobs.find(j => j.id === newJob.id);
+                            if (existing) {
+                                const likesChanged = newJob.likes.length !== existing.likes.length;
+                                const commentsChanged = newJob.comments.length !== existing.comments.length;
+
+                                if (likesChanged || commentsChanged) {
+                                    console.log(`[Polling] Job ${newJob.id} updated`);
+                                    updateJobCard(newJob);
+                                    Object.assign(existing, newJob);  // update localstorage
+                                }
+                            }
+                        }
+                    });
+
+                    // next page
+                    start += jobs.length;
+                    fetchNextBatch();
+                })
+                .catch(err => {
+                    console.warn('[Polling] Failed to fetch job feed', err);
+                });
+        };
+
+        fetchNextBatch(); // start first page
+    }, 5000);
+};
+
+
+// Define the function that loads the user information (userPage)
 let lastRenderedUserId = null;
-// Define the function that loads the user information (userpage)
 const userFeed = (userId, setHash = true) => {
     const loggedInUserId = localStorage.getItem('userId');
 
@@ -1347,6 +1394,11 @@ const createInteractionSection = (job, currentUserId, currentUserName) => {
     let liked = !!job.likes?.find(user => user.userId === Number(currentUserId));
     let likeCount = job.likes.length;
 
+    const likeCountSpan = document.createElement('span');
+    likeCountSpan.className = 'like-count';
+    likeCountSpan.textContent = `${job.likes.length} Likes`;
+    likeBtn.appendChild(likeCountSpan);
+
     const updateLikeButton = () => {
         likeBtn.textContent = `Like ❤️ ${likeCount}`;
         likeBtn.className = liked
@@ -1364,8 +1416,15 @@ const createInteractionSection = (job, currentUserId, currentUserName) => {
         }).then(() => {
             liked = !liked;
             likeCount += liked ? 1 : -1;
+            likeCountSpan.textContent = `${likeCount} Likes`;
             updateLikeButton();
-            homeFeed();
+            // homeFeed();
+            // Update local data & re-render this card manually
+            job.likes.push({
+                userId: Number(currentUserId),
+                userName: currentUserName,
+            });
+            updateJobCard(job);
             const userId = localStorage.getItem('userId');
             renderProfileJobs(userId);
             showNotification(liked ? 'Liked!' : 'Unliked!', 'success');
@@ -1419,6 +1478,9 @@ const createInteractionSection = (job, currentUserId, currentUserName) => {
     const commentList = document.createElement('div');
     commentList.className = 'comment-list';
 
+    const commentContainer = document.createElement('div');
+    commentContainer.className = 'comment-container';
+
     job.comments.forEach(comment => {
         const item = document.createElement('div');
         item.className = 'comment-item';
@@ -1437,6 +1499,7 @@ const createInteractionSection = (job, currentUserId, currentUserName) => {
         item.appendChild(content);
         commentList.appendChild(item);
     });
+    commentSection.appendChild(commentContainer);
 
     const commentInput = document.createElement('div');
     commentInput.className = 'comment-input';
@@ -1463,7 +1526,13 @@ const createInteractionSection = (job, currentUserId, currentUserName) => {
             method: 'POST',
             body: { id: job.id, comment: text }
         }).then(() => {
-            homeFeed();
+            // homeFeed();
+            job.comments.push({
+                userId: Number(currentUserId),
+                userName: currentUserName,
+                comment: text
+            });
+            updateJobCard(job);
             const userId = localStorage.getItem('userId');
             renderProfileJobs(userId);
             showNotification('Comment added!', 'success');
@@ -1497,6 +1566,7 @@ const createJobCard = (job) => {
 
     const card = document.createElement('div');
     card.className = 'job-card';
+    card.setAttribute('data-job-id', job.id);
 
     // ----- Header -----
     const header = document.createElement('div');
@@ -1576,6 +1646,16 @@ const createJobCard = (job) => {
 
     return card;
 };
+
+// update job-card content
+const updateJobCard = (job) => {
+    const oldCard = document.querySelector(`.job-card[data-job-id="${job.id}"]`);
+    if (!oldCard) return;
+
+    const newCard = createJobCard(job);
+    oldCard.replaceWith(newCard);
+};
+
 
 // Clears and repopulates job feed container with fresh job cards
 const renderJobFeed = (jobs, append = false) => {
