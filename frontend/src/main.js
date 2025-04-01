@@ -124,7 +124,7 @@ const ROUTES = {
     profile: '/user'
 };
 
-// test
+// test new line
 // Store page DOM elements in an object for easier access
 const pages = {
     login: loginPage,
