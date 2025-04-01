@@ -29,10 +29,11 @@
       <h2>LurkForWork</h2>
       <form>
         <div class="inputContainer">
-          <input type="email" id="LoginEmail" name="Email" placeholder="Email" />
+          <input type="email" id="LoginEmail" name="Email" placeholder="Email" autocomplete="email" />
         </div>
         <div class="inputContainer">
-          <input type="password" id="LoginPassword" name="Password" placeholder="Password" />
+          <input type="password" id="LoginPassword" name="Password" placeholder="Password"
+            autocomplete="current-password" />
         </div>
         <button type="button" id="LoginButton" class="auth-button">Login</button>
         <p class="switch-link">Don't have an account? <a href="#/auth/register" id="RegisterButton">Register</a></p>
@@ -46,16 +47,18 @@
       <h2>LurkForWork</h2>
       <form>
         <div class="inputContainer">
-          <input type="email" id="registerEmail" name="Email" placeholder="Email" />
+          <input type="email" id="registerEmail" name="Email" placeholder="Email" autocomplete="email" />
         </div>
         <div class="inputContainer">
-          <input type="text" id="registerName" name="Name" placeholder="Username" />
+          <input type="text" id="registerName" name="Name" placeholder="Username" autocomplete="name" />
         </div>
         <div class="inputContainer">
-          <input type="password" id="registerPassword" name="registerPassword" placeholder="Password" />
+          <input type="password" id="registerPassword" name="registerPassword" placeholder="Password"
+            autocomplete="new-password" />
         </div>
         <div class="inputContainer">
-          <input type="password" id="ConfirmPassword" name="ConfirmPassword" placeholder="Confirm Password" />
+          <input type="password" id="ConfirmPassword" name="ConfirmPassword" placeholder="Confirm Password"
+            autocomplete="new-password" />
           <button type="button" id="toggleConfirmPassword" class="toggle-btn">Show</button>
         </div>
         <button type="button" id="SubmitButton" class="auth-button">Register</button>
@@ -135,10 +138,10 @@
           <h2>Updating a Job</h2>
 
           <label for="jobTitle">Job Title</label>
-          <input type="text" id="jobTitle-update" placeholder="This is a new job" />
+          <input type="text" id="jobTitle-update" placeholder="This is a new job" autocomplete="off" />
 
           <label for="jobStartDate">Job StartDate</label>
-          <input type="text" id="jobStartDate-update" placeholder="DD/MM/YYYY" />
+          <input type="text" id="jobStartDate-update" placeholder="DD/MM/YYYY" autocomplete="off" />
 
           <label for="jobDescription">Job Description</label>
           <textarea id="jobDescription-update" rows="4" placeholder="Please enter a job description..."></textarea>
@@ -172,12 +175,7 @@
 
       <!-- Feed Section -->
       <section class="feed-container" id="feedContainer">
-        <div id="emptyJobCard" class="job-card">
-          <div class="header-information">
-            <h2>Are you ready to create a job?</h2>
-            <img src="styles/illustration.png" class="illustration" alt="img-illustration" />
-            <button class="postJobButton">Post a Job</button>
-          </div>
+        <!-- JS will populate this -->
       </section>
     </main>
   </div>
@@ -221,35 +219,37 @@
     </header>
 
     <main class="jobfeed-main profile-layout">
-      <!-- userbar -->
-      <section class="Sidebar">
-        <div class="sidebarUser" id="profileSidebar">
-          <div class="userSidebar"></div>
-          <div class="profileButton">
-            <button class="Updating hide">Updating your profile</button>
-            <button id="watchButton" class="Watching hide"></button>
+      <div class="left-column">
+        <!-- userbar -->
+        <section class="Sidebar">
+          <div class="sidebarUser" id="profileSidebar">
+            <div class="userSidebar"></div>
+            <div class="profileButton">
+              <button class="Updating hide">Updating your profile</button>
+              <button id="watchButton" class="Watching hide"></button>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <!-- Job Feed Section -->
-      <section class="user-job-feed" id="userJobFeed">
-        <!-- JS will populate this -->
-      </section>
+        <!-- Job Feed Section -->
+        <section class="user-job-feed" id="userJobFeed">
+          <!-- JS will populate this -->
+        </section>
+      </div>
       <!-- Update profile Modal -->
       <section id="updateProfileModal" class="modal hide">
         <div class="modal-content">
           <span class="close-button">&times;</span>
           <h2>Updating Profile</h2>
 
-          <label for="Email">Update Email</label>
-          <input type="email" id="updateEmail" name="Email" placeholder="Email" />
+          <label for="updateEmail">Update Email</label>
+          <input type="email" id="updateEmail" name="Email" placeholder="Email" autocomplete="email" />
 
-          <label for="name">Update Name</label>
-          <input type="text" id="updateName" name="Name" placeholder="Username" />
+          <label for="updateName">Update Name</label>
+          <input type="text" id="updateName" name="Name" placeholder="Username" autocomplete="name" />
 
           <div class="inputContainer">
-            <label for="password">Update Password</label>
+            <label for="updaterPassword">Update Password</label>
             <input type="password" id="updaterPassword" name="updaterPassword" placeholder="Password" />
           </div>
           <div class="inputContainer">
@@ -267,15 +267,27 @@
           </div>
         </div>
       </section>
-      <!-- Right-side suggestion box -->
-      <aside class="profile-watch">
-        <div class="Watch-header">
-          <h3>Users Watching</h3>
-          <p>From <span id="watchlistUserName"></span> watch list:</p>
-        </div>
-        <!-- watch user-->
-        <div class="watch-list"></div>
-      </aside>
+
+      <div class="right-column">
+        <!-- Right-side box -->
+        <aside class="profile-watch">
+          <div class="Watch-header">
+            <h3>Who Watching</h3>
+            <p>From <span id="WhoWatchlistName"></span> watched list:</p>
+          </div>
+          <!-- watch user-->
+          <div class="watch-list" id="whoWatching"></div>
+        </aside>
+
+        <aside class="profile-watch">
+          <div class="Watch-header">
+            <h3>User Watching</h3>
+            <p>From <span id="UserWatchlistName">your</span> watch list:</p>
+          </div>
+          <!-- watch user-->
+          <div class="watch-list" id="userWatching"></div>
+        </aside>
+      </div>
     </main>
   </div>
 
