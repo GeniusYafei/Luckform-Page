@@ -53,6 +53,7 @@ const searchButtonHome = document.querySelector('#homePage .search-button');
 const searchButtonProfile = document.querySelector('#profilePage .search-button');
 const logoPart = document.querySelectorAll('.logo-container');
 const homeButton = document.querySelectorAll('.home-icon');
+const notificationIcon = document.querySelector('.notification-button');
 
 // profile Page elements
 const profileModel = document.getElementById('updateProfileModal');
@@ -124,7 +125,6 @@ const ROUTES = {
     profile: '/user'
 };
 
-// test new line
 // Store page DOM elements in an object for easier access
 const pages = {
     login: loginPage,
@@ -256,7 +256,54 @@ const handleScroll = () => {
     }
 };
 
-// Define the function that job Polling
+// Define the function that Push notification polling function
+const startPushNotifications = () => {
+    if (pushInterval) clearInterval(pushInterval);
+
+    pushInterval = setInterval(() => {
+        apiCall({ url: `${BACKEND_URL}/job/feed?start=0` })
+            .then(jobs => {
+                // just seen first five to avoid scrolling too much
+                jobs.slice(0, 5).forEach(job => {
+                    if (!seenJobIds.has(job.id)) {
+                        seenJobIds.add(job.id);
+                        showInPageNotification(job); // pop-up prompt
+                    }
+                });
+            })
+            .catch(err => {
+                console.warn('[Push] Error polling for new jobs:', err.message);
+            });
+    }, 5000);
+};
+
+// live update show pop notification function 
+const showInPageNotification = (job) => {
+    const notif = document.createElement('div');
+    notif.className = 'notification-popup';
+
+    const strong = document.createElement('strong');
+    strong.textContent = 'New Job Posted!';
+    notif.appendChild(strong);
+
+    notif.appendChild(document.createElement('br'));
+
+    const title = document.createElement('span');
+    title.textContent = job.title;
+    notif.appendChild(title);
+
+    notif.addEventListener('click', () => {
+        userFeed(job.creatorId); // 跳转到发布者的页面
+    });
+
+    document.body.appendChild(notif);
+
+    setTimeout(() => {
+        notif.remove();
+    }, 6000);
+};
+
+// Define the function that job Polling for live update comment and like function
 let pollingInterval = null;
 const startJobPolling = () => {
     if (pollingInterval) clearInterval(pollingInterval);
