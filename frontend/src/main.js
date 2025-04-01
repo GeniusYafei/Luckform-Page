@@ -186,16 +186,19 @@ const loadMoreJobs = () => {
             }
 
             // Cumulative creatorId (for renderUserWatchlist)
-            const creatorIds = [];
             jobs.forEach(job => {
                 if (!loadedJobs.find(j => j.id === job.id)) {
                     loadedJobs.push(job);
-                    creatorIds.push(job.creatorId);
                 }
             });
 
-            renderJobFeed(jobs);
-            renderUserWatchlist([...new Set(creatorIds)]); // Display after removing the weight
+            // In descending order of createdAt time
+            loadedJobs.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+            renderJobFeed(jobs, true);
+            // Collect all Creatorids and pass them in
+            const allCreatorIds = loadedJobs.map(j => j.creatorId);
+            renderUserWatchlist([...new Set(allCreatorIds)]);
 
             currentStartIndex += jobs.length; // Add up the offset
         })
@@ -929,22 +932,27 @@ const renderProfileJobs = (userId) => {
 };
 
 // ==================== Render UserWatch list ====================
+const renderedUserIds = new Set();
 const renderUserWatchlist = (userId) => {
-    const UserWatchlistName = document.getElementById('UserWatchlistName');
+    // const UserWatchlistName = document.getElementById('UserWatchlistName');
     const userWatchList = document.getElementById('userWatching');
     // userWatchList.replaceChild();
 
     userId.forEach(id => {
-        console.log(id)
+        if (renderedUserIds.has(id)) return;
+        renderedUserIds.add(id);
+
         apiCall({ url: `${BACKEND_URL}/user/?userId=${id}` })
             .then(data => {
                 if (data.error) {
                     showNotification(data.error, 'error');
                     return;
                 };
-                const avatarWrapper = document.createElement('div');
+                // UserWatchlistName.textContent = data.name;
 
+                const avatarWrapper = document.createElement('div');
                 avatarWrapper.className = 'avatar-wrapper';
+
                 // Render avatar or fallback letter
                 if (data.image) {
                     const img = document.createElement('img');
@@ -984,7 +992,7 @@ const renderUserWatchlist = (userId) => {
 
 // ==================== Render user WhoWatch list ====================
 const renderWhoWatchlist = (userId) => {
-    // const WhoWatchlistName = document.getElementById('WhoWatchlistName');
+    const WhoWatchlistName = document.getElementById('WhoWatchlistName');
     const whoWatchList = document.getElementById('whoWatching');
     whoWatchList.replaceChildren();
 
@@ -994,7 +1002,7 @@ const renderWhoWatchlist = (userId) => {
                 showNotification(data.error, 'error');
                 return;
             };
-            // WhoWatchlistName.textContent = data.name;
+            WhoWatchlistName.textContent = data.name;
 
             const WatchMeUser = data.usersWhoWatchMeUserIds || [];
             console.log('[WatchMeUserIds]', WatchMeUser);
@@ -1524,11 +1532,11 @@ const createJobCard = (job) => {
 };
 
 // Clears and repopulates job feed container with fresh job cards
-const renderJobFeed = (jobs) => {
+const renderJobFeed = (jobs, append = false) => {
     const container = document.getElementById('feedContainer');
-    container.replaceChildren(); // Always clear first
+    if (!append) container.replaceChildren(); // Empty during initial loading
 
-    if (jobs.length === 0) {
+    if (jobs.length === 0 && !append) {
         const emptyCard = createEmptyJobCard();
         container.appendChild(emptyCard);
         return;
