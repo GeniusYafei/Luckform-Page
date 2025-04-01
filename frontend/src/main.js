@@ -69,6 +69,17 @@ const registerPage = document.getElementById('registerPage');
 const homePage = document.getElementById('homePage');
 const profilePage = document.getElementById('profilePage');
 
+// Declarative variable
+let currentStartIndex = 0;
+let isLoadingJobs = false;
+let allJobsLoaded = false;
+let pushInterval = null;
+let pollingInterval = null;
+let lastRenderedUserId = null;
+let currentPage = null;
+const loadedJobs = [];
+const seenJobIds = new Set();
+const renderedUserIds = new Set();
 
 // ==================== apiCall FUNCTION ====================
 const apiCall = ({ url, method = 'GET', token = true, body = null }) => {
@@ -145,10 +156,10 @@ const showModal = (type) => {
     modals[type].classList.remove('hide');
 }
 
-let currentStartIndex = 0;
-let isLoadingJobs = false;
-let allJobsLoaded = false;
-const loadedJobs = [];
+// let currentStartIndex = 0;
+// let isLoadingJobs = false;
+// let allJobsLoaded = false;
+// const loadedJobs = [];
 // Define the function that loads the JobFeed (homepage)
 const homeFeed = () => {
     const token = localStorage.getItem('token');
@@ -172,6 +183,8 @@ const homeFeed = () => {
     loadMoreJobs(); // load first page
     window.addEventListener('scroll', handleScroll); // start eventlistener for scroll
     startJobPolling();
+    startPushNotifications();
+    loadedJobs.forEach(job => seenJobIds.add(job.id));
 };
 
 // Gain all jobs creatorId
@@ -257,6 +270,7 @@ const handleScroll = () => {
 };
 
 // Define the function that Push notification polling function
+// let pushInterval = null;
 const startPushNotifications = () => {
     if (pushInterval) clearInterval(pushInterval);
 
@@ -277,7 +291,7 @@ const startPushNotifications = () => {
     }, 5000);
 };
 
-// live update show pop notification function 
+// live update show pop notification function
 const showInPageNotification = (job) => {
     const notif = document.createElement('div');
     notif.className = 'notification-popup';
@@ -293,7 +307,7 @@ const showInPageNotification = (job) => {
     notif.appendChild(title);
 
     notif.addEventListener('click', () => {
-        userFeed(job.creatorId); // 跳转到发布者的页面
+        userFeed(job.creatorId); // Go to the publisher's page
     });
 
     document.body.appendChild(notif);
@@ -304,7 +318,7 @@ const showInPageNotification = (job) => {
 };
 
 // Define the function that job Polling for live update comment and like function
-let pollingInterval = null;
+// let pollingInterval = null;
 const startJobPolling = () => {
     if (pollingInterval) clearInterval(pollingInterval);
 
@@ -359,8 +373,16 @@ const stopJobPolling = () => {
     }
 };
 
+const stopPushNotifications = () => {
+    if (pushInterval) {
+        clearInterval(pushInterval);
+        pushInterval = null;
+        console.log('[Push] Stopped');
+    }
+};
+
 // Define the function that loads the user information (userPage)
-let lastRenderedUserId = null;
+// let lastRenderedUserId = null;
 const userFeed = (userId, setHash = true) => {
     const loggedInUserId = localStorage.getItem('userId');
 
@@ -418,7 +440,7 @@ const userFeed = (userId, setHash = true) => {
 };
 
 // Define the function that loads the userProfile (profilePage)
-let currentPage = null;
+// let currentPage = null;
 // Show the selected page and optionally update the URL hash
 const showPage = (pageName, updateHash = true) => {
     // Prevent re-render
@@ -603,7 +625,9 @@ goToLoginButton.addEventListener('click', () => {
 logoutButton.forEach(btn => {
     btn.addEventListener('click', () => {
         showNotification('Logged out!', 'info')
-        stopJobPolling(); // Stop background polling
+        // Stop background polling
+        stopJobPolling();
+        stopPushNotifications();
 
         setTimeout(() => {
             localStorage.removeItem('token'); // Clear saved token
@@ -1094,7 +1118,7 @@ const renderProfileJobs = (userId) => {
 };
 
 // ==================== Render UserWatch list ====================
-const renderedUserIds = new Set();
+// const renderedUserIds = new Set();
 const renderUserWatchlist = (userId) => {
     const userWatchList = document.getElementById('userWatching');
     userWatchList.replaceChildren(); // It is cleared with each refresh
