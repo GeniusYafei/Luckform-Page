@@ -53,7 +53,8 @@ const searchButtonHome = document.querySelector('#homePage .search-button');
 const searchButtonProfile = document.querySelector('#profilePage .search-button');
 const logoPart = document.querySelectorAll('.logo-container');
 const homeButton = document.querySelectorAll('.home-icon');
-const notificationIcon = document.querySelector('.notification-button');
+const notificationIcon = document.querySelectorAll('.notification-button');
+const notificationPanel = document.getElementById('notificationPanel');
 
 // profile Page elements
 const profileModel = document.getElementById('updateProfileModal');
@@ -78,6 +79,7 @@ let pollingInterval = null;
 let lastRenderedUserId = null;
 let currentPage = null;
 const loadedJobs = [];
+const recentNotifications = [];
 const seenJobIds = new Set();
 const renderedUserIds = new Set();
 
@@ -156,6 +158,16 @@ const showModal = (type) => {
     modals[type].classList.remove('hide');
 }
 
+// Add a red dot
+const markNotificationUnread = () => {
+    notificationIcon.forEach(btn => btn.classList.add('new'));
+};
+
+// Remove the red dot (after clicking)
+const clearNotificationBadge = () => {
+    notificationIcon.forEach(btn => btn.classList.remove('new'));
+};
+
 // let currentStartIndex = 0;
 // let isLoadingJobs = false;
 // let allJobsLoaded = false;
@@ -184,7 +196,6 @@ const homeFeed = () => {
     window.addEventListener('scroll', handleScroll); // start eventlistener for scroll
     startJobPolling();
     startPushNotifications();
-    loadedJobs.forEach(job => seenJobIds.add(job.id));
 };
 
 // Gain all jobs creatorId
@@ -240,6 +251,7 @@ const loadMoreJobs = () => {
             jobs.forEach(job => {
                 if (!loadedJobs.find(j => j.id === job.id)) {
                     loadedJobs.push(job);
+                    seenJobIds.add(job.id);
                 }
             });
 
@@ -282,13 +294,14 @@ const startPushNotifications = () => {
                     if (!seenJobIds.has(job.id)) {
                         seenJobIds.add(job.id);
                         showInPageNotification(job); // pop-up prompt
+                        markNotificationUnread();
                     }
                 });
             })
             .catch(err => {
                 console.warn('[Push] Error polling for new jobs:', err.message);
             });
-    }, 5000);
+    }, 1000);
 };
 
 // live update show pop notification function
@@ -308,13 +321,16 @@ const showInPageNotification = (job) => {
 
     notif.addEventListener('click', () => {
         userFeed(job.creatorId); // Go to the publisher's page
+        notificationPanel.classList.add('hide');
     });
 
     document.body.appendChild(notif);
+    setTimeout(() => notif.remove(), 6000);
 
-    setTimeout(() => {
-        notif.remove();
-    }, 6000);
+    recentNotifications.unshift(job);
+    if (recentNotifications.length > 5) recentNotifications.pop();
+
+    markNotificationUnread();
 };
 
 // Define the function that job Polling for live update comment and like function
@@ -551,6 +567,20 @@ window.addEventListener('hashchange', () => {
 });
 
 // ==================== NAVIGATION BUTTON EVENT LISTENERS ====================
+
+// user click the notification icon
+notificationIcon.forEach(btn => {
+    btn.addEventListener('click', () => {
+        notificationPanel.classList.toggle('hide');
+        clearNotificationBadge();
+        renderNotificationPanel();
+    })
+})
+// notificationIcon.addEventListener('click', () => {
+//     notificationPanel.classList.toggle('hide');
+//     clearNotificationBadge();
+//     renderNotificationPanel();
+// });
 
 // User using the search button to view userprofile
 const SearchView = (input, button) => {
@@ -1070,6 +1100,35 @@ const createEmptyJobCard = () => {
     return card;
 };
 
+// ==================== Render Notification Panel Job ====================
+const renderNotificationPanel = () => {
+    notificationPanel.replaceChildren();
+
+    if (recentNotifications.length === 0) {
+        const empty = document.createElement('div');
+        empty.className = 'notification-empty';
+        empty.textContent = 'No new job notifications.';
+        notificationPanel.appendChild(empty);
+        return;
+    }
+
+    recentNotifications.forEach(job => {
+        const item = document.createElement('div');
+        item.className = 'notification-item';
+
+        const title = document.createElement('div');
+        title.textContent = `${job.title} by user ${job.creatorId}`;
+        item.appendChild(title);
+
+        item.addEventListener('click', () => {
+            userFeed(job.creatorId);
+            notificationPanel.classList.add('hide');
+        });
+
+        notificationPanel.appendChild(item);
+    });
+};
+
 
 // ==================== Render userProfiles Job ====================
 // Only the jobs posted by the user are displayed on the profile page
@@ -1355,7 +1414,7 @@ const renderJobCardHeader = (job, headerElement) => {
 
     apiCall({ url: `${BACKEND_URL}/user?userId=${job.creatorId}` })
         .then(data => {
-            console.log(data)
+            // console.log(data)
             const avatarWrapper = document.createElement('div');
             avatarWrapper.className = 'avatar-wrapper';
 
@@ -1460,6 +1519,7 @@ const createActionButtons = (job, onDelete, onUpdate) => {
 
     // Global listener to close dropdown when clicking elsewhere
     document.addEventListener('click', (event) => {
+        // close the dropdown item
         if (
             !updateButton.contains(event.target) &&
             !updateDropdown.contains(event.target)
@@ -1860,8 +1920,8 @@ const renderJobFeed = (jobs, append = false) => {
 //         profileMenu.classList.add('hide');
 //     }
 // })
-document.addEventListener('click', (e) => {
-    const target = e.target.closest('.clickable-user');
+document.addEventListener('click', (event) => {
+    const target = event.target.closest('.clickable-user');
     if (target && target.dataset.userId) {
         const userId = target.dataset.userId;
         userFeed(userId);
@@ -1869,5 +1929,15 @@ document.addEventListener('click', (e) => {
     profileMenu.forEach((menu) => {
         menu.classList.add('hide');
     });
+
+
+    // close the notification Panel
+    const clickedNotificationIcon = Array.from(notificationIcon).some(btn =>
+        btn.contains(event.target)
+    );
+
+    if (!notificationPanel.contains(event.target) && !clickedNotificationIcon) {
+        notificationPanel.classList.add('hide');
+    }
 });
 
