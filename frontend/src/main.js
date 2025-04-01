@@ -944,7 +944,43 @@ const renderUserWatchlist = (userId) => {
                 };
                 const avatarWrapper = document.createElement('div');
 
+                avatarWrapper.className = 'avatar-wrapper';
+                // Render avatar or fallback letter
+                if (data.image) {
+                    const img = document.createElement('img');
+                    img.src = data.image;
+                    img.alt = 'User Avatar';
+                    img.className = 'avatar-img';
+                    img.classList.add('avatar-img', 'clickable-user');
+                    img.setAttribute('data-user-id', data.id);
+                    avatarWrapper.appendChild(img);
+                } else {
+                    const avatarLetter = document.createElement('div');
+                    avatarLetter.className = 'avatar-button';
+                    avatarLetter.classList.add('avatar-img', 'clickable-user');
+                    avatarLetter.setAttribute('data-user-id', data.id);
+                    avatarLetter.textContent = data.name[0].toUpperCase();
+                    avatarWrapper.appendChild(avatarLetter);
+                }
 
+                // Append name and email
+                const userInfo = document.createElement('div');
+                userInfo.className = 'author-info';
+                const name = document.createElement('h5');
+                name.className = 'author-name'
+                name.textContent = data.name || 'User';
+                userInfo.appendChild(name);
+
+                const email = document.createElement('p');
+                email.textContent = data.email || '';
+                userInfo.appendChild(email);
+
+                userWatchList.appendChild(avatarWrapper);
+                userWatchList.appendChild(userInfo);
+
+            })
+    })
+}
 
 // ==================== Render user WhoWatch list ====================
 const renderWhoWatchlist = (userId) => {
