@@ -6,7 +6,7 @@
  *   https://developer.mozilla.org/en-US/docs/Web/API/File
  *   https://developer.mozilla.org/en-US/docs/Web/API/FileReader
  *   https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URIs
- * 
+ *
  * Example Usage:
  *   const file = document.querySelector('input[type="file"]').files[0];
  *   console.log(fileToDataUrl(file));
@@ -20,7 +20,7 @@ export function fileToDataUrl(file) {
     if (!valid) {
         throw Error('provided file is not a png, jpg or jpeg image.');
     }
-    
+
     const reader = new FileReader();
     const dataUrlPromise = new Promise((resolve,reject) => {
         reader.onerror = reject;
