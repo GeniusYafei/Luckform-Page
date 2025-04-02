@@ -132,10 +132,10 @@ const modals = {
 
 // Define the hash routes for each page
 const ROUTES = {
-    login: '/auth/login',
-    register: '/auth/register',
-    home: '/job/feed',
-    profile: '/user'
+    login: 'login',
+    register: 'register',
+    feed: 'feed',
+    profile: 'profile'
 };
 
 // Store page DOM elements in an object for easier access
@@ -405,6 +405,15 @@ const userFeed = (userId, setHash = true) => {
     // Default renders itself if no parameters are given
     const targetUserId = userId || loggedInUserId;
 
+    if (setHash) {
+        if (String(targetUserId) === String(loggedInUserId)) {
+            window.location.hash = '#' + ROUTES.profile;
+        } else {
+            window.location.hash = `#${ROUTES.profile}=${targetUserId}`;
+        }
+    }
+
+    localStorage.setItem('lastViewedUserId', targetUserId);
     if (String(targetUserId) === String(lastRenderedUserId)) {
         console.log(`[userFeed] Skipping repeated render for userId: ${targetUserId}`);
         return;
@@ -416,12 +425,6 @@ const userFeed = (userId, setHash = true) => {
         showNotification('The user was not found', 'error');
         showPage('home');
         return;
-    }
-
-    localStorage.setItem('lastViewedUserId', targetUserId);
-
-    if (setHash) {
-        window.location.hash = `/user?id=${targetUserId}`;
     }
 
     // Avoid repeated rendering of the current user
@@ -442,7 +445,6 @@ const userFeed = (userId, setHash = true) => {
           window.location.reload();
         }, 100);
       } else {
-        // Clear the tag after refreshing to avoid refreshing the next time you enter the profile
         sessionStorage.removeItem('profileReloaded');
       }
 
@@ -483,7 +485,16 @@ const showPage = (pageName, updateHash = true) => {
 
     // Update URL hash if needed
     if (updateHash) {
-        const targetHash = '#' + ROUTES[pageName];
+        let targetHash = '';
+        if (pageName === 'home') {
+            targetHash = '#' + ROUTES.feed;
+        } else if (pageName === 'profile') {
+            targetHash = '#' + ROUTES.profile;
+        } else if (pageName === 'login') {
+            targetHash = '#' + ROUTES.login;
+        } else if (pageName === 'register') {
+            targetHash = '#' + ROUTES.register;
+        }
         if (window.location.hash !== targetHash) {
             window.location.hash = targetHash;
         }
@@ -509,47 +520,58 @@ const routeToPage = () => {
 
     // If hash is empty or just '#', go to login
     if (!hash || hash === '#') {
-        window.location.hash = ROUTES.login;
+        window.location.hash = token ? '#' + ROUTES.feed : '#' + ROUTES.login;
         return;
     }
 
-    if (hash.startsWith('#/user?id=')) {
-        const query = new URLSearchParams(hash.split('?')[1]);
-        const id = query.get('id');
-        if (id) {
-            showPage('profile', false);
-            userFeed(id, false); // Do not repeat Settings hash
+    // login page route
+    if (hash === '#' + ROUTES.login) {
+        showPage('login', false);
+        return;
+    }
+
+    // register page route
+    if (hash === '#' + ROUTES.register) {
+        showPage('register', false);
+        return;
+    }
+
+    // feed page route
+    if (hash === '#' + ROUTES.feed) {
+        if (!token) {
+            showNotification('Please log in first.', 'error');
+            window.location.hash = '#' + ROUTES.login;
+            return;
         }
+        showPage('home', false);
         return;
     }
 
-    if (hash === '#/user') {
-        const id = localStorage.getItem('userId');
-        if (id) {
+    // current login user profile page
+    if (hash === '#' + ROUTES.profile) {
+        const userId = localStorage.getItem('userId');
+        if (userId) {
             showPage('profile', false);
-            userFeed(id, false);
+            userFeed(userId, false);
         } else {
             showNotification('Please log in first.', 'error');
-            window.location.hash = ROUTES.login;
+            window.location.hash = '#' + ROUTES.login;
         }
         return;
     }
 
-    // Loop through ROUTES to find a match
-    for (const [page, route] of Object.entries(ROUTES)) {
-        if (hash === '#' + route) {
-            // If accessing home page but no token, redirect to login
-            if (page === 'home' && !token) {
-                showNotification('Please log in first.', 'error');
-                window.location.hash = ROUTES.login;
-                return;
-            }
-            return showPage(page, false);
+    // specific user profile page via "#profile={userId}"
+    if (hash.startsWith('#' + ROUTES.profile + '=')) {
+        const userId = hash.split('=')[1];
+        if (userId) {
+            // showPage('profile', false);
+            userFeed(userId, false);
         }
+        return;
     }
 
-    // If no route matches, update to default login route
-    window.location.hash = ROUTES.login;
+    // If there is no match, you jump to the login page by default
+    window.location.hash = token ? '#' + ROUTES.feed : '#' + ROUTES.login;
 };
 
 // On page load, set the default hash if needed and route accordingly
@@ -563,9 +585,9 @@ window.addEventListener('load', () => {
     // Page routing jumps are then processed
     if (!window.location.hash) {
         if (localStorage.getItem('token')) {
-            window.location.hash = '/job/feed';
+            window.location.hash = '#' + ROUTES.feed;
         } else {
-            window.location.hash = '/auth/login';
+            window.location.hash = '#' + ROUTES.login;
         }
     } else {
         routeToPage();
@@ -649,12 +671,12 @@ homeButton.forEach(btn => {
 
 // When the register button is clicked, update the hash to trigger the register page
 registerButton.addEventListener('click', () => {
-    window.location.hash = ROUTES.register;
+    window.location.hash = '#' + ROUTES.register;
 });
 
 // When the "back to login" button is clicked, update the hash to trigger the login page
 goToLoginButton.addEventListener('click', () => {
-    window.location.hash = ROUTES.login;
+    window.location.hash = '#' + ROUTES.login;
 });
 
 // When logout is clicked, clear the token and navigate to the login page
@@ -676,7 +698,7 @@ logoutButton.forEach(btn => {
         setTimeout(() => {
             localStorage.removeItem('token'); // Clear saved token
             localStorage.removeItem('userId') // Clear saved userId
-            window.location.hash = ROUTES.login;
+            window.location.hash = '#' + ROUTES.login;
         }, 100);
     })
 })
