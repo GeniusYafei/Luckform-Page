@@ -357,7 +357,7 @@ const showInPageNotification = (job) => {
     });
 
     document.body.appendChild(notif);
-    setTimeout(() => notif.remove(), 6000);
+    setTimeout(() => notif.remove(), 60000);
 
     recentNotifications.unshift(job);
     if (recentNotifications.length > 5) recentNotifications.pop();
@@ -411,7 +411,7 @@ const startJobPolling = () => {
                     if (err.message === 'Failed to fetch') {
                         showNotification('Server is not responding. Please check backend status.', 'error');
                     }
-                    
+
                     console.warn('[Push] Error polling for new jobs:', err.message);
                 });
         };
@@ -478,15 +478,16 @@ const userFeed = (userId, setHash = true) => {
     renderProfileJobs(targetUserId);  // display job-card
     renderWhoWatchlist(targetUserId);
 
-    if (!sessionStorage.getItem('profileReloaded')) {
-        sessionStorage.setItem('profileReloaded', 'true');
-        // Refresh the profile page after a delay of 100ms
-        setTimeout(() => {
-            window.location.reload();
-        }, 100);
-    } else {
-        sessionStorage.removeItem('profileReloaded');
-    }
+    // refresh page for debug issues
+    // if (!sessionStorage.getItem('profileReloaded')) {
+    //     sessionStorage.setItem('profileReloaded', 'true');
+    //     // Refresh the profile page after a delay of 100ms
+    //     setTimeout(() => {
+    //         window.location.reload();
+    //     }, 100);
+    // } else {
+    //     sessionStorage.removeItem('profileReloaded');
+    // }
 
 
     // Display only your own User Watching list
@@ -675,17 +676,22 @@ const SearchView = (input, button) => {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         const numberRegex = /^[0-9]+$/;
 
-        if (numberRegex.test(userInput)) {
+        if (!userInput) {
+            showNotification('Please enter the user ID or email.', 'info');
+        } else if (numberRegex.test(userInput) && userInput.length < 5) {
+            showNotification('User ID must be at least 5 digits.', 'info');
+        } else if (numberRegex.test(userInput)) {
+            // Search by user ID
             apiCall({ url: `${BACKEND_URL}/user?userId=${userInput}` })
                 .then(data => {
                     if (data && data.id) {
                         userFeed(data.id);
+                    } else {
+                        showNotification('User not found.', 'error');
                     }
                 })
-                .catch(() => {
-                    showNotification('Invalid user ID.', 'error');
-                });
         } else if (emailRegex.test(userInput)) {
+            // Watch by email
             apiCall({
                 url: `${BACKEND_URL}/user/watch`,
                 method: 'PUT',
@@ -695,16 +701,15 @@ const SearchView = (input, button) => {
                     showNotification('Watching by email successful.', 'success');
                     loadMoreJobs();
                 })
+                .catch(() => {
+                    showNotification('Failed to watch this email.', 'error');
+                });
         } else {
-            showNotification('Please enter the user ID or email', 'info');
-        }
-
-        if (userInput.length < 5) {
-            showNotification('Please enter the user ID or email', 'info');
-            return;
+            showNotification('Please enter a valid user ID or email.', 'info');
         }
     });
 };
+
 
 SearchView(searchUserHome, searchButtonHome);
 SearchView(searchUserProfile, searchButtonProfile);
@@ -1421,9 +1426,9 @@ const renderUser = (userId) => {
                 const headerInfo = document.createElement('div');
                 headerInfo.className = 'header-info';
                 const watchInfo = document.createElement('p');
-                watchInfo.textContent = `Number of people who watched: ${WatchNumber}`;
+                watchInfo.textContent = `👁️ Watched by: ${WatchNumber}`;
                 const jobInfo = document.createElement('p');
-                jobInfo.textContent = `Posted jobs: ${data.jobs.length}`;
+                jobInfo.textContent = `📄 Jobs posted: ${data.jobs.length}`;
                 headerInfo.appendChild(watchInfo);
                 headerInfo.appendChild(jobInfo);
                 avatar.appendChild(headerInfo);
@@ -1654,7 +1659,7 @@ const createInteractionSection = (job, currentUserId, currentUserName) => {
     likeBtn.appendChild(likeCountSpan);
 
     const updateLikeButton = () => {
-        likeBtn.textContent = `Like ❤️ ${likeCount}`;
+        likeBtn.textContent = liked ? `❤️ Liked (${likeCount})` : `🤍 Like (${likeCount})`;
         likeBtn.className = liked
             ? 'like-button btn-primary'
             : 'like-button btn-outline-primary';
@@ -1820,14 +1825,19 @@ const createInteractionSection = (job, currentUserId, currentUserName) => {
         commentSection.classList.toggle('hide');
     });
 
+    // Append only buttons to wrapper
     wrapper.appendChild(likeBtn);
     wrapper.appendChild(toggleLikesBtn);
-    wrapper.appendChild(likeList);
+    // wrapper.appendChild(likeList);
     wrapper.appendChild(toggleCommentsBtn);
-    wrapper.appendChild(commentSection);
+    // wrapper.appendChild(commentSection);
 
-    return wrapper;
-}
+    return {
+        interactionWrapper: wrapper,
+        likeList,
+        commentSection,
+    };
+};
 
 // ==================== Create Job Card (composed component) ====================
 const createJobCard = (job) => {
@@ -1916,8 +1926,10 @@ const createJobCard = (job) => {
     //     const interaction = createInteractionSection(job, currentUserId, currentUserName);
     //     card.appendChild(interaction);
     // })
-    const interaction = createInteractionSection(job, currentUserId, currentUserName);
-    card.appendChild(interaction);
+    const { interactionWrapper, likeList, commentSection } = createInteractionSection(job, currentUserId, currentUserName);
+    card.appendChild(interactionWrapper);   // put button
+    card.appendChild(likeList);
+    card.appendChild(commentSection);
     return card;
 };
 
