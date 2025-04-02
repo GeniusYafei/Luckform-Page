@@ -7,11 +7,27 @@ body {
   font-family: Arial;
 }
 
+#homePage.hide {
+    display: none;
+}
+
 /* page hide */
 #profilePage.hide,
 #loginPage.hide,
 #registerPage.hide {
   display: none;
+}
+
+.jobfeed-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background-color: white;
+  padding: 10px 20px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
 }
 
 .left-container {

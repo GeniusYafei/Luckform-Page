@@ -10,106 +10,6 @@
     margin-bottom: 0;
 }
 
-#homePage .jobfeed-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-    background-color: white;
-    padding: 10px 20px;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
-}
-
-#homePage .left-container {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-#homePage .right-container {
-    display: flex;
-    align-items: center;
-}
-
-#homePage .logo-container {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding-left: 10px;
-    cursor: pointer;
-}
-
-#homePage .component {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-right: 10px;
-}
-
-#homePage .component button {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 6px;
-    border-radius: 50%;
-    transition: background-color 0.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-#homePage .component button:hover {
-    background-color: #f3f2ef;
-}
-
-#homePage .logo-icon {
-    height: 1.5rem;
-    width: auto;
-}
-
-#homePage .left-container p {
-    margin: 0;
-    font-size: 20px;
-    font-weight: 600;
-    color: #0a66c2;
-}
-
-#homePage .searchUser {
-    height: 32px;
-    padding: 4px 12px;
-    border: 1px solid #ccc;
-    border-radius: 16px;
-    font-size: 14px;
-    outline: none;
-    transition: border 0.2s;
-    width: 200px;
-}
-
-#homePage .searchUser:focus {
-    border-color: #0a66c2;
-    box-shadow: 0 0 0 2px rgba(10, 102, 194, 0.2);
-}
-
-#homePage .search-button {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 4px;
-}
-
-#homePage .search-icon {
-    height: 18px;
-    width: 18px;
-    opacity: 0.6;
-    transition: opacity 0.2s;
-}
-
-#homePage .search-button:hover .search-icon {
-    opacity: 1;
-}
-
 #homePage .nav-icons {
     position: relative;
 }
@@ -135,9 +35,9 @@
     background-color: #d0e6f7;
 }
 
-/* #homePage .avatar-letter:hover {
+#homePage .avatar-letter:hover {
     background-color: #d0e6f7;
-} */
+}
 
 #homePage .profile-dropdown {
     position: absolute;

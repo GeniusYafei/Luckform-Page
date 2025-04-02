@@ -6,106 +6,6 @@
     background-color: #f4f2ee;
 }
 
-#profilePage .jobfeed-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    position: sticky;
-    top: 0;
-    z-index: 99;
-    background-color: white;
-    padding: 10px 20px;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
-}
-
-#profilePage .left-container {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-#profilePage .right-container {
-    display: flex;
-    align-items: center;
-}
-
-
-#profilePage .logo-container {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding-left: 10px;
-    cursor: pointer;
-}
-
-#profilePage .component {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-right: 10px;
-}
-
-#profilePage .component button {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 6px;
-    border-radius: 50%;
-    transition: background-color 0.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-#profilePage .component button:hover {
-    background-color: #f3f2ef;
-}
-
-#profilePage .logo-icon {
-    height: 1.5rem;
-    width: auto;
-}
-
-#profilePage .left-container p {
-    margin: 0;
-    font-size: 20px;
-    font-weight: 600;
-    color: #0a66c2;
-}
-
-#profilePage .searchUser {
-    height: 32px;
-    padding: 4px 12px;
-    border: 1px solid #ccc;
-    border-radius: 16px;
-    font-size: 14px;
-    outline: none;
-    transition: border 0.2s;
-    width: 200px;
-}
-
-#profilePage .searchUser:focus {
-    border-color: #0a66c2;
-    box-shadow: 0 0 0 2px rgba(10, 102, 194, 0.2);
-}
-
-#profilePage .search-button {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 4px;
-}
-
-#profilePage .search-icon {
-    height: 18px;
-    width: 18px;
-    opacity: 0.6;
-    transition: opacity 0.2s;
-}
-
-#profilePage .search-button:hover .search-icon {
-    opacity: 1;
-}
 
 #profilePage .nav-icons {
     position: relative;
@@ -187,13 +87,19 @@
 
 #profilePage .header-info {
     position: absolute;
-    top: 8px;
-    right: 8px;
-    font-size: 12px;
-    color: #666;
+    top: 10px;
+    right: 10px;
+    font-size: 13px;
+    line-height: 1.8;
+    color: #4a4a4a;
     background-color: #f3f3f3;
-    padding: 4px 8px;
-    border-radius: 8px;
+    padding: 8px 12px;
+    border-radius: 10px;
+    /* box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); */
+    border: 1px solid #e0e0e0;
+    text-align: right;
+    min-width: 139px;
+    z-index: 1;
 }
 
 #profilePage .sidebarUser .avatar-img {
@@ -569,103 +475,52 @@
     font-size: 18px;
 }
 
-#profilePage .avatar-wrapper img.user-avatar {
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    object-fit: cover;
-}
-
-#profilePage .author-info {
-    margin: 5px;
-}
-
-#WhoWatchlistName {
-    text-decoration: underline;
-    font-weight: 600;
-    color: black;
-}
-
-#UserWatchlistName {
-    text-decoration: underline;
-    font-weight: 600;
-    color: black;
-}
-
-#profilePage .privacy-message {
-    color: #888;
-    font-size: 14px;
-    padding: 10px;
-    text-align: center;
-}
 
 
-#profilePage .author-info .author-name {
-    font-weight: 600;
-    font-size: 14px;
-    margin: 0;
-}
-
-#profilePage .author-info .post-time {
-    font-size: 12px;
-    color: gray;
-    margin: 0;
-}
-
-#profilePage .interaction-wrapper {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    margin-top: 10px;
-}
-
-#profilePage .like-button,
-#profilePage .comment-button,
-#profilePage .toggle-likes-button {
-    background-color: transparent;
-    border: 1px solid #0073b1;
-    color: #0073b1;
-    font-size: 14px;
-    cursor: pointer;
-    margin-right: 10px;
-    padding: 6px 12px;
-    border-radius: 20px;
-    transition: all 0.2s;
-}
-
-#profilePage .like-button:hover,
-#profilePage .comment-button:hover,
-#profilePage .toggle-likes-button:hover {
-    background-color: #eef3f8;
-}
-
-#profilePage .btn-primary {
-    background-color: #0a66c2;
-    color: white;
-    border: 1px solid transparent;
-}
-
-#profilePage .btn-primary:hover {
-    background-color: #004182;
+#profilePage .interaction-wrapper button:hover {
+    background-color: #e6f0f6;
 }
 
 #profilePage .like-list,
 #profilePage .comment-section {
-    padding-left: 10px;
-    margin-top: 8px;
+    margin-top: 6px;
+    padding: 12px 16px;
+    background-color: #f9fafb;
+    border-radius: 8px;
+    border: 1px solid #eee;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+    width: 100%;
 }
 
 #profilePage .like-item,
 #profilePage .comment-item {
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 2px 0;
+    gap: 10px;
+    padding: 6px 0;
+    border-bottom: 1px solid #e0e0e0;
+    font-size: 14px;
+    color: #333;
+}
+
+#profilePage .like-item:last-child,
+#profilePage .comment-item:last-child {
+    border-bottom: none;
+}
+
+#profilePage .interaction-wrapper .btn-primary {
+    background-color: #0a66c2;
+    color: white;
+    border: 1px solid transparent;
+}
+
+#profilePage .interaction-wrapper .btn-primary:hover {
+    background-color: #004182;
 }
 
 #profilePage .avatar-letter {
-    width: 24px;
-    height: 24px;
+    width: 28px;
+    height: 28px;
     background-color: #e6f0f6;
     color: #0073b1;
     border-radius: 50%;
@@ -738,9 +593,48 @@
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
-#profilePage .id-img {
-    width: 10%;
+#profilePage .job-content {
+    margin-top: 10px;
+    padding: 12px 16px;
+    /* background-color: #f9fafb; */
+    border-radius: 10px;
+    /* border: 1px solid #eee; */
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+#profilePage .job-content h1 {
+    font-size: 32px;
+    font-weight: 600;
+    color: black;
+    margin: 0;
+}
+
+#profilePage .job-content h6 {
+    font-size: 13px;
+    color: #666;
+    margin: 0;
+}
+
+#profilePage .job-content p {
+    font-size: 16px;
+    color: #333;
+    line-height: 1.5;
+    margin: 0;
+}
+
+#profilePage .job-content img.id-img {
+    width: 100%;
+    max-width: 100%;
     height: auto;
+    max-height: 200px;
+    object-fit: contain;
+    border-radius: 10px;
+    /* background-color: #f9fafb; */
+    /* display: flex; */
+    flex-direction: start;
+    margin-top: 10px;
 }
 
 #profilePage .postJobButton {
