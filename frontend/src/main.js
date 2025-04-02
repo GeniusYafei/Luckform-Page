@@ -405,11 +405,6 @@ const userFeed = (userId, setHash = true) => {
     // Default renders itself if no parameters are given
     const targetUserId = userId || loggedInUserId;
 
-    currentStartIndex = 0;
-    isLoadingJobs = false;
-    allJobsLoaded = false;
-    loadedJobs.length = 0;
-
     if (String(targetUserId) === String(lastRenderedUserId)) {
         console.log(`[userFeed] Skipping repeated render for userId: ${targetUserId}`);
         return;
@@ -439,6 +434,18 @@ const userFeed = (userId, setHash = true) => {
     renderUser(targetUserId);         // display user information
     renderProfileJobs(targetUserId);  // display job-card
     renderWhoWatchlist(targetUserId);
+
+    if (!sessionStorage.getItem('profileReloaded')) {
+        sessionStorage.setItem('profileReloaded', 'true');
+        // Refresh the profile page after a delay of 100ms
+        setTimeout(() => {
+          window.location.reload();
+        }, 100);
+      } else {
+        // Clear the tag after refreshing to avoid refreshing the next time you enter the profile
+        sessionStorage.removeItem('profileReloaded');
+      }
+
 
     // Display only your own User Watching list
     const userWatchList = document.getElementById('userWatching');
@@ -1853,6 +1860,15 @@ const updateJobCard = (job) => {
 };
 
 const updateJobInteractions = (job) => {
+    let container;
+    if (currentPage === 'profile') {
+        container = document.getElementById('userJobFeed');
+    } else if (currentPage === 'home') {
+        container = document.getElementById('feedContainer');
+    } else {
+        container = document;
+    }
+
     const card = document.querySelector(`.job-card[data-job-id="${job.id}"]`);
     if (!card) return;
 
