@@ -405,6 +405,11 @@ const userFeed = (userId, setHash = true) => {
     // Default renders itself if no parameters are given
     const targetUserId = userId || loggedInUserId;
 
+    currentStartIndex = 0;
+    isLoadingJobs = false;
+    allJobsLoaded = false;
+    loadedJobs.length = 0;
+
     if (String(targetUserId) === String(lastRenderedUserId)) {
         console.log(`[userFeed] Skipping repeated render for userId: ${targetUserId}`);
         return;
@@ -429,6 +434,7 @@ const userFeed = (userId, setHash = true) => {
     Object.values(pages).forEach(page => page.classList.add('hide'));
     pages['profile'].classList.remove('hide');
 
+    startJobPolling();
     updateTopAvatar();
     renderUser(targetUserId);         // display user information
     renderProfileJobs(targetUserId);  // display job-card
@@ -609,6 +615,7 @@ const SearchView = (input, button) => {
             })
                 .then(() => {
                     showNotification('Watching by email successful.', 'success');
+                    loadMoreJobs();
                 })
         } else {
             showNotification('Please enter the user ID or email', 'info');
@@ -1021,6 +1028,10 @@ loginButton.addEventListener('click', () => {
             // If the login succeeds, save the token and userId
             localStorage.setItem('token', data.token);
             localStorage.setItem('userId', data.userId);
+            apiCall({ url: `${BACKEND_URL}/user/?userId=${data.userId}` })
+                .then(user => {
+                localStorage.setItem('userName', user.name || 'User');
+            });
             // later usersWhoWatch
             return apiCall({
                 url: `${BACKEND_URL}/user/watch`,
@@ -1169,10 +1180,23 @@ const renderProfileJobs = (userId) => {
         }
         userJobs.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
+        // userJobs.forEach(job => {
+        //     if (!loadedJobs.find(j => j.id === job.id)) {
+        //         loadedJobs.push(job);
+        //     }
+        //     const jobCard = createJobCard(job);
+        //     container.appendChild(jobCard);
+        // });
         userJobs.forEach(job => {
+            if (!loadedJobs.find(j => j.id === job.id)) {
+                loadedJobs.push(job);
+                seenJobIds.add(job.id);
+            }
             const jobCard = createJobCard(job);
             container.appendChild(jobCard);
         });
+        // const jobCard = createJobCard(job);
+        // container.appendChild(jobCard);
     });
 };
 
@@ -1320,7 +1344,10 @@ const renderUser = (userId) => {
                 headerInfo.className = 'header-info';
                 const watchInfo = document.createElement('p');
                 watchInfo.textContent = `Number of people who watched: ${WatchNumber}`;
+                const jobInfo = document.createElement('p');
+                jobInfo.textContent = `Posted jobs: ${data.jobs.length}`;
                 headerInfo.appendChild(watchInfo);
+                headerInfo.appendChild(jobInfo);
                 avatar.appendChild(headerInfo);
 
                 // Render avatar or fallback letter
@@ -1727,6 +1754,7 @@ const createInteractionSection = (job, currentUserId, currentUserName) => {
 // ==================== Create Job Card (composed component) ====================
 const createJobCard = (job) => {
     const currentUserId = localStorage.getItem('userId');
+    const currentUserName = localStorage.getItem('userName') || 'User';
 
     const card = document.createElement('div');
     card.className = 'job-card';
@@ -1802,15 +1830,16 @@ const createJobCard = (job) => {
 
     // ----- Interaction section -----
     // Get the current user name and insert it into the interactive bar
-    apiCall({
-        url: `${BACKEND_URL}/user/?userId=${currentUserId}`,
-        method: 'GET',
-    }).then(data => {
-        const currentUserName = data.name || 'User';
-        const interaction = createInteractionSection(job, currentUserId, currentUserName);
-        card.appendChild(interaction);
-    })
-
+    // apiCall({
+    //     url: `${BACKEND_URL}/user/?userId=${currentUserId}`,
+    //     method: 'GET',
+    // }).then(data => {
+    //     const currentUserName = data.name || 'User';
+    //     const interaction = createInteractionSection(job, currentUserId, currentUserName);
+    //     card.appendChild(interaction);
+    // })
+    const interaction = createInteractionSection(job, currentUserId, currentUserName);
+    card.appendChild(interaction);
     return card;
 };
 
@@ -1878,7 +1907,7 @@ const updateJobInteractions = (job) => {
         });
     }
 
-    // ✅ Update comment count number
+    // Update comment count number
     const commentToggleBtn = card.querySelector('.comment-button');
     if (commentToggleBtn) {
         commentToggleBtn.textContent = `Comment 💬 ${job.comments.length}`;
