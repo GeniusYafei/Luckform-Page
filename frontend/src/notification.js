@@ -5,59 +5,36 @@
  * @param {number} duration - Duration in ms before auto-hide (default 5000ms).
  */
 export function showNotification(message, type = 'info', duration = 3000) {
-    // Remove existing container if any
-    const existing = document.getElementById('notification-container');
-    if (existing) existing.remove();
+    const container = document.getElementById('notification-container');
+    if (container.children.length >= 5) return;
 
     // Create container
-    const container = document.createElement('div');
-    container.id = 'notification-container';
-    container.className = 'position-fixed top-0 end-0 p-0';
-    container.style.zIndex = 1080; // Bootstrap default modal z-index is 1050
+    const notif = document.createElement('div');
+    notif.classList.add('notification', `notification-${type}`);
 
     // Create alert element
-    const alertDiv = document.createElement('div');
-    alertDiv.className = `alert ${getAlertClass(type)} alert-dismissible fade show`;
-    alertDiv.setAttribute('role', 'alert');
+    const icon = document.createElement('div');
+    icon.textContent = getIcon(type);
+    notif.appendChild(icon);
 
-    // Create strong element for icon
-    const iconElem = document.createElement('strong');
-    iconElem.textContent = getIcon(type);
-    alertDiv.appendChild(iconElem);
-
-    // Add a space and the message text
-    const messageText = document.createTextNode(' ' + message);
-    alertDiv.appendChild(messageText);
+    // error msg
+    const msg = document.createElement('div');
+    msg.className = 'message';
+    msg.textContent = message;
+    notif.appendChild(msg);
 
     // Create close button
     const closeBtn = document.createElement('button');
-    closeBtn.type = 'button';
-    closeBtn.className = 'btn-close';
-    closeBtn.setAttribute('data-bs-dismiss', 'alert');
-    closeBtn.setAttribute('aria-label', 'Close');
-    alertDiv.appendChild(closeBtn);
+    closeBtn.className = 'close-btn';
+    closeBtn.innerHTML = '×';
+    closeBtn.onclick = () => notif.remove();
+    notif.appendChild(closeBtn);
 
-    // Append alert to container and container to body
-    container.appendChild(alertDiv);
-    document.body.appendChild(container);
+    container.appendChild(notif);
 
-    // Auto-dismiss after duration
     setTimeout(() => {
-        alertDiv.classList.remove('show');
-        alertDiv.classList.add('hide');
-        setTimeout(() => container.remove(), 300); // wait for fade out
+        notif.remove();
     }, duration);
-}
-
-// Get Bootstrap alert class based on type
-function getAlertClass(type) {
-    const classes = {
-        info: 'alert-info',
-        success: 'alert-success',
-        warning: 'alert-warning',
-        error: 'alert-danger',
-    };
-    return classes[type] || classes.info;
 }
 
 // Get Unicode icon based on type
@@ -68,5 +45,5 @@ function getIcon(type) {
         warning: '⚠️',
         error: '❌',
     };
-    return icons[type] || icons.info;
+    return icons[type] || '';
 }
