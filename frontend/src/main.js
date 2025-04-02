@@ -85,6 +85,12 @@ const renderedUserIds = new Set();
 
 // ==================== apiCall FUNCTION ====================
 const apiCall = ({ url, method = 'GET', token = true, body = null }) => {
+
+    if (!navigator.onLine) {
+        showNotification('You are offline. This action cannot be completed.', 'error');
+        return Promise.reject(new Error('Offline mode'));
+    }
+
     const headers = {
         'Content-Type': 'application/json'
     };
@@ -116,6 +122,9 @@ const apiCall = ({ url, method = 'GET', token = true, body = null }) => {
             });
         })
         .catch(err => {
+            if (err.message === 'Failed to fetch') {
+                showNotification('Server is not responding. Please check backend status.', 'error');
+            }
             showNotification(err.message || 'Network error', 'error');
             return Promise.reject(err);
         });
@@ -184,6 +193,18 @@ const homeFeed = () => {
         return;
     }
 
+    if (!navigator.onLine) {
+        showNotification('You are offline. Showing cached feed.', 'info');
+        const cached = localStorage.getItem('cachedFeed');
+        if (cached) {
+            const jobs = JSON.parse(cached);
+            renderJobFeed(jobs, false); // false mean first load
+        } else {
+            showNotification('No cached feed available.', 'warning');
+        }
+        return; // don't proceed with API call
+    }
+
     currentStartIndex = 0;
     isLoadingJobs = false;
     allJobsLoaded = false;
@@ -247,6 +268,9 @@ const loadMoreJobs = () => {
                 return;
             }
 
+            // After successfully loading jobs
+            localStorage.setItem('cachedFeed', JSON.stringify(loadedJobs));
+
             // Cumulative creatorId (for renderUserWatchlist)
             jobs.forEach(job => {
                 if (!loadedJobs.find(j => j.id === job.id)) {
@@ -287,6 +311,10 @@ const startPushNotifications = () => {
     if (pushInterval) clearInterval(pushInterval);
 
     pushInterval = setInterval(() => {
+        if (!navigator.onLine) {
+            console.log('[Push] Offline - skipping notification check');
+            return;
+        }
         apiCall({ url: `${BACKEND_URL}/job/feed?start=0` })
             .then(jobs => {
                 // just seen first five to avoid scrolling too much
@@ -299,6 +327,10 @@ const startPushNotifications = () => {
                 });
             })
             .catch(err => {
+                if (err.message === 'Failed to fetch') {
+                    showNotification('Server is not responding. Please check backend status.', 'error');
+                }
+
                 console.warn('[Push] Error polling for new jobs:', err.message);
             });
     }, 1000);
@@ -339,6 +371,10 @@ const startJobPolling = () => {
     if (pollingInterval) clearInterval(pollingInterval);
 
     pollingInterval = setInterval(() => {
+        if (!navigator.onLine) {
+            console.log('[Polling] Offline – skipping update');
+            return;  // It is not requested offline
+        }
         console.log('[Polling] Checking updates...');
 
         const jobIdsToWatch = new Set(loadedJobs.map(job => job.id));
@@ -372,7 +408,11 @@ const startJobPolling = () => {
                     fetchNextBatch();
                 })
                 .catch(err => {
-                    console.warn('[Polling] Failed to fetch job feed', err);
+                    if (err.message === 'Failed to fetch') {
+                        showNotification('Server is not responding. Please check backend status.', 'error');
+                    }
+                    
+                    console.warn('[Push] Error polling for new jobs:', err.message);
                 });
         };
 
@@ -442,11 +482,11 @@ const userFeed = (userId, setHash = true) => {
         sessionStorage.setItem('profileReloaded', 'true');
         // Refresh the profile page after a delay of 100ms
         setTimeout(() => {
-          window.location.reload();
+            window.location.reload();
         }, 100);
-      } else {
+    } else {
         sessionStorage.removeItem('profileReloaded');
-      }
+    }
 
 
     // Display only your own User Watching list
@@ -592,6 +632,15 @@ window.addEventListener('load', () => {
     } else {
         routeToPage();
     }
+});
+// listen for the user whether is offline or online
+window.addEventListener('offline', () => {
+    showNotification('You are offline. Some features may not work.', 'warning');
+    startJobPolling();
+});
+
+window.addEventListener('online', () => {
+    showNotification('Back online!', 'success');
 });
 
 // Listen for hash changes (e.g., when using back/forward buttons)
@@ -1059,8 +1108,8 @@ loginButton.addEventListener('click', () => {
             localStorage.setItem('userId', data.userId);
             apiCall({ url: `${BACKEND_URL}/user/?userId=${data.userId}` })
                 .then(user => {
-                localStorage.setItem('userName', user.name || 'User');
-            });
+                    localStorage.setItem('userName', user.name || 'User');
+                });
             // later usersWhoWatch
             return apiCall({
                 url: `${BACKEND_URL}/user/watch`,
