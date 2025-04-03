@@ -1,49 +1,39 @@
 (optional) TODO!
+# Bonus Features
 
-1. **Display of Followers and Followings**
-   Users can see the number and list of users who are watching them (followers), as well as who they are watching (followings). Followings are private to each user.
+1. 🧩 A global, reusable **toast notification system** was implemented, providing distinct visual styles for success and error messages to enhance user feedback.
 
-2. **Public Profile Viewer**
-   Clicking on the avatar or name in the feed, comments, or like sections will direct to the corresponding user’s profile page.
+2. 🌐 A **unified and clean API wrapper** was built around `fetch`, simplifying all API requests with consistent error handling and token management.
 
-3. **Dynamic Profile Sidebar Rendering**
-   The profile sidebar shows user details and conditionally displays either an "Update Profile" button (for self) or a "Watch / Unwatch" toggle (for others).
+3. 🛑 **Delete actions are protected** by a confirmation popup, preventing accidental deletions and improving safety.
 
-4. **Watch and Unwatch Functionality**
-   A fully functioning button on user profiles allows watching or unwatching users, reflecting real-time changes.
+4. ✅ During **user registration**, the system validates email format, name length, and password strength with real-time feedback.
 
-5. **Email-Based User Watching**
-   Users can input an email in a popup modal on the feed page to watch another user directly, without needing to visit their profile.
+5. 👁️ A **"Show Password" toggle** was added to the confirm password field, making it easier for users to verify their input.
 
-6. **Custom Avatar Fallback**
-   When a user hasn’t uploaded a profile picture, their avatar is replaced with a fallback letter using the first character of their name.
+6. 🎨 A rich set of **custom icons and illustrations** were added, including Home, Notification, Search, Logo, and empty state graphics, greatly improving visual appeal.
 
-7. **Improved Job Card Header**
-   Author info (avatar, name, time posted) in each job card header is clickable and dynamically rendered.
+7. 🧑‍🤝‍🧑 Implemented a **User Watching List**, allowing users to see which users they follow and navigate to their profiles directly.
 
-8. **Interactive Like & Comment Sections**
-   Like and comment buttons toggle the corresponding section visibility with animations and smooth UI feedback.
+8. 📭 For new users who haven’t posted a job yet, a friendly **empty job card** with illustration appears, prompting them to post a job.
 
-9. **Live Likes and Comments Update (Polling)**
-   Likes and comments update in real-time using polling, avoiding the need for manual page refreshes.
+9. 🔍 The **Empty Job Card** appears on both the home and profile pages when the user has no posts, guiding users with visuals and text to improve engagement.
 
-10. **Infinite Scroll on Feed**
-   The homepage implements Infinite Scroll that progressively loads more job posts as the user scrolls down.
+10. 🧠 The **Search Input** supports dual functionality:
+    - Searching by **email** allows users to follow someone.
+    - Searching by **user ID** navigates directly to their profile page.
+    - It also includes validation to prevent invalid input.
 
-11. **User Watchlist with Creator IDs**
-   "User Watching" is intelligently generated using all creator IDs from the feed, reflecting users you follow.
+11. 🔗 **URL-based navigation** is supported — users can manually visit any route such as `/profile?id=123`, `/feed`, etc., and the system will render the correct page accordingly.
 
-12. **Follow Privacy Protection**
-   "User Watching" is visible only when users view their own profile. On others’ profiles, a privacy message is shown instead.
+12. 🏠 Users can return to the homepage by clicking either the **home icon** or the **site logo**, providing multiple navigation options.
 
-13. **Loader Message Feedback**
-   A small loader or feedback message is displayed when waiting for asynchronous data to load (e.g., job feed or user info).
+13. 👤 **Clicking any avatar or username** throughout the app (like in job cards, likes, comments, or watch lists) will navigate to that user’s profile page.
 
-14. **Debounced Feed Re-rendering**
-   When clicking repeatedly on the same user profile, re-rendering is skipped to prevent unnecessary DOM updates.
+14. ⏳ A **loading animation** was implemented to prevent content flashing during page loads. It also cycles through **fun loader messages** to keep users engaged while waiting.
 
-15. **Avatar and Email Click Navigation**
-   Clicking on avatars or names in any context (like, comment, watchlist) will navigate to the corresponding user’s profile.
+15. 🔔 A custom **Notification Panel** was developed. When users someone follows posts a job:
+    - A red dot appears on the notification icon.
+    - Clicking the icon reveals a panel listing the **latest 5 job notifications**, linking directly to the poster’s profile.
 
-16. **Custom Notification Icon for Job Posts**
-   A custom notification popup is implemented to alert the user when someone they follow posts a new job, simulating push notifications via polling.
+16. 🛡️ When a user logs out, their **token is cleared**. If they try to access restricted pages via URL (like `/feed`), the system redirects them to the login page for security.
