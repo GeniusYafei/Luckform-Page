@@ -823,21 +823,27 @@
 
 @media screen and (max-width: 768px) {
     .profile-layout {
-        grid-template-columns: 1fr;
-        grid-template-areas:
-            "left-column"
-            "right-column";
         display: flex;
-        /* flex-direction: column-reverse; */
+        flex-direction: column;
         gap: 20px;
         padding: 10px;
     }
 
+    #profilePage .sidebarUser {
+        order: 1;
+    }
+
+    #profilePage .right-column {
+        order: 2;
+    }
+
+    #profilePage .user-job-feed {
+        order: 3;
+    }
 
     .left-column,
     .right-column {
-      width: 100%;
-      margin-top: 20px;
+        width: 100%;
     }
 
     #profilePage .sidebarInformation,
@@ -846,3 +852,16 @@
         margin: 0;
     }
 }
+
+@media screen and (max-width: 480px) {
+    #profilePage .header-info {
+      position: static;
+      background-color: transparent;
+      border: none;
+      padding: 0;
+      margin-top: 10px;
+      font-size: 12px;
+      text-align: center;
+      line-height: 1.4;
+    }
+  }

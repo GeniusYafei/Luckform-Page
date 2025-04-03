@@ -507,14 +507,26 @@ body {
 
   .search-container {
     display: flex;
-    margin-top: 5px;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
   }
 
   .searchUser {
+    flex: 1;
     width: 100%;
     max-width: 100%;
   }
 
+  .search-button {
+    flex-shrink: 0;
+    padding: 6px;
+  }
+
+  .left-container .search-container {
+    flex: 1;
+  }
+  
   .postJobButton {
     width: 100%;
     font-size: 15px;
