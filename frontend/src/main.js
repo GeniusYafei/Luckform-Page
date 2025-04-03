@@ -377,7 +377,7 @@ const showInPageNotification = (job) => {
     });
 
     document.body.appendChild(notif);
-    setTimeout(() => notif.remove(), 60000);
+    setTimeout(() => notif.remove(), 6000);
 
     recentNotifications.unshift(job);
     if (recentNotifications.length > 5) recentNotifications.pop();
