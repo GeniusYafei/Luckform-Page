@@ -437,6 +437,31 @@ body {
   color: #888;
 }
 
+@media screen and (max-width: 768px) {
+  .jobfeed-main {
+    flex-direction: column;
+    padding: 0 10px;
+  }
+
+  .Sidebar,
+  .sidebarUser,
+  .sidebarInformation,
+  .sidebarUserWatch {
+    width: 100%;
+    margin: 0;
+  }
+
+  .feed-container {
+    width: 100%;
+  }
+
+  .postJobButton {
+    padding: 8px 12px;
+    font-size: 14px;
+    width: auto;
+  }
+}
+
 @media screen and (max-width: 480px) {
   #homePage .job-content h1,
   #profilePage .job-content h1 {
@@ -452,7 +477,7 @@ body {
   #profilePage .job-content img.id-img {
     max-height: 180px;
   }
-  
+
   .jobfeed-header {
     flex-direction: column;
     align-items: flex-start;
@@ -477,7 +502,8 @@ body {
 
   .postJobButton {
     width: 100%;
-    margin-top: 10px;
+    font-size: 15px;
+    margin-top: 8px;
   }
 
   .component {
@@ -486,5 +512,20 @@ body {
 
   .logo-container p {
     font-size: 16px;
+  }
+
+  .notification-panel {
+    width: 90%;
+    right: 5%;
+  }
+
+  .modal-content {
+    width: 90%;
+    padding: 15px;
+  }
+
+  .ImagePreview {
+    max-height: 150px;
+    overflow: hidden;
   }
 }
