@@ -486,6 +486,15 @@ body {
     max-height: 180px;
   }
 
+  .logo-container p {
+    display: none;
+  }
+
+  .tooltip-wrapper {
+    display: flex;
+    width: 100%;
+  }
+
   .jobfeed-header {
     flex-direction: column;
     align-items: flex-start;
@@ -493,15 +502,23 @@ body {
     padding: 10px;
   }
 
-  .left-container,
+  /* .left-container,
   .right-container {
     width: 100%;
     justify-content: space-between;
-  }
+  } */
 
   .left-container {
-    flex-direction: column;
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
     align-items: flex-start;
+    gap: 6px;
+  }
+
+  .right-container {
+    width: 100%;
+    justify-content: space-between;
     gap: 6px;
   }
 
@@ -526,7 +543,7 @@ body {
   .left-container .search-container {
     flex: 1;
   }
-  
+
   .postJobButton {
     width: 100%;
     font-size: 15px;
