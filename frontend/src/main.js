@@ -155,6 +155,26 @@ const pages = {
     profile: profilePage
 };
 
+// funny loading messages
+const loadingMessages = [
+    'Connecting you to opportunities...',
+    'Polishing your feed ✨',
+    'Linking you in...',
+    'Assembling job cards 🧱',
+    'Fetching new posts...',
+    'Dusting off your profile 🧹',
+    'Recharging the network 💼',
+    'Bringing you closer to success 🚀',
+];
+
+const updateLoaderText = () => {
+    const textElem = document.getElementById('loading-text');
+    if (textElem) {
+        const message = loadingMessages[Math.floor(Math.random() * loadingMessages.length)];
+        textElem.textContent = message;
+    }
+}
+
 const showModal = (type) => {
     if (type === 'update') {
         // If you are not currently on the home page, "borrow" the homePage modal
@@ -618,10 +638,16 @@ const routeToPage = () => {
 // On page load, set the default hash if needed and route accordingly
 window.addEventListener('load', () => {
     const loader = document.getElementById('loading');
+
+    updateLoaderText();
+
+    // Set a random time between 0.5 and 5.5 seconds
+    const randomDelay = Math.floor(Math.random() * 5000) + 500;
+
     // The delay makes loading disappear, making sure it actually shows up
-    // setTimeout(() => {
-    //     loader.classList.add('hidden');
-    // }, 1000);
+    setTimeout(() => {
+        loader.classList.add('hidden');
+    }, randomDelay);
 
     // Page routing jumps are then processed
     if (!window.location.hash) {
@@ -634,6 +660,7 @@ window.addEventListener('load', () => {
         routeToPage();
     }
 });
+
 // listen for the user whether is offline or online
 window.addEventListener('offline', () => {
     showNotification('You are offline. Some features may not work.', 'warning');
@@ -647,6 +674,18 @@ window.addEventListener('online', () => {
 // Listen for hash changes (e.g., when using back/forward buttons)
 // window.addEventListener('hashchange', routeToPage);
 window.addEventListener('hashchange', () => {
+    const loader = document.getElementById('loading');
+    loader.classList.remove('hidden');
+
+    updateLoaderText();
+    // Set a random time between 0.5 and 5.5 seconds
+    const randomDelay = Math.floor(Math.random() * 5000) + 500;
+
+    // The delay makes loading disappear, making sure it actually shows up
+    setTimeout(() => {
+        loader.classList.add('hidden');
+    }, randomDelay);
+
     routeToPage();
     lastRenderedUserId = null;
 });
