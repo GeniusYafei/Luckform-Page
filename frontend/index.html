@@ -17,11 +17,14 @@
 </head>
 
 <body>
+  <div id="notificationPanel" class="notification-panel hide"></div>
+  <div id="notification-container" class="notification-container"></div>
+
   <!-- loading page-->
-  <!-- <div class="loading" id="loading">
+  <div class="loading" id="loading">
     <div id="spinner"></div>
-    <p>loading...</p>
-  </div> -->
+    <span id="loading-text">loading...</span>
+  </div>
 
   <!-- Login Pages -->
   <div id="loginPage" class="page" page="loginPage">
@@ -36,7 +39,7 @@
             autocomplete="current-password" />
         </div>
         <button type="button" id="LoginButton" class="auth-button">Login</button>
-        <p class="switch-link">Don't have an account? <a href="#/auth/register" id="RegisterButton">Register</a></p>
+        <p class="switch-link">Don't have an account? <a href="#register" id="RegisterButton">Register</a></p>
       </form>
     </div>
   </div>
@@ -62,7 +65,7 @@
           <button type="button" id="toggleConfirmPassword" class="toggle-btn">Show</button>
         </div>
         <button type="button" id="SubmitButton" class="auth-button">Register</button>
-        <p class="switch-link">Already have an account? <a href="#/auth/login" id="GoToLogin">Login</a></p>
+        <p class="switch-link">Already have an account? <a href="#login" id="GoToLogin">Login</a></p>
       </form>
     </div>
   </div>
@@ -92,7 +95,7 @@
             <img src="styles/homeicon.svg" alt="Home" class="home-icon">
           </button>
           <button class="notification-button" aria-label="notification">
-            <img src="styles/notificationicon.svg" alt="Notification" class="notification">
+            <img src="styles/notificationicon.svg" alt="Notification" id="notification">
           </button>
         </div>
         <!-- Button post modal -->
@@ -205,7 +208,7 @@
             <img src="styles/homeicon.svg" alt="Home" class="home-icon" />
           </button>
           <button class="notification-button" aria-label="notification">
-            <img src="styles/notificationicon.svg" alt="Notification" class="notification" />
+            <img src="styles/notificationicon.svg" alt="Notification" id="notification" />
           </button>
         </div>
         <div class="nav-icons">
