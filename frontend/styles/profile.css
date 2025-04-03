@@ -820,3 +820,22 @@
 #watchButton.unwatch-mode:hover {
     background-color: #f3f2ef;
 }
+
+@media screen and (max-width: 768px) {
+    .profile-layout {
+      grid-template-columns: 1fr;
+      grid-template-areas:
+        "left-column"
+        "right-column";
+    }
+
+    .right-column {
+      margin-top: 20px;
+    }
+
+    #profilePage .sidebarInformation,
+    #profilePage .sidebarUserWatch {
+      width: 100%;
+      margin: 0;
+    }
+  }

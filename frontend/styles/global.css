@@ -428,3 +428,20 @@ body {
   padding: 12px;
   color: #888;
 }
+
+@media screen and (max-width: 480px) {
+  #homePage .job-content h1,
+  #profilePage .job-content h1 {
+    font-size: 20px;
+  }
+
+  #homePage .job-content p,
+  #profilePage .job-content p {
+    font-size: 13px;
+  }
+
+  #homePage .job-content img.id-img,
+  #profilePage .job-content img.id-img {
+    max-height: 180px;
+  }
+}

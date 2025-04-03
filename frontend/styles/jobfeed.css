@@ -35,9 +35,9 @@
     background-color: #d0e6f7;
 }
 
-#homePage .avatar-letter:hover {
+/* #homePage .avatar-letter:hover {
     background-color: #d0e6f7;
-}
+} */
 
 #homePage .profile-dropdown {
     position: absolute;
@@ -648,3 +648,23 @@
 .hide {
     display: none;
 }
+
+@media screen and (max-width: 768px) {
+    #homePage .jobfeed-main {
+      flex-direction: column;
+      padding: 0 10px;
+    }
+
+    #homePage .Sidebar,
+    #homePage .sidebarUser,
+    #homePage .sidebarInformation,
+    #homePage .sidebarUserWatch {
+      width: 100%;
+      margin: 0;
+    }
+
+    #homePage .postJobButton {
+      width: 100%;
+      margin: 10px 0;
+    }
+  }
