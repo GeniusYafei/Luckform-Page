@@ -1071,6 +1071,7 @@ confirmUpButton.addEventListener('click', () => {
             .then(() => {
                 showNotification('Update user profile successful!', 'success');
                 profileModel.classList.add('hide');
+                userFeed();
                 renderUser(userId);
                 renderProfileJobs(userId);
             })
