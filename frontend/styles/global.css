@@ -316,7 +316,7 @@ body {
   border-radius: 10px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   font-size: 14px;
-  z-index: 9999;
+  z-index: 99999;
   animation: fadeIn 0.4s ease;
   cursor: pointer;
 }
