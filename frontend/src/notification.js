@@ -45,7 +45,7 @@ export function showNotification(message, type = 'info', duration = 3000) {
     // Create close button
     const closeBtn = document.createElement('button');
     closeBtn.className = 'close-btn';
-    closeBtn.innerHTML = '×';
+    closeBtn.textContent = '×';
     closeBtn.onclick = () => notif.remove();
     notif.appendChild(closeBtn);
 
