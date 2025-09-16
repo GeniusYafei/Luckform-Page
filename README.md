@@ -1,5 +1,13 @@
+# start the project
+
+**First start the backend, in `ass3-backend` folder type `npm start` to start the backend server. if lack dependencies, you need install the packages, please type `npm install`**
+
+**Second start the frontend, in `lurforwork` folder type `npx http-server . -c 1 -p [port]` or `npx http-server . -c 1 -p 8080` you can choose the a port that is not occupied, if lack dependencies, you need install the packages, please type `npm install --global http-server`**
+
+
 ## 0. Change Log
 29/3: Update on the 2.2.1 - Author details
+
 
 # Assessment 3 - Vanilla JS: LurkForWork
 
@@ -56,7 +64,7 @@ Milestone 2 focuses on fetching feed data from the API. A feed and it's associat
 
 The application should present a "feed" of user content on the home page derived `GET /job/feed`. Note that the feed will only return information from people that the logged in user is watching.
 
-The jobs should be displayed in reverse chronological order (most recent jobs first). 
+The jobs should be displayed in reverse chronological order (most recent jobs first).
 
 Each job should display:
 1. Name of the author who made the job post
@@ -72,7 +80,7 @@ Each job should display:
   * How many comments the job post has
 
 ### 2.3. Milestone 3 - Advanced Feed (10%)
- 
+
 Milestone 3 focuses on a richer UX and will require some backend interaction.
 
 #### 2.3.1. Show likes on a job
@@ -141,7 +149,7 @@ Milestone 5 focuses on interacting with content and comments.
   * This screen should also contain some form of save button
   * Update button will only visible to the job creator
 * Users can delete a job they made via (`DELETE /job`)
-  * Every single feed should have a delete button that allows them to delete the job 
+  * Every single feed should have a delete button that allows them to delete the job
   * Delete button will only visible to the job creator
 
 #### 2.5.3. Leaving comments
@@ -152,8 +160,8 @@ Milestone 5 focuses on interacting with content and comments.
 
 ### 2.6. Milestone 6 - Challenge Components (`advanced`) (5%)
 
-#### 2.6.1. Infinite Scroll 
-* Instead of pagination, users an infinitely scroll through results on the feed. For infinite scroll to be properly implemented you need to progressively load jobs as you scroll. 
+#### 2.6.1. Infinite Scroll
+* Instead of pagination, users an infinitely scroll through results on the feed. For infinite scroll to be properly implemented you need to progressively load jobs as you scroll.
 
 #### 2.6.2. Live Update
 * If a user likes a job or comments on a job, the job's likes and comments should update without requiring a page reload/refresh. This should be done with some kind of polling.
